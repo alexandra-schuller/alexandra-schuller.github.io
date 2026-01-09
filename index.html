@@ -56,8 +56,8 @@
         <div class="grid">
           <!-- Card 1 -->
           <a class="card" href="projects/project-1.html" aria-label="Open project: Capstone Deck & Girder Design">
-            <img alt="" class="card-img"
-  src="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20width%3D'1200'%20height%3D'800'%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20fill%3D'%23121A26'/%3E%3Ctext%20x%3D'60'%20y%3D'140'%20fill%3D'%23FFFFFF'%20font-size%3D'56'%20font-family%3D'Arial'%20opacity%3D'0.92'%3ECapstone%3C/text%3E%3Ctext%20x%3D'60'%20y%3D'210'%20fill%3D'%23FFFFFF'%20font-size%3D'28'%20font-family%3D'Arial'%20opacity%3D'0.75'%3EDeck%20%26%20Girder%20Design%3C/text%3E%3C/svg%3E" />
+            <img alt="" class="card-img" src="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20width%3D'1200'%20height%3D'800'%3E%3Cdefs%3E%3ClinearGradient%20id%3D'g'%20x1%3D'0'%20y1%3D'0'%20x2%3D'1'%20y2%3D'1'%3E%3Cstop%20offset%3D'0'%20stop-color%3D'%23121A26'/%3E%3Cstop%20offset%3D'1'%20stop-color%3D'%232A3B55'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20fill%3D'url(%23g)'/%3E%3Ctext%20x%3D'60'%20y%3D'140'%20fill%3D'%23FFFFFF'%20font-size%3D'56'%20font-family%3D'Arial'%20opacity%3D'0.92'%3ECapstone%20Deck%20%26%20Girder%3C/text%3E%3Ctext%20x%3D'60'%20y%3D'210'%20fill%3D'%23FFFFFF'%20font-size%3D'28'%20font-family%3D'Arial'%20opacity%3D'0.75'%3EStructural%20design%20%7C%20Loads%20%7C%20Checks%3C/text%3E%3C/svg%3E" />
+            <div class="card-body">
               <div class="card-title">Capstone Deck &amp; Girder Design</div>
               <div class="card-tags">
                 <span class="tag">Steel / Composite</span>
@@ -142,39 +142,33 @@
     </section>
 
     <section id="about" class="section section-alt">
-  <div class="container-wide">
-    <div class="text-rail">
-      <h2>About</h2>
-      <p class="about">
-        I’m a civil engineering student focused on structural and infrastructure projects. I like clean documentation,
-        defensible assumptions, and designs that are practical to build. This site is a curated set of work samples.
-      </p>
-    </div>
-  </div>
-</section>
+      <div class="container">
+        <h2>About</h2>
+        <p class="about">
+          I’m a civil engineering student focused on structural and infrastructure projects. I like clean documentation,
+          defensible assumptions, and designs that are practical to build. This site is a curated set of work samples.
+        </p>
+      </div>
+    </section>
 
     <section id="contact" class="section">
-  <div class="container-wide">
-    <div class="text-rail">
-      <h2>Contact</h2>
-      <p class="muted">Add links when you’re ready:</p>
-      <div class="contact-row">
-        <a class="pill" href="#" title="Add your email link">Email</a>
-        <a class="pill" href="#" title="Add your LinkedIn link">LinkedIn</a>
-        <a class="pill" href="#" title="Add your resume PDF link">Resume (PDF)</a>
+      <div class="container">
+        <h2>Contact</h2>
+        <p class="muted">Add links when you’re ready:</p>
+        <div class="contact-row">
+          <a class="pill" href="#" title="Add your email link">Email</a>
+          <a class="pill" href="#" title="Add your LinkedIn link">LinkedIn</a>
+          <a class="pill" href="#" title="Add your resume PDF link">Resume (PDF)</a>
+        </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
   </main>
 
   <footer class="footer">
-  <div class="container-wide">
-    <div class="text-rail">
+    <div class="container">
       <span class="muted">© <span id="year"></span> Alexandra Schuller</span>
     </div>
-  </div>
-</footer>
+  </footer>
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
