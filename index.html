@@ -1,12 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Alexandra Schuller | Portfolio</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>Alexandra Schuller</h1>
-  <p>Civil Engineering Student</p>
-  <p>Portfolio in progress.</p>
+  <header class="site-header">
+    <div class="container">
+      <div class="topline">
+        <div>
+          <h1>Alexandra Schuller</h1>
+          <p class="subtitle">Civil Engineering Student • Structural + Infrastructure Focus</p>
+        </div>
+
+        <nav class="nav">
+          <a href="#projects">Projects</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+        </nav>
+      </div>
+
+      <div class="hero">
+        <p class="hero-text">
+          A project-first portfolio showcasing design thinking, clear documentation, and practical engineering decisions.
+        </p>
+        <div class="hero-buttons">
+          <a class="btn" href="#projects">View projects</a>
+          <a class="btn btn-ghost" href="#contact">Get in touch</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="projects" class="section">
+      <div class="container">
+        <div class="section-head">
+          <h2>Projects</h2>
+          <p class="muted">Click a card to see scope, assumptions, calculations, and outcomes.</p>
+        </div>
+
+        <div class="grid">
+          <!-- Card 1 -->
+          <a class="card" href="projects/project-1.html" aria-label="Open project: Capstone Deck & Girder Design">
+            <img alt="" class="card-img" src="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20width%3D'1200'%20height%3D'800'%3E%3Cdefs%3E%3ClinearGradient%20id%3D'g'%20x1%3D'0'%20y1%3D'0'%20x2%3D'1'%20y2%3D'1'%3E%3Cstop%20offset%3D'0'%20stop-color%3D'%23121A26'/%3E%3Cstop%20offset%3D'1'%20stop-color%3D'%232A3B55'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20fill%3D'url(%23g)'/%3E%3Ctext%20x%3D'60'%20y%3D'140'%20fill%3D'%23FFFFFF'%20font-size%3D'56'%20font-family%3D'Arial'%20opacity%3D'0.92'%3ECapstone%20Deck%20%26%20Girder%3C/text%3E%3Ctext%20x%3D'60'%20y%3D'210'%20fill%3D'%23FFFFFF'%20font-size%3D'28'%20font-family%3D'Arial'%20opacity%3D'0.75'%3EStructural%20design%20%7C%20Loads%20%7C%20Checks%3C/text%3E%3C/svg%3E" />
+            <div class="card-body">
+              <div class="card-title">Capstone Deck &amp; Girder Design</div>
+              <div class="card-tags">
+                <span class="tag">Steel / Composite</span>
+                <span class="tag">CHBDC</span>
+                <span class="tag">Model + Checks</span>
+              </div>
+              <p class="card-desc">A full-span structural concept with load path decisions, analysis model, and code-based verification.</p>
+            </div>
+          </a>
+
+          <!-- Card 2 -->
+          <a class="card" href="projects/project-2.html" aria-label="Open project: Bridge Model + Load Cases">
+            <img alt="" class="card-img" src="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20width%3D'1200'%20height%3D'800'%3E%3Cdefs%3E%3ClinearGradient%20id%3D'g'%20x1%3D'0'%20y1%3D'1'%20x2%3D'1'%20y2%3D'0'%3E%3Cstop%20offset%3D'0'%20stop-color%3D'%231D2C2A'/%3E%3Cstop%20offset%3D'1'%20stop-color%3D'%233A6B63'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20fill%3D'url(%23g)'/%3E%3Ctext%20x%3D'60'%20y%3D'140'%20fill%3D'%23FFFFFF'%20font-size%3D'56'%20font-family%3D'Arial'%20opacity%3D'0.92'%3EBridge%20Model%3C/text%3E%3Ctext%20x%3D'60'%20y%3D'210'%20fill%3D'%23FFFFFF'%20font-size%3D'28'%20font-family%3D'Arial'%20opacity%3D'0.75'%3ELoad%20cases%20%7C%20Boundaries%20%7C%20Results%3C/text%3E%3C/svg%3E" />
+            <div class="card-body">
+              <div class="card-title">Bridge Model + Load Cases</div>
+              <div class="card-tags">
+                <span class="tag">CSI Bridge</span>
+                <span class="tag">Combinations</span>
+                <span class="tag">QA</span>
+              </div>
+              <p class="card-desc">A clean modeling workflow: geometry, boundary conditions, load definition, and result interpretation.</p>
+            </div>
+          </a>
+
+          <!-- Card 3 -->
+          <a class="card" href="projects/project-3.html" aria-label="Open project: Concrete Canoe Mix + Testing">
+            <img alt="" class="card-img" src="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20width%3D'1200'%20height%3D'800'%3E%3Cdefs%3E%3ClinearGradient%20id%3D'g'%20x1%3D'0'%20y1%3D'0'%20x2%3D'1'%20y2%3D'1'%3E%3Cstop%20offset%3D'0'%20stop-color%3D'%23261B2D'/%3E%3Cstop%20offset%3D'1'%20stop-color%3D'%23563E6B'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20fill%3D'url(%23g)'/%3E%3Ctext%20x%3D'60'%20y%3D'140'%20fill%3D'%23FFFFFF'%20font-size%3D'56'%20font-family%3D'Arial'%20opacity%3D'0.92'%3EConcrete%20Canoe%3C/text%3E%3Ctext%20x%3D'60'%20y%3D'210'%20fill%3D'%23FFFFFF'%20font-size%3D'28'%20font-family%3D'Arial'%20opacity%3D'0.75'%3EMix%20design%20%7C%20Testing%20%7C%20Build%3C/text%3E%3C/svg%3E" />
+            <div class="card-body">
+              <div class="card-title">Concrete Canoe Mix + Testing</div>
+              <div class="card-tags">
+                <span class="tag">Materials</span>
+                <span class="tag">Testing</span>
+                <span class="tag">Leadership</span>
+              </div>
+              <p class="card-desc">Design-to-build work: mix iteration, test results, practical constraints, and final performance.</p>
+            </div>
+          </a>
+
+          <!-- Card 4 -->
+          <a class="card" href="projects/project-4.html" aria-label="Open project: Slab Design on Stiff Supports">
+            <img alt="" class="card-img" src="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20width%3D'1200'%20height%3D'800'%3E%3Cdefs%3E%3ClinearGradient%20id%3D'g'%20x1%3D'0'%20y1%3D'1'%20x2%3D'1'%20y2%3D'0'%3E%3Cstop%20offset%3D'0'%20stop-color%3D'%23242424'/%3E%3Cstop%20offset%3D'1'%20stop-color%3D'%235A5A5A'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20fill%3D'url(%23g)'/%3E%3Ctext%20x%3D'60'%20y%3D'140'%20fill%3D'%23FFFFFF'%20font-size%3D'56'%20font-family%3D'Arial'%20opacity%3D'0.92'%3ESlab%20Design%3C/text%3E%3Ctext%20x%3D'60'%20y%3D'210'%20fill%3D'%23FFFFFF'%20font-size%3D'28'%20font-family%3D'Arial'%20opacity%3D'0.75'%3EProcedure%20%7C%20Rebar%20%7C%20Punching%20shear%3C/text%3E%3C/svg%3E" />
+            <div class="card-body">
+              <div class="card-title">Slab Design on Stiff Supports</div>
+              <div class="card-tags">
+                <span class="tag">CSA A23.3</span>
+                <span class="tag">Rebar</span>
+                <span class="tag">Checks</span>
+              </div>
+              <p class="card-desc">A repeatable workflow for moments, reinforcement direction, and punching shear verification.</p>
+            </div>
+          </a>
+
+          <!-- Card 5 -->
+          <a class="card" href="projects/project-5.html" aria-label="Open project: Open-Channel Flow Lab Analysis">
+            <img alt="" class="card-img" src="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20width%3D'1200'%20height%3D'800'%3E%3Cdefs%3E%3ClinearGradient%20id%3D'g'%20x1%3D'0'%20y1%3D'0'%20x2%3D'1'%20y2%3D'1'%3E%3Cstop%20offset%3D'0'%20stop-color%3D'%231E2A3A'/%3E%3Cstop%20offset%3D'1'%20stop-color%3D'%233D5A80'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20fill%3D'url(%23g)'/%3E%3Ctext%20x%3D'60'%20y%3D'140'%20fill%3D'%23FFFFFF'%20font-size%3D'56'%20font-family%3D'Arial'%20opacity%3D'0.92'%3EHydraulics%20Lab%3C/text%3E%3Ctext%20x%3D'60'%20y%3D'210'%20fill%3D'%23FFFFFF'%20font-size%3D'28'%20font-family%3D'Arial'%20opacity%3D'0.75'%3EData%20%7C%20Plots%20%7C%20Interpretation%3C/text%3E%3C/svg%3E" />
+            <div class="card-body">
+              <div class="card-title">Open-Channel Flow Lab Analysis</div>
+              <div class="card-tags">
+                <span class="tag">Excel</span>
+                <span class="tag">Calibration</span>
+                <span class="tag">Reporting</span>
+              </div>
+              <p class="card-desc">Turning raw measurements into clean results: coefficients, plots, and engineering conclusions.</p>
+            </div>
+          </a>
+
+          <!-- Card 6 -->
+          <a class="card" href="projects/project-6.html" aria-label="Open project: Python/MATLAB Tools for Engineering">
+            <img alt="" class="card-img" src="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20width%3D'1200'%20height%3D'800'%3E%3Cdefs%3E%3ClinearGradient%20id%3D'g'%20x1%3D'0'%20y1%3D'1'%20x2%3D'1'%20y2%3D'0'%3E%3Cstop%20offset%3D'0'%20stop-color%3D'%231B2B1B'/%3E%3Cstop%20offset%3D'1'%20stop-color%3D'%233B7A57'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20fill%3D'url(%23g)'/%3E%3Ctext%20x%3D'60'%20y%3D'140'%20fill%3D'%23FFFFFF'%20font-size%3D'56'%20font-family%3D'Arial'%20opacity%3D'0.92'%3EEngineering%20Tools%3C/text%3E%3Ctext%20x%3D'60'%20y%3D'210'%20fill%3D'%23FFFFFF'%20font-size%3D'28'%20font-family%3D'Arial'%20opacity%3D'0.75'%3EScripts%20%7C%20Automation%20%7C%20Validation%3C/text%3E%3C/svg%3E" />
+            <div class="card-body">
+              <div class="card-title">Engineering Tools (Scripts)</div>
+              <div class="card-tags">
+                <span class="tag">Automation</span>
+                <span class="tag">Numerical</span>
+                <span class="tag">Clarity</span>
+              </div>
+              <p class="card-desc">Small tools that save time: repeatable calculations, structured outputs, and sanity checks.</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="section section-alt">
+      <div class="container">
+        <h2>About</h2>
+        <p class="about">
+          I’m a civil engineering student focused on structural and infrastructure projects. I like clean documentation,
+          defensible assumptions, and designs that are practical to build. This site is a curated set of work samples.
+        </p>
+      </div>
+    </section>
+
+    <section id="contact" class="section">
+      <div class="container">
+        <h2>Contact</h2>
+        <p class="muted">Add links when you’re ready:</p>
+        <div class="contact-row">
+          <a class="pill" href="#" title="Add your email link">Email</a>
+          <a class="pill" href="#" title="Add your LinkedIn link">LinkedIn</a>
+          <a class="pill" href="#" title="Add your resume PDF link">Resume (PDF)</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <span class="muted">© <span id="year"></span> Alexandra Schuller</span>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
