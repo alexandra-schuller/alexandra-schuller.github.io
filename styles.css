@@ -1,3 +1,4 @@
+/* styles.css (REPLACE ENTIRE FILE WITH THIS) */
 :root{
   --bg: #0b0f16;
   --panel: #0f1622;
@@ -19,6 +20,7 @@ body{
 }
 
 a{ color:inherit; text-decoration:none; }
+
 .container{
   max-width: 1280px;
   margin-left: auto;
@@ -26,18 +28,27 @@ a{ color:inherit; text-decoration:none; }
   padding-left: 48px;
   padding-right: 48px;
 }
+
 .container-wide{
   max-width: 1500px;
   margin-left: auto;
   margin-right: auto;
   padding-left: 48px;
-  padding-right: 48px; /* SAME as .container so the left edge lines up */
+  padding-right: 48px;
 }
+
+/* A readable text column that stays LEFT-aligned inside the wide container */
+.text-rail{
+  max-width: 1100px;
+}
+
 .site-header{ padding: 42px 0 26px; }
+
 .topline{
   display:flex; gap:18px; align-items:flex-start; justify-content:space-between;
   flex-wrap:wrap;
 }
+
 h1{ margin:0; font-size: 40px; letter-spacing: -0.02em; }
 .subtitle{ margin:8px 0 0; color: var(--muted); }
 
@@ -57,6 +68,7 @@ h1{ margin:0; font-size: 40px; letter-spacing: -0.02em; }
 .hero{ margin-top: 20px; padding: 18px 0 6px; }
 .hero-text{ max-width: 70ch; color: var(--text); opacity:0.92; font-size: 18px; }
 .hero-buttons{ display:flex; gap:10px; margin-top: 14px; flex-wrap:wrap; }
+
 .btn{
   display:inline-flex; align-items:center; justify-content:center;
   padding: 10px 14px;
@@ -71,7 +83,11 @@ h1{ margin:0; font-size: 40px; letter-spacing: -0.02em; }
 .section{ padding: 34px 0; }
 .section-alt{ background: rgba(0,0,0,0.18); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
 
-.section-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:18px; flex-wrap:wrap; }
+.section-head{
+  display:flex; align-items:flex-end; justify-content:space-between;
+  gap:18px; flex-wrap:wrap;
+}
+
 h2{ margin:0 0 8px; font-size: 26px; letter-spacing: -0.01em; }
 .muted{ color: var(--muted); margin:0; }
 
@@ -81,6 +97,7 @@ h2{ margin:0 0 8px; font-size: 26px; letter-spacing: -0.01em; }
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
+
 .card{
   background: rgba(255,255,255,0.04);
   border: 1px solid var(--border);
@@ -102,6 +119,7 @@ h2{ margin:0 0 8px; font-size: 26px; letter-spacing: -0.01em; }
   display:block;
   object-fit: cover;
 }
+
 .card-body{ padding: 14px 14px 16px; }
 .card-title{ font-weight: 650; font-size: 16px; margin: 0 0 8px; }
 .card-desc{ margin: 10px 0 0; color: var(--muted); }
@@ -136,32 +154,8 @@ h2{ margin:0 0 8px; font-size: 26px; letter-spacing: -0.01em; }
 }
 
 @media (max-width: 900px){
-  .grid{
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
+  .grid{ grid-template-columns: repeat(2, 1fr); }
 
-@media (max-width: 600px){
-  .grid{
-    grid-template-columns: 1fr;
-  }
-  h1{ font-size: 34px; }
-}
-/* Wider sections for visual content */
-.wide-container{
-  max-width: 1500px;
-}
-
-/* Keep text readable */
-.section-head,
-.hero{
-  max-width: 900px;
-}
-.about,
-#contact .container{
-  max-width: 1100px;
-}
-@media (max-width: 900px){
   .container,
   .container-wide{
     padding-left: 32px;
@@ -170,6 +164,9 @@ h2{ margin:0 0 8px; font-size: 26px; letter-spacing: -0.01em; }
 }
 
 @media (max-width: 600px){
+  .grid{ grid-template-columns: 1fr; }
+  h1{ font-size: 34px; }
+
   .container,
   .container-wide{
     padding-left: 20px;
