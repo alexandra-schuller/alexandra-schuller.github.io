@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../styles.css?v=18" />
+  <link rel="stylesheet" href="../styles.css?v=21" />
 </head>
 <body>
   <header class="site-header">
@@ -19,43 +19,33 @@
   </header>
 
   <main class="section">
-    <div class="container text-rail">
-      <img class="project-hero" src="../assets/capdecarie-hero.jpg" alt="Revit render of the CapDécarie green deck above the Décarie Expressway" />
-
-      <p class="project-text" data-en="What if a highway dividing a neighbourhood could become the foundation for a new public space? For our final Civil Engineering capstone, our team of five developed CapDécarie — a proposal to transform a section of Montréal’s Décarie Expressway trench between Snowdon and Queen Mary into a 5,670 m² green deck and pedestrian park, while replacing and redesigning the aging Queen Mary overpass.">
-        Et si une autoroute qui divise un quartier pouvait devenir le fondement d’un nouvel espace public? Pour notre projet de synthèse final en génie civil, notre équipe de cinq personnes a développé CapDécarie — une proposition visant à transformer une section de la tranchée de l’autoroute Décarie, entre Snowdon et Queen Mary, en un parc suspendu et piétonnier de 5 670 m², tout en remplaçant et en redessinant le viaduc vieillissant de Queen Mary.
-      </p>
-
-      <h2 data-en="At a glance">En bref</h2>
-      <div class="contact-row">
-        <span class="pill" data-en="5,670 m² green deck">Parc suspendu de 5 670 m²</span>
-        <span class="pill" data-en="~180 m structure">Structure d’environ 180 m</span>
-        <span class="pill" data-en="Highway bridge redesign">Refonte du viaduc</span>
-        <span class="pill">CSiBridge</span>
-        <span class="pill">SAP2000</span>
-        <span class="pill">Revit</span>
-        <span class="pill">CSA S6 / CSA S7</span>
-      </div>
-
-      <h2 data-en="Selected visuals">Visuels sélectionnés</h2>
-      <div class="figure-grid">
-        <figure>
+    <div class="container">
+      <div class="carousel">
+        <figure class="carousel-slide">
+          <img src="../assets/capdecarie-hero.jpg" alt="Revit render of the CapDécarie green deck above the Décarie Expressway" />
+          <figcaption data-en="Revit render of the cap above the Décarie Expressway">Rendu Revit du parc suspendu au-dessus de l’autoroute Décarie</figcaption>
+        </figure>
+        <figure class="carousel-slide">
           <img src="../assets/capdecarie-csibridge.jpg" alt="CSiBridge model of the redesigned Queen Mary overpass" />
           <figcaption data-en="CSiBridge model of the redesigned Queen Mary overpass">Modèle CSiBridge du viaduc Queen Mary redessiné</figcaption>
         </figure>
-        <figure>
+        <figure class="carousel-slide">
           <img src="../assets/capdecarie-sap2000.jpg" alt="SAP2000 structural frame model of the cap deck" />
           <figcaption data-en="SAP2000 structural frame model of the ~180 m cap deck">Modèle de cadre structural SAP2000 du parc suspendu d’environ 180 m</figcaption>
         </figure>
-        <figure>
+        <figure class="carousel-slide">
           <img src="../assets/capdecarie-revit-highway.jpg" alt="Revit visualization of the cap structure above the expressway" />
           <figcaption data-en="Revit visualization of the cap structure above the expressway">Visualisation Revit de la structure du parc au-dessus de l’autoroute</figcaption>
         </figure>
-        <figure>
+        <figure class="carousel-slide">
           <img src="../assets/capdecarie-phasing.jpg" alt="Three-phase construction sequencing over the expressway" />
           <figcaption data-en="Three-phase construction sequencing over the expressway">Séquencement de la construction en trois phases au-dessus de l’autoroute</figcaption>
         </figure>
       </div>
+
+      <p class="project-text" data-en="What if a highway dividing a neighbourhood could become the foundation for a new public space? For our final Civil Engineering capstone, our team of five developed CapDécarie — a proposal to transform a section of Montréal’s Décarie Expressway trench between Snowdon and Queen Mary into a 5,670 m² green deck and pedestrian park, while replacing and redesigning the aging Queen Mary overpass.">
+        Et si une autoroute qui divise un quartier pouvait devenir le fondement d’un nouvel espace public? Pour notre projet de synthèse final en génie civil, notre équipe de cinq personnes a développé CapDécarie — une proposition visant à transformer une section de la tranchée de l’autoroute Décarie, entre Snowdon et Queen Mary, en un parc suspendu et piétonnier de 5 670 m², tout en remplaçant et en redessinant le viaduc vieillissant de Queen Mary.
+      </p>
 
       <p class="project-text" data-en="The project combines structural engineering, transportation, sustainability, and urban design to turn an existing piece of highway infrastructure into an opportunity for neighbourhood reconnection. Our work took the concept from feasibility through detailed engineering, including bridge and foundation design, load and seismic analysis, steel and reinforced-concrete design, traffic management, drainage, embodied-carbon analysis, cost estimating, and construction phasing.">
         Le projet combine génie structural, transport, durabilité et design urbain pour transformer une infrastructure autoroutière existante en une occasion de reconnecter le quartier. Notre travail a mené le concept de l’étude de faisabilité jusqu’à la conception détaillée, incluant la conception du pont et des fondations, l’analyse des charges et sismique, la conception en acier et en béton armé, la gestion de la circulation, le drainage, l’analyse du carbone intrinsèque, l’estimation des coûts et le phasage de la construction.
@@ -73,6 +63,7 @@
       <a class="btn" href="../assets/capdecarie-drawings.pdf" target="_blank" rel="noopener" data-en="View Selected Structural Drawings →">Voir les dessins structuraux sélectionnés →</a>
     </div>
   </main>
+  <script src="../carousel.js"></script>
   <script src="../i18n.js"></script>
 </body>
 </html>

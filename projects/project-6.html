@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../styles.css?v=18" />
+  <link rel="stylesheet" href="../styles.css?v=21" />
 </head>
 <body>
   <header class="site-header">
@@ -19,15 +19,7 @@
   </header>
 
   <main class="section">
-    <div class="container text-rail">
-      <div class="contact-row">
-        <span class="pill">Abaqus</span>
-        <span class="pill">MATLAB</span>
-        <span class="pill">Hoek–Brown</span>
-        <span class="pill">Mohr–Coulomb</span>
-        <span class="pill" data-en="Finite Element Analysis">Analyse par éléments finis</span>
-      </div>
-
+    <div class="container">
       <p class="project-text" data-en="How much can a seemingly small change in rock quality affect the stability of an entire slope? For this Advanced Geotechnical Engineering project, I investigated the influence of rock mass quality on slope stability by combining laboratory data, analytical rock mechanics, and numerical modelling.">
         Quel impact un changement apparemment minime dans la qualité du roc peut-il avoir sur la stabilité de toute une pente? Pour ce projet en génie géotechnique avancé, j’ai étudié l’influence de la qualité du massif rocheux sur la stabilité des pentes en combinant données de laboratoire, mécanique des roches analytique et modélisation numérique.
       </p>
@@ -38,54 +30,37 @@
         Les paramètres obtenus ont été intégrés dans MATLAB pour une analyse non linéaire de stabilité des pentes, tandis qu’Abaqus a servi à développer un modèle 3D par éléments finis et à visualiser les contraintes principales et la déformation du matériau rocheux intact. L’analyse a démontré qu’une réduction du GSI peut réduire significativement la résistance au cisaillement et augmenter la déformation, soulignant l’importance de représenter des conditions géologiques réalistes lors de la prédiction du comportement et de la sécurité des pentes rocheuses.
       </p>
 
-      <h2 data-en="01 — Finite Element Modelling">01 — Modélisation par éléments finis</h2>
-      <div class="figure-grid">
-        <figure>
+      <div class="carousel">
+        <figure class="carousel-slide">
           <img src="../assets/rockslope-max-principal.jpg" alt="Abaqus maximum principal stress contours" />
           <figcaption data-en="Maximum principal stresses">Contraintes principales maximales</figcaption>
         </figure>
-        <figure>
+        <figure class="carousel-slide">
           <img src="../assets/rockslope-min-principal.jpg" alt="Abaqus minimum principal stress contours" />
           <figcaption data-en="Minimum principal stresses">Contraintes principales minimales</figcaption>
         </figure>
-      </div>
-      <p class="project-text" data-en="Abaqus 3D finite-element model — principal stress distribution and deformation of the intact rock material using Mohr–Coulomb strength parameters.">
-        Modèle 3D par éléments finis Abaqus — distribution des contraintes principales et déformation du matériau rocheux intact selon les paramètres de résistance de Mohr–Coulomb.
-      </p>
-
-      <h2 data-en="02 — Effect of Geological Strength">02 — Effet de la qualité géologique</h2>
-      <div class="figure-grid">
-        <figure>
+        <figure class="carousel-slide">
           <img src="../assets/rockslope-gsi100-displacement.png" alt="MATLAB total displacement contour for GSI 100" />
           <figcaption data-en="Total displacement — GSI 100">Déplacement total — GSI 100</figcaption>
         </figure>
-        <figure>
+        <figure class="carousel-slide">
           <img src="../assets/rockslope-gsi85-displacement.png" alt="MATLAB total displacement contour for GSI 85" />
           <figcaption data-en="Total displacement — GSI 85">Déplacement total — GSI 85</figcaption>
         </figure>
-        <figure>
+        <figure class="carousel-slide">
           <img src="../assets/rockslope-gsi100-plastic-strain.png" alt="MATLAB plastic strain contour for GSI 100" />
           <figcaption data-en="Plastic strain — GSI 100">Déformation plastique — GSI 100</figcaption>
         </figure>
-        <figure>
+        <figure class="carousel-slide">
           <img src="../assets/rockslope-gsi85-plastic-strain.png" alt="MATLAB plastic strain contour for GSI 85" />
           <figcaption data-en="Plastic strain — GSI 85">Déformation plastique — GSI 85</figcaption>
         </figure>
       </div>
-      <div class="contact-row">
-        <span class="pill" data-en="GSI 100 → 85">GSI 100 → 85</span>
-        <span class="pill" data-en="Cohesion: 9.04 → 4.66 MPa">Cohésion : 9,04 → 4,66 MPa</span>
-        <span class="pill" data-en="Friction angle: 41.97° → 33.74°">Angle de frottement : 41,97° → 33,74°</span>
-      </div>
-
-      <h2 data-en="03 — Engineering Takeaway">03 — Constat technique</h2>
-      <p class="project-text" data-en="Lower geological quality produced lower shear strength, greater displacement, and increased plastic deformation — demonstrating why realistic rock-mass characterization is critical to slope-stability assessment.">
-        Une qualité géologique plus faible a entraîné une résistance au cisaillement moindre, un déplacement plus important et une déformation plastique accrue — démontrant l’importance d’une caractérisation réaliste du massif rocheux pour l’évaluation de la stabilité des pentes.
-      </p>
 
       <a class="btn" href="../assets/rockslope-report.pdf" target="_blank" rel="noopener" data-en="View Full Technical Report →">Voir le rapport technique complet →</a>
     </div>
   </main>
+  <script src="../carousel.js"></script>
   <script src="../i18n.js"></script>
 </body>
 </html>
