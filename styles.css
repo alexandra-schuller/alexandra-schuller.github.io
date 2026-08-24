@@ -45,9 +45,23 @@ a{ color:inherit; text-decoration:none; }
 /* A readable text column that stays LEFT-aligned inside the wide container */
 .text-rail{
   max-width: 1100px;
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-.site-header{ padding: 42px 0 26px; }
+.site-header{ padding: 42px 0 8px; }
+.header-inner{ display: flex; align-items: stretch; justify-content: space-between; gap: 32px; }
+
+.headshot{
+  width: clamp(240px, 28vw, 380px);
+  height: auto;
+  flex-shrink: 0;
+  display: block;
+  align-self: flex-start;
+  margin-top: 46px;
+}
 
 .topline{
   display:flex; gap:18px; align-items:flex-start; justify-content:space-between;
@@ -70,7 +84,8 @@ h1{ margin:0; font-size: 44px; font-weight: 500; letter-spacing: -0.005em; }
   background: rgba(255,255,255,0.04);
 }
 
-.hero{ margin-top: 8px; padding: 4px 0 6px; }
+.hero{ margin-top: 8px; padding: 4px 0 6px; flex: 1; display: flex; flex-direction: column; }
+#contact{ margin-top: auto; padding-top: 24px; }
 .hero-text{ max-width: 70ch; color: var(--text); opacity:0.92; font-size: 19px; font-weight: 400; }
 .hero-buttons{ display:flex; gap:10px; margin-top: 14px; flex-wrap:wrap; }
 
@@ -135,6 +150,7 @@ h2{ margin:0 0 8px; font-size: 29px; font-weight: 500; letter-spacing: -0.005em;
 
 .about{ max-width: 80ch; color: var(--text); opacity:0.92; }
 
+.contact-title{ margin-top: 22px; }
 .contact-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
 .pill{
   padding: 9px 12px;
@@ -155,7 +171,7 @@ h2{ margin:0 0 8px; font-size: 29px; font-weight: 500; letter-spacing: -0.005em;
 .lang-toggle{
   position: fixed;
   top: 16px;
-  right: 16px;
+  right: 48px;
   z-index: 50;
   font-family: inherit;
   font-size: 14px;
@@ -177,6 +193,8 @@ h2{ margin:0 0 8px; font-size: 29px; font-weight: 500; letter-spacing: -0.005em;
     padding-left: 32px;
     padding-right: 32px;
   }
+
+  .headshot{ display: none; }
 }
 
 @media (max-width: 600px){

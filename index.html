@@ -8,12 +8,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=4" />
+  <link rel="stylesheet" href="styles.css?v=11" />
 </head>
 <body>
   <header class="site-header">
     <!-- Use the same outer width as the cards -->
-    <div class="container-wide">
+    <div class="container-wide header-inner">
       <!-- Constrain readable text to a rail (but keep it left-aligned) -->
       <div class="text-rail">
         <div class="topline">
@@ -28,12 +28,17 @@
             Je suis étudiante en génie civil, avec un intérêt marqué pour les structures et les infrastructures. J’aime la documentation
             claire, les hypothèses défendables et les conceptions pratiques à réaliser. Ce site rassemble une sélection de mes travaux.
           </p>
-          <div class="hero-buttons">
-            <a class="btn" href="#projects" data-en="View projects">Voir les projets</a>
-            <a class="btn btn-ghost" href="#contact" data-en="Get in touch">Nous joindre</a>
+          <div id="contact">
+            <h2 class="contact-title">Contact</h2>
+            <div class="contact-row">
+              <a class="pill" href="#" title="Add your email link" data-en="Email">Courriel</a>
+              <a class="pill" href="https://www.linkedin.com/in/alexandra-schuller/" target="_blank" rel="noopener">LinkedIn</a>
+              <a class="pill" href="#" title="Add your resume PDF link" data-en="Resume (PDF)">CV (PDF)</a>
+            </div>
           </div>
         </div>
       </div>
+      <img class="headshot" src="assets/headshot.jpg" alt="Alexandra Schuller" />
     </div>
   </header>
 
@@ -106,20 +111,6 @@
               <p class="card-desc" data-en="Small tools that save time: repeatable calculations, structured outputs, and sanity checks.">De petits outils qui font gagner du temps : calculs reproductibles, résultats structurés et vérifications de cohérence.</p>
             </div>
           </a>
-        </div>
-      </div>
-    </section>
-
-    <section id="contact" class="section">
-      <div class="container-wide">
-        <div class="text-rail">
-          <h2>Contact</h2>
-          <p class="muted" data-en="Add links when you’re ready:">Ajoutez vos liens quand vous serez prête :</p>
-          <div class="contact-row">
-            <a class="pill" href="#" title="Add your email link" data-en="Email">Courriel</a>
-            <a class="pill" href="https://www.linkedin.com/in/alexandra-schuller/" target="_blank" rel="noopener">LinkedIn</a>
-            <a class="pill" href="#" title="Add your resume PDF link" data-en="Resume (PDF)">CV (PDF)</a>
-          </div>
         </div>
       </div>
     </section>
