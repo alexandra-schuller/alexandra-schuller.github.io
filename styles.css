@@ -111,6 +111,7 @@ h1{ margin:0; font-size: 44px; font-weight: 500; letter-spacing: -0.005em; }
 
 h2{ margin:0 0 8px; font-size: 29px; font-weight: 500; letter-spacing: -0.005em; }
 .muted{ color: var(--muted); margin:0; }
+.project-text{ color: var(--text); font-size: 21px; font-weight: 600; line-height: 1.6; margin: 0 0 18px; max-width: 80ch; }
 
 .grid{
   margin-top: 18px;
@@ -155,6 +156,30 @@ h2{ margin:0 0 8px; font-size: 29px; font-weight: 500; letter-spacing: -0.005em;
 .card-desc{ margin: 10px 0 0; color: var(--muted); font-size: 19px; font-weight: 700; line-height: 1.5; }
 
 .about{ max-width: 80ch; color: var(--text); opacity:0.92; }
+
+.project-hero{
+  width: 100%;
+  display: block;
+  border: 3px solid var(--accent);
+  box-shadow: var(--shadow);
+  margin: 24px 0 28px;
+}
+
+.figure-grid{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin: 12px 0 28px;
+}
+.figure-grid figure{
+  margin: 0;
+  border: 3px solid var(--accent);
+  background: var(--panel);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.figure-grid img{ width: 100%; display: block; }
+.figure-grid figcaption{ padding: 10px 14px; color: var(--muted); font-size: 16px; font-weight: 600; }
 
 .contact-title{ margin-top: 22px; }
 .contact-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
@@ -215,4 +240,6 @@ h2{ margin:0 0 8px; font-size: 29px; font-weight: 500; letter-spacing: -0.005em;
     padding-left: 20px;
     padding-right: 20px;
   }
+
+  .figure-grid{ grid-template-columns: 1fr; }
 }
