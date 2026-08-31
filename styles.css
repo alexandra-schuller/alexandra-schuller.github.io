@@ -46,21 +46,21 @@ a{ color:inherit; text-decoration:none; }
 .text-rail{
   max-width: 1100px;
   min-width: 0;
-  flex: 0 1 auto;
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
 
 .site-header{ padding: 42px 0 8px; }
-.header-inner{ display: flex; align-items: stretch; justify-content: flex-start; gap: 32px; }
+.header-inner{ display: flex; align-items: center; justify-content: space-between; gap: 32px; }
 
 .headshot{
-  width: clamp(190px, 18vw, 260px);
-  height: auto;
+  width: clamp(240px, 28vw, 380px);
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: top center;
   flex-shrink: 0;
   display: block;
-  align-self: flex-start;
-  margin-top: 46px;
 }
 
 .topline{
@@ -68,8 +68,8 @@ a{ color:inherit; text-decoration:none; }
   flex-wrap:wrap;
 }
 
-h1{ margin:0; font-size: 44px; font-weight: 500; letter-spacing: -0.005em; }
-.subtitle{ margin:8px 0 0; color: var(--muted); font-weight: 400; font-size: 17px; }
+h1{ margin:0; font-size: 50px; font-weight: 500; letter-spacing: -0.005em; }
+.subtitle{ margin:8px 0 0; color: var(--muted); font-weight: 400; font-size: 20px; }
 
 .nav{ display:flex; gap:14px; align-items:center; }
 .nav a{
@@ -84,9 +84,9 @@ h1{ margin:0; font-size: 44px; font-weight: 500; letter-spacing: -0.005em; }
   background: rgba(255,255,255,0.04);
 }
 
-.hero{ margin-top: 8px; padding: 4px 0 6px; flex: 1; display: flex; flex-direction: column; }
-#contact{ margin-top: auto; padding-top: 24px; }
-.hero-text{ max-width: 70ch; color: var(--text); opacity:0.92; font-size: 19px; font-weight: 400; }
+.hero{ margin-top: 22px; padding: 4px 0 6px; flex: 1; display: flex; flex-direction: column; }
+#contact{ margin-top: auto; padding-top: 8px; }
+.hero-text{ color: var(--text); opacity:0.92; font-size: 22px; font-weight: 400; margin: 0 0 14px; }
 .hero-buttons{ display:flex; gap:10px; margin-top: 14px; flex-wrap:wrap; }
 
 .btn{
@@ -230,7 +230,7 @@ h2{ margin:0 0 8px; font-size: 29px; font-weight: 500; letter-spacing: -0.005em;
 .figure-grid img{ width: 100%; display: block; }
 .figure-grid figcaption{ padding: 10px 14px; color: var(--muted); font-size: 16px; font-weight: 600; }
 
-.contact-title{ margin-top: 22px; }
+.contact-title{ margin-top: 0; }
 .contact-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
 .pill{
   padding: 9px 14px;
