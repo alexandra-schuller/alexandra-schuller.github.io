@@ -96,9 +96,9 @@ h1{ margin:0; font-size: 44px; font-weight: 500; letter-spacing: -0.005em; }
   border: 3px solid var(--accent);
   background: var(--accent-soft);
   box-shadow: 0 8px 20px rgba(139,58,150,0.14);
-  transition: background 140ms ease, border-width 140ms ease;
+  transition: background 140ms ease, box-shadow 140ms ease;
 }
-.btn:hover{ background: var(--accent-soft-hover); border-width: 5px; }
+.btn:hover{ background: var(--accent-soft-hover); box-shadow: 0 0 0 3px var(--accent), 0 8px 20px rgba(139,58,150,0.14); }
 .btn-ghost{ background: transparent; }
 
 .section{ padding: 34px 0; }
@@ -127,14 +127,13 @@ h2{ margin:0 0 8px; font-size: 29px; font-weight: 500; letter-spacing: -0.005em;
   overflow:hidden;
   box-shadow: var(--shadow);
   transform: translateY(0);
-  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease, border-width 140ms ease, box-shadow 140ms ease;
+  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
 }
 .card:hover{
   transform: translateY(-4px);
   background: var(--accent-soft-hover);
   border-color: var(--accent);
-  border-width: 6px;
-  box-shadow: 0 22px 55px rgba(139,58,150,0.26);
+  box-shadow: 0 0 0 3px var(--accent), 0 22px 55px rgba(139,58,150,0.26);
 }
 
 .card-img{
@@ -239,9 +238,9 @@ h2{ margin:0 0 8px; font-size: 29px; font-weight: 500; letter-spacing: -0.005em;
   font-size: 17px;
   font-weight: 700;
   letter-spacing: 0.01em;
-  transition: background 140ms ease, border-width 140ms ease;
+  transition: background 140ms ease, box-shadow 140ms ease;
 }
-.pill:hover{ background: var(--accent-soft-hover); border-width: 5px; }
+.pill:hover{ background: var(--accent-soft-hover); box-shadow: 0 0 0 3px var(--accent); }
 
 .footer{
   padding: 22px 0 40px;
