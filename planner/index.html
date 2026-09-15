@@ -991,13 +991,25 @@
       toast("Backed up " + ((rows || []).length) + " day" + ((rows || []).length === 1 ? "" : "s") + ".");
     }, function () { toast("Couldn't read your days to back them up."); });
   };
+  /* Android can evict a site's storage when the tablet runs low on space.
+     Asking to persist puts this planner off limits to that sweep. */
+  var persisted = null;
+  function claimStorage() {
+    if (!navigator.storage || !navigator.storage.persist) return Promise.resolve(null);
+    return navigator.storage.persisted().then(function (p) {
+      return p ? true : navigator.storage.persist();
+    }).then(function (p) { persisted = p; return p; }, function () { return null; });
+  }
+
   function showUsage() {
     var el = document.getElementById("usage");
     allKeys().then(function (ks) {
       var n = (ks || []).length;
-      el.textContent = n + " day" + (n === 1 ? "" : "s") + " written, kept on this device only. "
-        + "Back up now and then — clearing your browser data erases them.";
-    }, function () { el.textContent = "Your days are kept on this device only."; });
+      var msg = n + " day" + (n === 1 ? "" : "s") + " written, kept on this tablet only. ";
+      if (persisted === true) msg += "Your browser has marked them protected, so they won't be cleared to free up space. ";
+      else if (persisted === false) msg += "Your browser may clear them if the tablet runs very low on space. ";
+      el.textContent = msg + "Back them up now and then — erasing your browsing data erases them too.";
+    }, function () { el.textContent = "Your days are kept on this tablet only."; });
   }
 
   /* ================= boot ================= */
@@ -1021,6 +1033,7 @@
   });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { renderAll(); });
 
+  claimStorage();
   openDB().then(function (d) {
     idb = d;
     if (!idb) { setStatus("No storage"); toast("This browser won't let the planner save. Private mode?"); return; }
