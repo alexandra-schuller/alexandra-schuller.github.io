@@ -19,9 +19,9 @@
   :root {
     --paper:       #F6F7F4;
     --ink:         #1B2421;
-    --ink-soft:    #5C6763;
-    --ink-faint:   #8B9490;
-    --rule-strong: #BFC7C0;
+    --ink-soft:    #4A5551;
+    --ink-faint:   #6E7873;
+    --rule-strong: #ACB5AE;
     --pine:        #3F6B5B;
     --pine-wash:   #E6EEE9;
     --brass:       #A8813A;
@@ -72,7 +72,7 @@
   .spacer { margin-left: auto; }
 
   button {
-    font: inherit; font-size: 14px; color: var(--ink);
+    font: inherit; font-size: 15px; color: var(--ink);
     background: transparent;
     border: 1px solid var(--rule-strong);
     border-radius: 4px;
@@ -89,11 +89,11 @@
   .ghost { border-color: transparent; color: var(--ink-soft); }
   .ghost:hover:not(:disabled) { color: var(--ink); }
 
-  .datebtn { font-family: "Newsreader", Georgia, serif; font-size: 17px; min-width: 172px; justify-content: center; }
+  .datebtn { font-family: "Newsreader", Georgia, serif; font-size: 19px; min-width: 172px; justify-content: center; }
   .swatch { width: 15px; height: 15px; border-radius: 50%; border: 1px solid rgba(0,0,0,.22); }
   .status {
     font-family: "DM Mono", ui-monospace, monospace;
-    font-size: 11px; color: var(--ink-faint); letter-spacing: .02em;
+    font-size: 12px; color: var(--ink-soft); letter-spacing: .02em;
     min-width: 70px; text-align: right;
   }
 
@@ -171,7 +171,7 @@
   .toast[hidden] { display: none !important; }
 
   @media (max-width: 680px) {
-    .datebtn { min-width: 0; font-size: 15px; }
+    .datebtn { min-width: 0; font-size: 17px; }
     .bar { gap: 5px; padding: 5px 8px; }
     .grp + .grp { margin-left: 0; padding-left: 6px; }
     .status { display: none; }
@@ -411,8 +411,12 @@
 
   /* ================= the printed page ================= */
   function drawTemplate() {
-    var RULE = "#DCE1DB", STRONG = "#BFC7C0", FAINT = "#8B9490",
-        SOFT = "#5C6763", PINE = "#3F6B5B", BRASS = "#A8813A", DARK = "#1B2421";
+    var RULE = "#CFD6CE", STRONG = "#A6B0A8", FAINT = "#69736E",
+        SOFT = "#3D4844", PINE = "#33594A", BRASS = "#8E6E2B", DARK = "#141B18";
+    // Printed type scales with the row it sits in, so a tall portrait page
+    // gets bigger labels rather than the same small ones floating in space.
+    var hourPx = Math.round(Math.min(Math.max(L.schedRow * 0.55, 16), 30));
+    var mealPx = Math.round(Math.min(Math.max(L.r * 0.55, 15), 28));
 
     clearAll(tplX, tplC);
     applyView(tplX);
@@ -424,39 +428,39 @@
     tplX.strokeRect(0, 0, W, H);
 
     // coil gutter
-    tplX.fillStyle = "#F1F3EE";
+    tplX.fillStyle = "#EDF0EA";
     tplX.fillRect(0, 0, L.gutter, H);
     tplX.strokeStyle = RULE;
     line(L.gutter, 0, L.gutter, H);
     for (var y = L.holeGap * 0.6; y < H - 16; y += L.holeGap) {
       tplX.beginPath(); tplX.arc(L.holeX, y, L.holeR, 0, 6.2832);
-      tplX.fillStyle = "#E4E8E1"; tplX.fill();
-      tplX.strokeStyle = "#D2D8D0"; tplX.stroke();
+      tplX.fillStyle = "#DFE4DC"; tplX.fill();
+      tplX.strokeStyle = "#C3CBC2"; tplX.stroke();
     }
 
     // date header
     tplX.textBaseline = "alphabetic";
     tplX.fillStyle = DARK;
-    tplX.font = '300 62px "Newsreader", Georgia, serif';
+    tplX.font = '400 66px "Newsreader", Georgia, serif';
     var dn = String(cur.getDate());
-    tplX.fillText(dn, L.left, 90);
+    tplX.fillText(dn, L.left, 92);
     var nw = tplX.measureText(dn).width;
 
     tplX.fillStyle = PINE;
-    tplX.font = 'italic 400 27px "Newsreader", Georgia, serif';
+    tplX.font = 'italic 400 31px "Newsreader", Georgia, serif';
     tplX.fillText(DOW[cur.getDay()], L.left + nw + 16, 74);
 
     tplX.fillStyle = FAINT;
-    tplX.font = '400 12px "DM Mono", ui-monospace, monospace';
-    tplX.fillText(sp(MON[cur.getMonth()].toUpperCase() + " " + cur.getFullYear()), L.left + nw + 18, 93);
+    tplX.font = '500 14px "DM Mono", ui-monospace, monospace';
+    tplX.fillText(sp(MON[cur.getMonth()].toUpperCase() + " " + cur.getFullYear()), L.left + nw + 18, 95);
 
     if (key(cur) === key(today)) {
       tplX.strokeStyle = BRASS; tplX.fillStyle = BRASS;
-      tplX.font = '400 11px "DM Mono", ui-monospace, monospace';
+      tplX.font = '500 13px "DM Mono", ui-monospace, monospace';
       var tw = tplX.measureText(sp("TODAY")).width;
-      tplX.lineWidth = 1 / view.k;
-      tplX.strokeRect(L.right - tw - 17, 58, tw + 17, 22);
-      tplX.fillText(sp("TODAY"), L.right - tw - 9, 73);
+      tplX.lineWidth = 1.5 / view.k;
+      tplX.strokeRect(L.right - tw - 19, 56, tw + 19, 25);
+      tplX.fillText(sp("TODAY"), L.right - tw - 10, 73);
     }
 
     tplX.fillStyle = BRASS;
@@ -464,12 +468,12 @@
 
     label("TODAY'S SCHEDULE", L.left, L.labelY);
     label("TO DO", L.rightCol, L.labelY);
-    label("NOTES", L.rightCol, L.notesTop - 12);
-    label("MEALS", L.rightCol, L.mealsTop - 12);
+    label("NOTES", L.rightCol, L.notesTop - 13);
+    label("MEALS", L.rightCol, L.mealsTop - 13);
 
     function label(text, x, baseline) {
       tplX.fillStyle = SOFT;
-      tplX.font = '500 11px "DM Mono", ui-monospace, monospace';
+      tplX.font = '500 15px "DM Mono", ui-monospace, monospace';
       tplX.fillText(sp(text), x, baseline);
     }
 
@@ -480,14 +484,14 @@
       tplX.strokeStyle = RULE; line(L.left, bot, L.colSplit, bot);
       var n = String(h % 12 || 12);
       tplX.fillStyle = FAINT;
-      tplX.font = '400 13px "DM Mono", ui-monospace, monospace';
-      tplX.fillText(n, L.left + 5, bot - 11);
+      tplX.font = '500 ' + hourPx + 'px "DM Mono", ui-monospace, monospace';
+      tplX.fillText(n, L.left + 6, bot - 10);
       var mer = h === 6 ? "AM" : h === 12 ? "PM" : "";
       if (mer) {
         var w2 = tplX.measureText(n).width;
         tplX.fillStyle = BRASS;
-        tplX.font = '400 9px "DM Mono", ui-monospace, monospace';
-        tplX.fillText(mer, L.left + 7 + w2, bot - 11);
+        tplX.font = '500 ' + Math.round(hourPx * 0.68) + 'px "DM Mono", ui-monospace, monospace';
+        tplX.fillText(mer, L.left + 9 + w2, bot - 10);
       }
     });
 
@@ -496,9 +500,9 @@
     for (var i = 0; i < L.todoRows; i++) {
       var top = L.todoTop + i * L.r, bot2 = top + L.r;
       tplX.strokeStyle = RULE; line(L.rightCol, bot2, L.right, bot2);
-      tplX.strokeStyle = STRONG; tplX.lineWidth = 1 / view.k;
-      var bs = Math.min(14, L.r - 8);
-      tplX.strokeRect(L.rightCol + 5, top + (L.r - bs) / 2, bs, bs);
+      tplX.strokeStyle = STRONG; tplX.lineWidth = 1.4 / view.k;
+      var bs = Math.min(Math.max(L.r * 0.42, 14), 26, L.r - 6);
+      tplX.strokeRect(L.rightCol + 6, top + (L.r - bs) / 2, bs, bs);
     }
 
     // notes
@@ -512,8 +516,8 @@
       var bot3 = L.mealsTop + (i + 1) * L.r;
       tplX.strokeStyle = RULE; line(L.rightCol, bot3, L.right, bot3);
       tplX.fillStyle = FAINT;
-      tplX.font = '400 11px "DM Mono", ui-monospace, monospace';
-      tplX.fillText(m, L.rightCol + 5, bot3 - 10);
+      tplX.font = '500 ' + mealPx + 'px "DM Mono", ui-monospace, monospace';
+      tplX.fillText(m, L.rightCol + 6, bot3 - 9);
     });
 
     function line(x1, y1, x2, y2) {
