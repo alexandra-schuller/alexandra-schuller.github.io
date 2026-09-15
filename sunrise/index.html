@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Sunrise</title>
-<meta name="description" content="Light, weather and air over Montréal, and what to put on before you go out.">
+<meta name="description" content="Light, weather and air over Montréal, what to put on before you go out, and the way in to everything else.">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#0A0F1E">
+<meta name="theme-color" content="#FDF7F0">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -16,23 +16,41 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap">
 <style>
   :root {
-    --sky-top:   #070C18;
-    --sky-bot:   #101A30;
-    --ink:       #F3F6FB;
-    --ink-2:     #AEB9CD;
-    --ink-3:     #74809A;
-    --card:      rgba(255,255,255,.055);
-    --card-line: rgba(255,255,255,.11);
-    --gold:      #F5C451;
-    --gold-soft: #FFE1A0;
-    --rose:      #EC8C82;
-    --moon:      #9DCBEA;
-    --good:      #55C08A;
-    --moderate:  #E8C65E;
-    --serious:   #EFA05C;
-    --critical:  #E8706A;
-    --severe:    #BB86D6;
-    --r: 14px;
+    /* ground — warm cream, the light just after dawn */
+    --paper:    #FDF7F0;
+    --paper-2:  #F9EDE2;
+    --card:     #FFFCF8;
+    --line:     #E9DBCB;
+    --line-2:   #F1E5D8;
+
+    /* ink, warmed up from the planner's */
+    --ink:      #2C3A33;
+    --ink-2:    #5F6D64;
+    --ink-3:    #8E9A91;
+
+    /* the set — bright company, low volume */
+    --apricot:  #E8944C;
+    --butter:   #E4B443;
+    --rose:     #DD7F8A;
+    --clay:     #CE7A62;
+    --pine:     #4A7A66;
+    --peri:     #7E8ACA;
+    --brass:    #A8813A;
+
+    --t-apricot: #FCEFE1;
+    --t-butter:  #FBF3DC;
+    --t-rose:    #FAEAEC;
+    --t-clay:    #F9EAE4;
+    --t-pine:    #E8F1EB;
+    --t-peri:    #ECEEF9;
+
+    --good:     #4F9375;
+    --moderate: #C79A34;
+    --serious:  #D2783C;
+    --critical: #C95B56;
+    --severe:   #8672B8;
+
+    --r: 16px;
   }
 
   * { box-sizing: border-box; }
@@ -41,8 +59,8 @@
   body {
     margin: 0;
     min-height: 100%;
-    background: var(--sky-top);
-    background-image: linear-gradient(175deg, var(--sky-top) 0%, var(--sky-bot) 62%, var(--sky-top) 100%);
+    background: var(--paper);
+    background-image: linear-gradient(168deg, var(--paper) 0%, var(--paper-2) 46%, var(--paper) 100%);
     background-attachment: fixed;
     color: var(--ink);
     font-family: "Manrope", "Helvetica Neue", Arial, sans-serif;
@@ -52,19 +70,19 @@
   }
 
   .wrap {
-    max-width: 880px;
+    max-width: 960px;
     margin: 0 auto;
     padding-left: 20px; padding-right: 20px;
     padding-block: 26px 56px;
   }
 
   /* ---------- masthead ---------- */
-  .top { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
+  .top { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
   .mark {
     font-family: "Instrument Serif", Georgia, serif;
-    font-size: 34px; line-height: 1; letter-spacing: .01em;
+    font-size: 36px; line-height: 1;
   }
-  .mark em { font-style: italic; color: var(--gold); }
+  .mark em { font-style: italic; color: var(--apricot); }
   .place {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
     font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase;
@@ -75,11 +93,10 @@
   /* ---------- cards ---------- */
   .card {
     background: var(--card);
-    border: 1px solid var(--card-line);
+    border: 1px solid var(--line);
     border-radius: var(--r);
     padding: 20px;
   }
-  .card + .card, .grid, .stack > * + * { margin-top: 14px; }
   .stack > * + * { margin-top: 14px; }
 
   .lbl {
@@ -90,7 +107,10 @@
   }
 
   /* ---------- the arc ---------- */
-  .arc-card { padding: 20px 20px 16px; }
+  .arc-card {
+    padding: 20px 20px 16px;
+    background: linear-gradient(180deg, #FFF9F0 0%, var(--card) 70%);
+  }
   svg.arc { display: block; width: 100%; height: auto; max-width: 100%; overflow: visible; }
 
   .ends {
@@ -104,99 +124,115 @@
   }
   .end .v {
     font-family: "Instrument Serif", Georgia, serif;
-    font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;
+    font-size: 42px; line-height: 1; font-variant-numeric: tabular-nums;
   }
   .end.right { text-align: right; }
-  .end .v.rise { color: var(--gold-soft); }
+  .end .v.rise { color: var(--apricot); }
   .end .v.set  { color: var(--rose); }
 
   .now-line {
     margin-top: 16px; padding-top: 14px;
-    border-top: 1px solid var(--card-line);
-    display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline;
+    border-top: 1px solid var(--line-2);
+    display: flex; flex-wrap: wrap; gap: 7px 22px; align-items: baseline;
   }
   .headline { font-size: 17px; font-weight: 600; }
-  .headline b { color: var(--gold); font-weight: 700; }
+  .headline b { color: var(--apricot); font-weight: 700; }
   .sub { color: var(--ink-2); font-size: 14.5px; }
   .sub b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 
   /* ---------- advice ---------- */
-  .advice { border-color: rgba(245,196,81,.30); background: rgba(245,196,81,.075); }
-  .advice .lbl { color: var(--gold); }
+  .advice { background: var(--t-butter); border-color: #EFDFB4; }
+  .advice .lbl { color: #9A7A21; }
   .advice ul { margin: 0; padding: 0; list-style: none; }
   .advice li { display: flex; gap: 11px; align-items: flex-start; }
   .advice li + li { margin-top: 9px; }
   .advice .dot {
     flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%;
-    background: var(--gold); margin-top: 8px;
+    background: var(--apricot); margin-top: 8px;
   }
   .advice .lead { font-size: 17.5px; font-weight: 600; line-height: 1.4; }
   .advice li + li span:last-child { color: var(--ink-2); font-size: 15px; }
 
-  /* ---------- condition tiles ---------- */
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(186px, 1fr)); gap: 12px; }
+  /* ---------- the twelve ---------- */
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 14px; }
+  @media (min-width: 620px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 940px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+
   .tile {
-    background: var(--card); border: 1px solid var(--card-line);
-    border-radius: var(--r); padding: 15px 16px 14px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 14px 15px 13px;
     display: flex; flex-direction: column; gap: 7px;
+    min-height: 124px;
   }
   .tile .k {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
     font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
     color: var(--ink-3);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .tile .k::before {
+    content: ""; width: 8px; height: 8px; border-radius: 3px;
+    background: var(--accent, var(--ink-3)); flex: 0 0 auto;
   }
   .tile .v {
     font-size: 27px; font-weight: 600; line-height: 1.05;
     font-variant-numeric: tabular-nums; letter-spacing: -.01em;
   }
   .tile .v small { font-size: 15px; font-weight: 500; color: var(--ink-2); margin-left: 1px; }
-  .tile .note { font-size: 13px; color: var(--ink-2); line-height: 1.35; }
+  .tile .note { font-size: 12.5px; color: var(--ink-2); line-height: 1.35; margin-top: auto; }
 
-  /* meters: a thin track with a filled span, plus a written label beside it */
-  .meter { height: 5px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
-  .meter i { display: block; height: 100%; border-radius: 3px; background: var(--ink-2); }
-  .chip {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 13px; font-weight: 600;
-  }
-  .chip::before {
-    content: ""; width: 9px; height: 9px; border-radius: 2px; background: currentColor;
-  }
+  .meter { height: 5px; border-radius: 3px; background: rgba(0,0,0,.07); overflow: hidden; }
+  .meter i { display: block; height: 100%; border-radius: 3px; background: var(--accent, var(--ink-2)); }
+
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
+  .chip::before { content: ""; width: 9px; height: 9px; border-radius: 2px; background: currentColor; }
   .c-good { color: var(--good); } .c-moderate { color: var(--moderate); }
   .c-serious { color: var(--serious); } .c-critical { color: var(--critical); }
   .c-severe { color: var(--severe); }
 
   .gh { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-  .gh + .gh { margin-top: 2px; }
   .gh-k {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
     font-size: 10px; letter-spacing: .13em; text-transform: uppercase; color: var(--ink-3);
   }
   .gh-v {
     font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums;
-    color: var(--gold-soft); white-space: nowrap;
+    color: var(--ink); white-space: nowrap;
   }
 
   .compass { display: flex; align-items: center; gap: 9px; }
   .compass svg { flex: 0 0 auto; }
 
-  /* ---------- horoscope ---------- */
-  .tile.wide { grid-column: 1 / -1; }
-  .horo-head { display: flex; align-items: baseline; gap: 12px; }
-  .horo-body { margin: 0; font-size: 15.5px; line-height: 1.6; color: var(--ink-2); max-width: 68ch; }
-  .linkish {
-    font: inherit; font-size: 12.5px; color: var(--ink-3);
-    background: transparent; border: 0; border-bottom: 1px solid var(--card-line);
-    padding: 0 0 1px; cursor: pointer; margin-left: auto;
+  /* ---------- the app tiles ---------- */
+  a.tile { text-decoration: none; color: inherit; }
+  .tile.app {
+    background: var(--tint, var(--card));
+    border-color: var(--edge, var(--line));
+    justify-content: flex-start;
   }
-  .linkish:hover { color: var(--ink); border-bottom-color: var(--ink-3); }
-  .sign-select {
-    font: inherit; font-size: 15px; color: var(--ink);
-    background: #121A2E; border: 1px solid var(--card-line);
-    border-radius: 8px; padding: 9px 11px; max-width: 280px; cursor: pointer;
+  .tile.app .name {
+    font-family: "Instrument Serif", Georgia, serif;
+    font-size: 25px; line-height: 1.12; letter-spacing: .005em;
+    margin-top: 2px;
   }
-  .sign-select option { background: #121A2E; color: var(--ink); }
-  .sign-select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .tile.app .blurb { font-size: 12.5px; color: var(--ink-2); line-height: 1.35; margin-top: auto; }
+  a.tile.app:hover { border-color: var(--accent); }
+  a.tile.app:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .tile.app .go {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--accent); font-weight: 500;
+  }
+  .tile.app.soon { opacity: .82; }
+  .tile.app.soon .name { color: var(--ink-2); }
+  .tile.app .soon-tag {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-3); border: 1px solid var(--line); border-radius: 20px;
+    padding: 2px 9px; align-self: flex-start;
+  }
 
   /* ---------- hourly ---------- */
   .hours svg { display: block; width: 100%; height: auto; overflow: visible; }
@@ -206,8 +242,8 @@
   .d {
     display: flex; flex-direction: column; gap: 5px;
     padding: 13px 14px;
-    border: 1px solid var(--card-line); border-radius: 11px;
-    background: rgba(255,255,255,.03);
+    border: 1px solid var(--line-2); border-radius: 12px;
+    background: #FFFDFA;
   }
   .d .n {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
@@ -216,33 +252,29 @@
   .d .c { font-size: 13.5px; color: var(--ink-2); line-height: 1.3; min-height: 2.6em; }
   .d .t { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .d .t span { color: var(--ink-3); font-weight: 500; }
+  .d .note { font-size: 12.5px; color: var(--ink-3); }
 
   /* ---------- footer ---------- */
-  .foot {
-    margin-top: 22px;
-    font-size: 12.5px; color: var(--ink-3); line-height: 1.6;
-  }
+  .foot { margin-top: 22px; font-size: 12.5px; color: var(--ink-3); line-height: 1.6; }
   .foot a { color: var(--ink-2); }
   .foot button {
     font: inherit; font-size: 12.5px;
-    color: var(--ink-2); background: transparent;
-    border: 1px solid var(--card-line); border-radius: 6px;
-    padding: 5px 11px; cursor: pointer; margin-top: 8px;
+    color: var(--ink-2); background: var(--card);
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 6px 13px; cursor: pointer; margin-top: 8px;
   }
   .foot button:hover { color: var(--ink); border-color: var(--ink-3); }
 
-  .err {
-    border-color: rgba(232,112,106,.4); background: rgba(232,112,106,.1);
-    font-size: 14.5px;
-  }
+  .err { background: var(--t-rose); border-color: #EFCED2; font-size: 14.5px; color: var(--ink); }
   [hidden] { display: none !important; }
 
   @media (max-width: 560px) {
     .wrap { padding-block: 20px 44px; }
-    .mark { font-size: 29px; }
-    .end .v { font-size: 33px; }
+    .mark { font-size: 30px; }
+    .end .v { font-size: 34px; }
     .days { grid-template-columns: 1fr; }
     .top .place:last-child { margin-left: 0; width: 100%; }
+    .tile.app .name { font-size: 21px; }
   }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
@@ -268,6 +300,7 @@
       <div class="now-line">
         <div class="headline" id="headline">Loading…</div>
         <div class="sub" id="daylight"></div>
+        <div class="sub" id="golden"></div>
       </div>
     </section>
 
@@ -292,8 +325,6 @@
   <p class="foot">
     Light times calculated for Montréal; weather and air quality from
     <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>.
-    Horoscope via <a href="https://ohmanda.com" target="_blank" rel="noopener">ohmanda</a>,
-    relayed through a public proxy because it sends no CORS headers.
     <span id="stamp"></span><br>
     <button id="refresh">Refresh</button>
   </p>
@@ -306,9 +337,7 @@
   var LAT = 45.5019, LON = -73.5674, TZ = "America/Montreal";
   var KEY = "sunrise:last";
 
-  /* ===================== sun position =====================
-     Standard low-precision solar position (Meeus). Good to well under a
-     minute for our purposes, and it runs offline. */
+  /* ===================== sun & moon ===================== */
   var rad = Math.PI / 180, OBL = 23.4397 * rad;
 
   function toDays(date) { return date.valueOf() / 86400000 - 0.5 + 2440588 - 2451545; }
@@ -326,9 +355,6 @@
     return Math.asin(Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H)) / rad;
   }
 
-  /* Moon by elongation — the angle between moon and sun along the ecliptic.
-     0° is new, 180° is full. More faithful than counting off a mean cycle,
-     which can be most of a day out. */
   function moonLon(d) {
     var L = rad * (218.316 + 13.176396 * d);
     var M = rad * (134.963 + 13.064993 * d);
@@ -343,8 +369,8 @@
     var e = elongation(when || new Date());
     var names = ["New moon","Waxing crescent","First quarter","Waxing gibbous",
                  "Full moon","Waning gibbous","Last quarter","Waning crescent"];
-    var i = Math.floor((e + 22.5) / 45) % 8;
-    return { name: names[i], lit: Math.round((1 - Math.cos(e * rad)) / 2 * 100) };
+    return { name: names[Math.floor((e + 22.5) / 45) % 8],
+             lit: Math.round((1 - Math.cos(e * rad)) / 2 * 100) };
   }
 
   var SYNODIC = 29.530588853;
@@ -352,7 +378,7 @@
     var step = 6 * 3600000, prev = elongation(from);
     for (var t = from.getTime() + step; t < from.getTime() + 40 * 86400000; t += step) {
       var cur = elongation(new Date(t));
-      if (prev < 180 && cur >= 180) {            // 180° sits far from the 0/360 wrap
+      if (prev < 180 && cur >= 180) {
         var lo = t - step, hi = t;
         for (var k = 0; k < 30; k++) {
           var mid = (lo + hi) / 2;
@@ -365,16 +391,12 @@
     return null;
   }
 
-  /* The old almanac names. The Harvest Moon isn't September's by rule — it's
-     whichever full moon falls nearest the autumn equinox, so October steals it
-     some years. And a second full moon inside one calendar month is a Blue Moon. */
   var MOON_NAMES = ["Wolf Moon","Snow Moon","Worm Moon","Pink Moon","Flower Moon",
                     "Strawberry Moon","Buck Moon","Sturgeon Moon","Corn Moon",
                     "Hunter's Moon","Beaver Moon","Cold Moon"];
   function fullMoonName(d) {
     var prev = new Date(d.getTime() - SYNODIC * 86400000);
-    if (prev.getMonth() === d.getMonth() && prev.getFullYear() === d.getFullYear())
-      return "Blue Moon";
+    if (prev.getMonth() === d.getMonth() && prev.getFullYear() === d.getFullYear()) return "Blue Moon";
     var equinox = new Date(d.getFullYear(), 8, 22, 12);
     if (Math.abs(d - equinox) <= SYNODIC / 2 * 86400000) return "Harvest Moon";
     return MOON_NAMES[d.getMonth()];
@@ -384,7 +406,7 @@
   function $(id) { return document.getElementById(id); }
   function pad(n) { return String(n).padStart(2, "0"); }
   function hhmm(d) { return d.getHours() + ":" + pad(d.getMinutes()); }
-  function parseLocal(s) {                       // "2026-09-15T06:32" in Montréal time
+  function parseLocal(s) {
     var m = s.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
     return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]);
   }
@@ -412,23 +434,27 @@
     return e;
   }
 
-  var WMO = {
-    0:  ["Clear", "clear"],
-    1:  ["Mostly clear", "clear"],
-    2:  ["Partly cloudy", "cloud"],
-    3:  ["Overcast", "cloud"],
-    45: ["Fog", "fog"], 48: ["Freezing fog", "fog"],
-    51: ["Light drizzle", "rain"], 53: ["Drizzle", "rain"], 55: ["Heavy drizzle", "rain"],
-    56: ["Freezing drizzle", "ice"], 57: ["Freezing drizzle", "ice"],
-    61: ["Light rain", "rain"], 63: ["Rain", "rain"], 65: ["Heavy rain", "rain"],
-    66: ["Freezing rain", "ice"], 67: ["Freezing rain", "ice"],
-    71: ["Light snow", "snow"], 73: ["Snow", "snow"], 75: ["Heavy snow", "snow"],
-    77: ["Snow grains", "snow"],
-    80: ["Rain showers", "rain"], 81: ["Rain showers", "rain"], 82: ["Heavy showers", "rain"],
-    85: ["Snow showers", "snow"], 86: ["Snow showers", "snow"],
-    95: ["Thunderstorms", "storm"], 96: ["Thunderstorms, hail", "storm"], 99: ["Thunderstorms, hail", "storm"]
+  var C = {
+    ink: "#2C3A33", ink2: "#5F6D64", ink3: "#8E9A91",
+    line: "#E2D3C1", lineSoft: "#EFE4D6",
+    apricot: "#E8944C", butter: "#E4B443", rose: "#DD7F8A",
+    clay: "#CE7A62", pine: "#4A7A66", peri: "#7E8ACA", card: "#FFFCF8"
   };
-  function wx(code) { return WMO[code] || ["—", "cloud"]; }
+
+  var WMO = {
+    0:["Clear"],1:["Mostly clear"],2:["Partly cloudy"],3:["Overcast"],
+    45:["Fog"],48:["Freezing fog"],
+    51:["Light drizzle"],53:["Drizzle"],55:["Heavy drizzle"],
+    56:["Freezing drizzle","ice"],57:["Freezing drizzle","ice"],
+    61:["Light rain"],63:["Rain"],65:["Heavy rain"],
+    66:["Freezing rain","ice"],67:["Freezing rain","ice"],
+    71:["Light snow","snow"],73:["Snow","snow"],75:["Heavy snow","snow"],77:["Snow grains","snow"],
+    80:["Rain showers"],81:["Rain showers"],82:["Heavy showers"],
+    85:["Snow showers","snow"],86:["Snow showers","snow"],
+    95:["Thunderstorms","storm"],96:["Thunderstorms, hail","storm"],99:["Thunderstorms, hail","storm"]
+  };
+  function wx(code) { return WMO[code] || ["—"]; }
+  function wxKind(code) { return (WMO[code] && WMO[code][1]) || "plain"; }
 
   function aqiBand(v) {
     if (v == null) return null;
@@ -452,7 +478,7 @@
     return pts[Math.round(deg / 22.5) % 16];
   }
   function windWord(k) {
-    if (k < 2)  return "Still";
+    if (k < 2) return "Still";
     if (k < 12) return "Light";
     if (k < 20) return "A breeze";
     if (k < 30) return "Breezy";
@@ -461,22 +487,15 @@
     return "Gale";
   }
 
-  /* Québec's pollen calendar. Open-Meteo's pollen model covers Europe only and
-     every North-American source needs a paid key, so this is the season — not a
-     live count — and it says so on the tile. */
   function pollenSeason(date) {
-    var m = date.getMonth() + 1, d = date.getDate();
-    var doy = m * 100 + d;
+    var doy = (date.getMonth() + 1) * 100 + date.getDate();
     if (doy >= 815 && doy <= 1015)
-      return { what: "Ragweed", peak: doy <= 920,
-               note: "Peak season in Québec until the first hard frost." };
+      return { what: "Ragweed", peak: doy <= 920, note: "Peak in Québec until the first hard frost." };
     if (doy >= 325 && doy <= 605)
-      return { what: "Tree pollen", peak: doy >= 415 && doy <= 525,
-               note: "Birch, maple, poplar and oak through the spring." };
+      return { what: "Tree pollen", peak: doy >= 415 && doy <= 525, note: "Birch, maple, poplar, oak." };
     if (doy >= 520 && doy <= 810)
-      return { what: "Grass pollen", peak: doy >= 605 && doy <= 710,
-               note: "Grasses run from late spring into the summer." };
-    return { what: "Quiet", peak: false, note: "Little is in season right now." };
+      return { what: "Grass pollen", peak: doy >= 605 && doy <= 710, note: "Grasses into the summer." };
+    return { what: "Quiet", peak: false, note: "Little is in season now." };
   }
 
   /* ===================== the arc ===================== */
@@ -489,8 +508,7 @@
     var span = t1 - t0;
     var N = 160, pts = [], maxAlt = -90, minAlt = 90;
     for (var i = 0; i <= N; i++) {
-      var t = t0 + span * (i / N);
-      var a = sunAltitude(new Date(t));
+      var t = t0 + span * (i / N), a = sunAltitude(new Date(t));
       pts.push([t, a]);
       if (a > maxAlt) maxAlt = a;
       if (a < minAlt) minAlt = a;
@@ -502,23 +520,22 @@
 
     var defs = svg("defs");
     var g1 = svg("linearGradient", { id: "dayfill", x1: "0", y1: "0", x2: "0", y2: "1" });
-    g1.appendChild(svg("stop", { offset: "0", "stop-color": "#F5C451", "stop-opacity": ".26" }));
-    g1.appendChild(svg("stop", { offset: "1", "stop-color": "#F5C451", "stop-opacity": "0" }));
+    g1.appendChild(svg("stop", { offset: "0", "stop-color": C.butter, "stop-opacity": ".34" }));
+    g1.appendChild(svg("stop", { offset: "1", "stop-color": C.apricot, "stop-opacity": ".04" }));
     defs.appendChild(g1);
     var g2 = svg("linearGradient", { id: "arcline", x1: "0", y1: "0", x2: "1", y2: "0" });
-    g2.appendChild(svg("stop", { offset: "0", "stop-color": "#FFE1A0" }));
-    g2.appendChild(svg("stop", { offset: ".5", "stop-color": "#F5C451" }));
-    g2.appendChild(svg("stop", { offset: "1", "stop-color": "#EC8C82" }));
+    g2.appendChild(svg("stop", { offset: "0", "stop-color": C.butter }));
+    g2.appendChild(svg("stop", { offset: ".48", "stop-color": C.apricot }));
+    g2.appendChild(svg("stop", { offset: "1", "stop-color": C.rose }));
     defs.appendChild(g2);
     var glow = svg("radialGradient", { id: "glow" });
-    glow.appendChild(svg("stop", { offset: "0", "stop-color": "#FFE1A0", "stop-opacity": ".85" }));
-    glow.appendChild(svg("stop", { offset: "1", "stop-color": "#FFE1A0", "stop-opacity": "0" }));
+    glow.appendChild(svg("stop", { offset: "0", "stop-color": C.butter, "stop-opacity": ".55" }));
+    glow.appendChild(svg("stop", { offset: "1", "stop-color": C.butter, "stop-opacity": "0" }));
     defs.appendChild(glow);
     S.appendChild(defs);
 
     var yH = Y(0);
 
-    // golden hour bands, where the light is between -4° and +6°
     var bands = [], inb = false, bs = 0;
     pts.forEach(function (p) {
       var g = p[1] >= -4 && p[1] <= 6;
@@ -527,13 +544,10 @@
     });
     if (inb) bands.push([bs, pts[pts.length - 1][0]]);
     bands.forEach(function (b) {
-      S.appendChild(svg("rect", {
-        x: X(b[0]), y: padTop, width: Math.max(1, X(b[1]) - X(b[0])), height: Ht - padTop - padBot,
-        fill: "#F5C451", opacity: ".07"
-      }));
+      S.appendChild(svg("rect", { x: X(b[0]), y: padTop, width: Math.max(1, X(b[1]) - X(b[0])),
+        height: Ht - padTop - padBot, fill: C.butter, opacity: ".13" }));
     });
 
-    // daylight fill under the curve
     var dayPts = pts.filter(function (p) { return p[1] >= 0; });
     if (dayPts.length > 1) {
       var fp = "M " + X(dayPts[0][0]) + " " + yH;
@@ -542,22 +556,18 @@
       S.appendChild(svg("path", { d: fp, fill: "url(#dayfill)" }));
     }
 
-    // horizon
-    S.appendChild(svg("line", {
-      x1: padX - 6, y1: yH, x2: Wd - padX + 6, y2: yH,
-      stroke: "rgba(255,255,255,.34)", "stroke-width": "1"
-    }));
-    var hl = svg("text", { x: padX - 6, y: yH + 17, fill: "#74809A",
+    S.appendChild(svg("line", { x1: padX - 6, y1: yH, x2: Wd - padX + 6, y2: yH,
+      stroke: C.line, "stroke-width": "1.5" }));
+    var hl = svg("text", { x: padX - 6, y: yH + 18, fill: C.ink3,
       "font-family": "IBM Plex Mono, monospace", "font-size": "10.5", "letter-spacing": "1.4" });
     hl.textContent = "HORIZON";
     S.appendChild(hl);
 
-    // the path itself, dashed where the sun is down
     function seg(list, dash, op) {
       if (list.length < 2) return;
       var d = "M " + X(list[0][0]) + " " + Y(list[0][1]);
       list.forEach(function (p, i) { if (i) d += " L " + X(p[0]) + " " + Y(p[1]); });
-      var o = { d: d, fill: "none", stroke: "url(#arcline)", "stroke-width": "2.5",
+      var o = { d: d, fill: "none", stroke: "url(#arcline)", "stroke-width": "3",
                 "stroke-linecap": "round", opacity: op };
       if (dash) o["stroke-dasharray"] = "2 7";
       S.appendChild(svg("path", o));
@@ -568,44 +578,37 @@
       else if (phase === 0) below1.push(p);
       else below2.push(p);
     });
-    if (below1.length) below1.push(above[0] || below1[below1.length - 1]);
+    if (below1.length && above.length) below1.push(above[0]);
     if (below2.length && above.length) below2.unshift(above[above.length - 1]);
-    seg(below1, true, ".55"); seg(above, false, "1"); seg(below2, true, ".55");
+    seg(below1, true, ".5"); seg(above, false, "1"); seg(below2, true, ".5");
 
-    // solar noon
     var peak = pts.reduce(function (a, b) { return b[1] > a[1] ? b : a; });
-    S.appendChild(svg("line", {
-      x1: X(peak[0]), y1: Y(peak[1]) + 6, x2: X(peak[0]), y2: yH,
-      stroke: "rgba(255,255,255,.14)", "stroke-width": "1", "stroke-dasharray": "2 5"
-    }));
-    var nl = svg("text", { x: X(peak[0]), y: Y(peak[1]) - 11, fill: "#74809A", "text-anchor": "middle",
+    S.appendChild(svg("line", { x1: X(peak[0]), y1: Y(peak[1]) + 6, x2: X(peak[0]), y2: yH,
+      stroke: C.lineSoft, "stroke-width": "1.5", "stroke-dasharray": "2 5" }));
+    var nl = svg("text", { x: X(peak[0]), y: Y(peak[1]) - 11, fill: C.ink3, "text-anchor": "middle",
       "font-family": "IBM Plex Mono, monospace", "font-size": "10.5", "letter-spacing": "1.2" });
     nl.textContent = "NOON " + hhmm(new Date(peak[0]));
     S.appendChild(nl);
 
-    // the sun, where it is right now
     var nt = now.getTime();
     if (nt >= t0 && nt <= t1) {
       var na = sunAltitude(now), nx = X(nt), ny = Y(na);
-      S.appendChild(svg("circle", { cx: nx, cy: ny, r: 30, fill: "url(#glow)" }));
-      S.appendChild(svg("circle", { cx: nx, cy: ny, r: 8, fill: na >= 0 ? "#FFD98A" : "#9DCBEA" }));
-      S.appendChild(svg("circle", { cx: nx, cy: ny, r: 8, fill: "none",
-        stroke: "rgba(10,15,30,.55)", "stroke-width": "1.5" }));
-      var t = svg("text", { x: nx, y: ny - 19, fill: "#F3F6FB", "text-anchor": "middle",
+      S.appendChild(svg("circle", { cx: nx, cy: ny, r: 32, fill: "url(#glow)" }));
+      S.appendChild(svg("circle", { cx: nx, cy: ny, r: 8.5, fill: na >= 0 ? C.apricot : C.peri }));
+      S.appendChild(svg("circle", { cx: nx, cy: ny, r: 8.5, fill: "none",
+        stroke: C.card, "stroke-width": "2" }));
+      var t2 = svg("text", { x: nx, y: ny - 20, fill: C.ink, "text-anchor": "middle",
         "font-family": "IBM Plex Mono, monospace", "font-size": "11", "letter-spacing": "1" });
-      t.textContent = "NOW";
-      S.appendChild(t);
+      t2.textContent = "NOW";
+      S.appendChild(t2);
     }
 
-    // where the sun crosses the horizon
-    [[rise, "rise"], [set, "set"]].forEach(function (p) {
+    [[rise, C.apricot], [set, C.rose]].forEach(function (p) {
       var x = X(p[0].getTime());
       if (x < padX - 4 || x > Wd - padX + 4) return;
-      S.appendChild(svg("circle", { cx: x, cy: yH, r: 3.5,
-        fill: p[1] === "rise" ? "#FFE1A0" : "#EC8C82" }));
+      S.appendChild(svg("circle", { cx: x, cy: yH, r: 4, fill: p[1],
+        stroke: C.card, "stroke-width": "1.5" }));
     });
-
-    return { golden: bands };
   }
 
   /* ===================== hourly ===================== */
@@ -615,53 +618,51 @@
     var Wd = 720, padL = 8, padR = 30, topH = 76, gap = 16, barH = 26, baseY = topH + gap + barH;
 
     var start = 0;
-    for (var i = 0; i < times.length; i++) { if (times[i].getTime() >= now.getTime() - 3600000) { start = i; break; } }
-    var T = times.slice(start, start + 13), C = temps.slice(start, start + 13), P = pops.slice(start, start + 13);
+    for (var i = 0; i < times.length; i++) {
+      if (times[i].getTime() >= now.getTime() - 3600000) { start = i; break; }
+    }
+    var T = times.slice(start, start + 13), Cv = temps.slice(start, start + 13), P = pops.slice(start, start + 13);
     if (T.length < 2) return;
 
-    var lo = Math.min.apply(null, C), hi = Math.max.apply(null, C);
+    var lo = Math.min.apply(null, Cv), hi = Math.max.apply(null, Cv);
     if (hi - lo < 4) { var mid = (hi + lo) / 2; lo = mid - 2; hi = mid + 2; }
     function X(i) { return padL + i / (T.length - 1) * (Wd - padL - padR); }
     function Y(v) { return 20 + (hi - v) / (hi - lo) * (topH - 30); }
 
-    // chance of precipitation — its own row, its own scale, labelled
     P.forEach(function (p, i) {
       var h = Math.max(1.5, (p || 0) / 100 * barH);
-      S.appendChild(svg("rect", {
-        x: X(i) - 9, y: baseY - h, width: 18, height: h, rx: "2",
-        fill: "#9DCBEA", opacity: (p || 0) > 0 ? ".55" : ".16"
-      }));
+      S.appendChild(svg("rect", { x: X(i) - 9, y: baseY - h, width: 18, height: h, rx: "2",
+        fill: C.peri, opacity: (p || 0) > 0 ? ".6" : ".2" }));
       if (p >= 30) {
-        var pt = svg("text", { x: X(i), y: baseY - h - 5, fill: "#9DCBEA", "text-anchor": "middle",
+        var pt = svg("text", { x: X(i), y: baseY - h - 5, fill: C.peri, "text-anchor": "middle",
           "font-family": "IBM Plex Mono, monospace", "font-size": "9.5" });
         pt.textContent = p + "%";
         S.appendChild(pt);
       }
     });
     S.appendChild(svg("line", { x1: padL - 4, y1: baseY, x2: Wd - padR + 4, y2: baseY,
-      stroke: "rgba(255,255,255,.16)", "stroke-width": "1" }));
+      stroke: C.lineSoft, "stroke-width": "1.5" }));
 
-    // temperature line
     var d = "";
-    C.forEach(function (v, i) { d += (i ? " L " : "M ") + X(i) + " " + Y(v); });
-    S.appendChild(svg("path", { d: d, fill: "none", stroke: "#F5C451", "stroke-width": "2",
+    Cv.forEach(function (v, i) { d += (i ? " L " : "M ") + X(i) + " " + Y(v); });
+    S.appendChild(svg("path", { d: d, fill: "none", stroke: C.apricot, "stroke-width": "2.5",
       "stroke-linecap": "round", "stroke-linejoin": "round" }));
 
-    C.forEach(function (v, i) {
-      if (i % 3 !== 0 && i !== C.length - 1) return;
-      S.appendChild(svg("circle", { cx: X(i), cy: Y(v), r: 4, fill: "#F5C451",
-        stroke: "#0A0F1E", "stroke-width": "2" }));
-      var lt = svg("text", { x: X(i), y: Y(v) - 11, fill: "#F3F6FB", "text-anchor": "middle",
+    Cv.forEach(function (v, i) {
+      if (i % 3 !== 0 && i !== Cv.length - 1) return;
+      S.appendChild(svg("circle", { cx: X(i), cy: Y(v), r: 4.5, fill: C.apricot,
+        stroke: C.card, "stroke-width": "2" }));
+      var lt = svg("text", { x: X(i), y: Y(v) - 12, fill: C.ink, "text-anchor": "middle",
         "font-family": "IBM Plex Mono, monospace", "font-size": "11.5" });
       lt.textContent = Math.round(v) + "°";
       S.appendChild(lt);
-      var ht = svg("text", { x: X(i), y: baseY + 17, fill: "#74809A", "text-anchor": "middle",
+      var ht = svg("text", { x: X(i), y: baseY + 17, fill: C.ink3, "text-anchor": "middle",
         "font-family": "IBM Plex Mono, monospace", "font-size": "10.5" });
       ht.textContent = T[i].getHours() + "h";
       S.appendChild(ht);
     });
 
-    var leg = svg("text", { x: padL - 4, y: topH + gap - 3, fill: "#74809A",
+    var leg = svg("text", { x: padL - 4, y: topH + gap - 3, fill: C.ink3,
       "font-family": "IBM Plex Mono, monospace", "font-size": "9.5", "letter-spacing": "1.2" });
     leg.textContent = "CHANCE OF RAIN";
     S.appendChild(leg);
@@ -669,9 +670,9 @@
 
   /* ===================== what to wear ===================== */
   function advise(c, day, aqi, pol, rise, set, now) {
-    var out = [], feels = c.apparent_temperature, code = c.weather_code;
+    var out = [], feels = c.apparent_temperature;
     var wind = c.wind_speed_10m, gust = c.wind_gusts_10m;
-    var kind = wx(code)[1];
+    var kind = wxKind(c.weather_code);
     var lowTonight = day.temperature_2m_min[0];
 
     if (feels <= -25) out.push("Everything you own. Cover your face — skin freezes fast at this.");
@@ -703,7 +704,7 @@
       out.push("Air quality is " + b.name.toLowerCase() + " (AQI " + Math.round(aqi) + "). " + b.note);
     }
 
-    if (pol.what === "Ragweed" || pol.what === "Tree pollen" || pol.what === "Grass pollen") {
+    if (pol.what !== "Quiet") {
       var wet = c.precipitation > 0 || day.precipitation_probability_max[0] >= 60;
       if (wet) out.push(pol.what + " is in season, but the rain should keep it down today.");
       else if (wind >= 12) out.push(pol.what + " is in season and the wind is spreading it. Antihistamine if you react.");
@@ -719,6 +720,47 @@
     return out.slice(0, 5);
   }
 
+  function goldenWindows(rise, set) {
+    function span(anchor) {
+      var lo = null, hi = null;
+      for (var m = -90; m <= 90; m += 2) {
+        var t = new Date(anchor.getTime() + m * 60000);
+        var a = sunAltitude(t);
+        if (a >= -4 && a <= 6) { if (!lo) lo = t; hi = t; }
+      }
+      return lo && hi ? hhmm(lo) + "–" + hhmm(hi) : "—";
+    }
+    return { am: span(rise), pm: span(set) };
+  }
+
+  /* ===================== the twelve ===================== */
+  var APPS = [
+    { name: "The Planner", blurb: "One day per page, written by hand.",
+      href: "/planner/", accent: "--pine", tint: "--t-pine", edge: "#CFE0D6" },
+    { name: "Strong Woman", blurb: "What you're lifting today.",
+      accent: "--rose", tint: "--t-rose", edge: "#F0D3D7" },
+    { name: "The Closet", blurb: "Everything you own, and what goes together.",
+      accent: "--clay", tint: "--t-clay", edge: "#EFD5CA" },
+    { name: "Morning Routine", blurb: "How the day starts.",
+      accent: "--butter", tint: "--t-butter", edge: "#EFE0B6" },
+    { name: "Bedtime Routine", blurb: "How it winds down.",
+      accent: "--peri", tint: "--t-peri", edge: "#D6DAF0" }
+  ];
+
+  function appTile(a) {
+    var live = !!a.href;
+    var t = el(live ? "a" : "div", "tile app" + (live ? "" : " soon"));
+    if (live) t.href = a.href;
+    t.style.setProperty("--accent", "var(" + a.accent + ")");
+    t.style.setProperty("--tint", "var(" + a.tint + ")");
+    t.style.setProperty("--edge", a.edge);
+    t.appendChild(el("div", "k", live ? "Open" : "Coming"));
+    t.appendChild(el("div", "name", a.name));
+    t.appendChild(el("div", "blurb", a.blurb));
+    t.appendChild(live ? el("div", "go", "Go →") : el("div", "soon-tag", "Soon"));
+    return t;
+  }
+
   /* ===================== render ===================== */
   function render(f, a) {
     var now = new Date();
@@ -732,13 +774,12 @@
     $("riseT").textContent = hhmm(rise);
     $("setT").textContent = hhmm(set);
 
-    // headline: the next thing the sun does
     var head;
     if (now < rise) head = "Sunrise in <b>" + until(rise - now) + "</b>";
     else if (now < set) head = "Sunset in <b>" + until(set - now) + "</b>";
     else {
-      var tomorrow = day.sunrise[1] ? parseLocal(day.sunrise[1]) : null;
-      head = tomorrow ? "Sun's down. Back up at <b>" + hhmm(tomorrow) + "</b>" : "Sun's down.";
+      var tm = day.sunrise[1] ? parseLocal(day.sunrise[1]) : null;
+      head = tm ? "Sun's down. Back up at <b>" + hhmm(tm) + "</b>" : "Sun's down.";
     }
     $("headline").innerHTML = head;
 
@@ -750,7 +791,9 @@
             (change < 0 ? "shorter" : "longer") + " tomorrow";
     $("daylight").innerHTML = dl;
 
-    // advice
+    var g = goldenWindows(rise, set);
+    $("golden").innerHTML = "Golden hour <b>" + g.am + "</b> and <b>" + g.pm + "</b>";
+
     var aqi = a && a.current ? a.current.us_aqi : null;
     var pol = pollenSeason(now);
     var lines = advise(c, day, aqi, pol, rise, set, now);
@@ -763,25 +806,23 @@
       ul.appendChild(li);
     });
 
-    // tiles
     var tiles = $("tiles");
     tiles.textContent = "";
 
-    function tile(k, build) {
+    function tile(k, accent, build) {
       var t = el("div", "tile");
+      t.style.setProperty("--accent", "var(" + accent + ")");
       t.appendChild(el("div", "k", k));
       build(t);
       tiles.appendChild(t);
-      return t;
     }
-    function meter(t, frac, color) {
+    function meter(t, frac) {
       var m = el("div", "meter"), i = el("i");
       i.style.width = Math.max(2, Math.min(100, frac * 100)) + "%";
-      if (color) i.style.background = color;
       m.appendChild(i); t.appendChild(m);
     }
 
-    tile("Right now", function (t) {
+    tile("Right now", "--apricot", function (t) {
       var v = el("div", "v");
       v.innerHTML = Math.round(c.temperature_2m) + "°<small>C</small>";
       t.appendChild(v);
@@ -789,23 +830,23 @@
         Math.round(c.apparent_temperature) + "°"));
     });
 
-    tile("UV index", function (t) {
-      var u = Math.max(c.uv_index, 0), b = uvBand(day.uv_index_max[0]);
+    tile("UV index", "--butter", function (t) {
+      var b = uvBand(day.uv_index_max[0]);
       var v = el("div", "v");
-      v.innerHTML = u.toFixed(1) + "<small> now</small>";
+      v.innerHTML = Math.max(c.uv_index, 0).toFixed(1) + "<small> now</small>";
       t.appendChild(v);
-      meter(t, day.uv_index_max[0] / 11, "var(--" + b.cls.slice(2) + ")");
-      t.appendChild(el("div", "chip " + b.cls, b.name + " · peaks at " + day.uv_index_max[0].toFixed(1)));
+      meter(t, day.uv_index_max[0] / 11);
+      t.appendChild(el("div", "chip " + b.cls, b.name + " · peaks " + day.uv_index_max[0].toFixed(1)));
     });
 
-    tile("Wind", function (t) {
+    tile("Wind", "--peri", function (t) {
       var row = el("div", "compass");
       var arrow = svg("svg", { width: "26", height: "26", viewBox: "0 0 26 26" });
       arrow.appendChild(svg("circle", { cx: "13", cy: "13", r: "11.5", fill: "none",
-        stroke: "rgba(255,255,255,.18)", "stroke-width": "1" }));
-      var g = svg("g", { transform: "rotate(" + ((c.wind_direction_10m + 180) % 360) + " 13 13)" });
-      g.appendChild(svg("path", { d: "M13 4 L17.4 20 L13 16.6 L8.6 20 Z", fill: "#9DCBEA" }));
-      arrow.appendChild(g);
+        stroke: C.lineSoft, "stroke-width": "1.5" }));
+      var gg = svg("g", { transform: "rotate(" + ((c.wind_direction_10m + 180) % 360) + " 13 13)" });
+      gg.appendChild(svg("path", { d: "M13 4 L17.4 20 L13 16.6 L8.6 20 Z", fill: C.peri }));
+      arrow.appendChild(gg);
       row.appendChild(arrow);
       var v = el("div", "v");
       v.innerHTML = Math.round(c.wind_speed_10m) + "<small> km/h</small>";
@@ -815,29 +856,29 @@
         compass(c.wind_direction_10m) + " · gusts " + Math.round(c.wind_gusts_10m)));
     });
 
-    tile("Humidity", function (t) {
+    tile("Humidity", "--pine", function (t) {
       var v = el("div", "v");
       v.innerHTML = Math.round(c.relative_humidity_2m) + "<small>%</small>";
       t.appendChild(v);
-      meter(t, c.relative_humidity_2m / 100, "#9DCBEA");
+      meter(t, c.relative_humidity_2m / 100);
       var h = c.relative_humidity_2m;
       t.appendChild(el("div", "note",
-        h < 30 ? "Dry — lip balm weather." : h > 75 ? "Damp. Cold bites harder, heat sits heavier." : "Comfortable."));
+        h < 30 ? "Dry — lip balm weather." : h > 75 ? "Damp. Cold bites harder." : "Comfortable."));
     });
 
-    tile("Air quality", function (t) {
+    tile("Air quality", "--clay", function (t) {
       if (aqi == null) { t.appendChild(el("div", "note", "Unavailable right now.")); return; }
       var b = aqiBand(aqi);
       var v = el("div", "v");
       v.innerHTML = Math.round(aqi) + "<small> AQI</small>";
       t.appendChild(v);
-      meter(t, aqi / 200, "var(--" + b.cls.slice(2) + ")");
+      meter(t, aqi / 200);
       t.appendChild(el("div", "chip " + b.cls, b.name));
       if (a.current.pm2_5 != null)
-        t.appendChild(el("div", "note", "PM2.5 " + a.current.pm2_5.toFixed(1) + " µg/m³ · " + b.note));
+        t.appendChild(el("div", "note", "PM2.5 " + a.current.pm2_5.toFixed(1) + " µg/m³"));
     });
 
-    tile("Pollen", function (t) {
+    tile("Pollen", "--rose", function (t) {
       var v = el("div", "v");
       v.style.fontSize = "22px";
       v.textContent = pol.what;
@@ -848,24 +889,13 @@
       t.appendChild(el("div", "note", pol.note + " Seasonal guide, not a live count."));
     });
 
-    tile("Golden hour", function (t) {
-      var g = goldenWindows(rise, set);
-      [["Morning", g.am], ["Evening", g.pm]].forEach(function (row) {
-        var r = el("div", "gh");
-        r.appendChild(el("span", "gh-k", row[0]));
-        r.appendChild(el("span", "gh-v", row[1]));
-        t.appendChild(r);
-      });
-      t.appendChild(el("div", "note", "The best light of the day."));
-    });
-
-    tile("Moon", function (t) {
+    tile("Moon", "--peri", function (t) {
       var m = moon(now);
       var v = el("div", "v");
       v.style.fontSize = "20px";
       v.textContent = m.name;
       t.appendChild(v);
-      meter(t, m.lit / 100, "#9DCBEA");
+      meter(t, m.lit / 100);
       var full = nextFullMoon(now);
       if (full) {
         var days = Math.round((full - now) / 86400000);
@@ -875,29 +905,25 @@
           full.toLocaleDateString("en-CA", { month: "short", day: "numeric" })));
         t.appendChild(r);
         t.appendChild(el("div", "note", fullMoonName(full) + " · " +
-          (days <= 0 ? "tonight" : days === 1 ? "tomorrow" : "in " + days + " days") +
-          " · " + m.lit + "% lit now"));
+          (days <= 0 ? "tonight" : days === 1 ? "tomorrow" : "in " + days + " days")));
       } else {
         t.appendChild(el("div", "note", m.lit + "% lit."));
       }
     });
 
-    horoscopeTile(tiles);
+    APPS.forEach(function (app) { tiles.appendChild(appTile(app)); });
 
-    // hourly
     if (f.hourly) {
       drawHours(f.hourly.time.map(parseLocal), f.hourly.temperature_2m,
                 f.hourly.precipitation_probability, now);
     }
 
-    // outlook
     var days = $("days");
     days.textContent = "";
     for (var i = 0; i < Math.min(3, day.time.length); i++) {
       var d = el("div", "d");
       var dt = parseLocal(day.time[i] + "T12:00");
-      d.appendChild(el("div", "n", i === 0 ? "Today" :
-        dt.toLocaleDateString("en-CA", { weekday: "long" })));
+      d.appendChild(el("div", "n", i === 0 ? "Today" : dt.toLocaleDateString("en-CA", { weekday: "long" })));
       d.appendChild(el("div", "c", wx(day.weather_code[i])[0]));
       var tt = el("div", "t");
       tt.innerHTML = Math.round(day.temperature_2m_max[i]) + "° <span>" +
@@ -907,193 +933,6 @@
         " – " + hhmm(parseLocal(day.sunset[i]))));
       days.appendChild(d);
     }
-  }
-
-  /* ===================== horoscope =====================
-     Neither horoscope source sends CORS headers, so the browser can't call
-     them straight. They go through a public read-only proxy, which is flaky —
-     hence two sources, two proxies, and a cache that holds the day's reading
-     so a bad minute never shows. */
-  var SIGNS = [
-    ["aries","Aries","Mar 21 – Apr 19"], ["taurus","Taurus","Apr 20 – May 20"],
-    ["gemini","Gemini","May 21 – Jun 20"], ["cancer","Cancer","Jun 21 – Jul 22"],
-    ["leo","Leo","Jul 23 – Aug 22"], ["virgo","Virgo","Aug 23 – Sep 22"],
-    ["libra","Libra","Sep 23 – Oct 22"], ["scorpio","Scorpio","Oct 23 – Nov 21"],
-    ["sagittarius","Sagittarius","Nov 22 – Dec 21"], ["capricorn","Capricorn","Dec 22 – Jan 19"],
-    ["aquarius","Aquarius","Jan 20 – Feb 18"], ["pisces","Pisces","Feb 19 – Mar 20"]
-  ];
-  var SIGN_KEY = "sunrise:sign", HORO_KEY = "sunrise:horoscope";
-  var DEFAULT_SIGN = "gemini";
-
-  var PROXIES = [
-    function (u) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
-    function (u) { return "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u); }
-  ];
-  var SOURCES = [
-    { name: "ohmanda.com",
-      url:  function (s) { return "https://ohmanda.com/api/horoscope/" + s + "/"; },
-      pick: function (j) { return j && j.horoscope; } },
-    { name: "horoscope-app-api",
-      url:  function (s) { return "https://horoscope-app-api.vercel.app/api/v1/get-horoscope/daily?sign=" + s + "&day=TODAY"; },
-      pick: function (j) { return j && j.data && j.data.horoscope; } }
-  ];
-
-  function dayStamp(d) {
-    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
-  }
-  /* Remember the sign in memory too, so a browser that blocks storage
-     (private window, blocked site data) still keeps it for the visit. */
-  var signMem = "";
-  function getSign() {
-    if (signMem) return signMem;
-    try { return localStorage.getItem(SIGN_KEY) || DEFAULT_SIGN; } catch (e) { return DEFAULT_SIGN; }
-  }
-  function setSign(v) {
-    signMem = v;
-    try { localStorage.setItem(SIGN_KEY, v); } catch (e) {}
-  }
-  function clearSign() {
-    signMem = "";
-    try { localStorage.removeItem(SIGN_KEY); } catch (e) {}
-  }
-
-  /* The page re-renders on every refresh; don't start a second request for a
-     reading already on its way. */
-  var horoInflight = null, horoInflightKey = "";
-  function horoscopeFor(sign, today) {
-    var k = sign + "|" + today;
-    if (horoInflight && horoInflightKey === k) return horoInflight;
-    horoInflightKey = k;
-    horoInflight = fetchHoroscope(sign);
-    horoInflight.catch(function () { if (horoInflightKey === k) horoInflight = null; });
-    return horoInflight;
-  }
-
-  function fetchJSON(url, ms) {
-    var ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, ms || 9000);
-    return fetch(url, ctl ? { signal: ctl.signal } : undefined)
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function (j) { clearTimeout(timer); return j; },
-            function (e) { clearTimeout(timer); throw e; });
-  }
-
-  function fetchHoroscope(sign) {
-    var attempts = [];
-    PROXIES.forEach(function (p) {
-      SOURCES.forEach(function (s) {
-        attempts.push({ url: p(s.url(sign)), pick: s.pick, name: s.name });
-      });
-    });
-    return attempts.reduce(function (chain, a) {
-      return chain.catch(function () {
-        return fetchJSON(a.url).then(function (j) {
-          var text = a.pick(j);
-          if (!text || String(text).length < 20) throw new Error("empty");
-          return { text: String(text).trim(), source: a.name };
-        });
-      });
-    }, Promise.reject());
-  }
-
-  function horoscopeTile(tiles) {
-    var t = el("div", "tile wide horo");
-    t.appendChild(el("div", "k", "Horoscope"));
-    tiles.appendChild(t);
-
-    var sign = getSign();
-    if (!sign) { renderPicker(t); return; }
-
-    var meta = SIGNS.filter(function (s) { return s[0] === sign; })[0] || SIGNS[0];
-    var head = el("div", "horo-head");
-    var name = el("div", "v");
-    name.style.fontSize = "21px";
-    name.textContent = meta[1];
-    head.appendChild(name);
-    var change = el("button", "linkish", "change");
-    change.addEventListener("click", function () {
-      clearSign();
-      t.textContent = "";
-      t.appendChild(el("div", "k", "Horoscope"));
-      renderPicker(t);
-    });
-    head.appendChild(change);
-    t.appendChild(head);
-
-    var body = el("p", "horo-body", "Reading the stars…");
-    t.appendChild(body);
-    var credit = el("div", "note");
-    t.appendChild(credit);
-
-    var today = dayStamp(new Date()), cached = null;
-    try { cached = JSON.parse(localStorage.getItem(HORO_KEY) || "null"); } catch (e) {}
-    if (cached && cached.sign === sign && cached.date === today) {
-      body.textContent = cached.text;
-      credit.textContent = "Daily reading via " + cached.source + ".";
-      return;
-    }
-
-    horoscopeFor(sign, today).then(function (r) {
-      body.textContent = r.text;
-      credit.textContent = "Daily reading via " + r.source + ".";
-      try {
-        localStorage.setItem(HORO_KEY, JSON.stringify({
-          sign: sign, date: today, text: r.text, source: r.source }));
-      } catch (e) {}
-    }, function () {
-      if (cached && cached.sign === sign) {
-        body.textContent = cached.text;
-        credit.textContent = "From " + cached.date + " — couldn't reach today's reading.";
-      } else {
-        body.textContent = "The horoscope service isn't answering right now. It's a free one, so it sulks occasionally — try Refresh in a bit.";
-        credit.textContent = "";
-      }
-    });
-  }
-
-  function renderPicker(t) {
-    t.appendChild(el("div", "horo-body", "Pick your sign and it'll remember — it's kept on this device, not published."));
-    var sel = document.createElement("select");
-    sel.className = "sign-select";
-    sel.setAttribute("aria-label", "Your star sign");
-    var ph = document.createElement("option");
-    ph.value = ""; ph.textContent = "Choose your sign…";
-    sel.appendChild(ph);
-    SIGNS.forEach(function (s) {
-      var o = document.createElement("option");
-      o.value = s[0]; o.textContent = s[1] + "  ·  " + s[2];
-      sel.appendChild(o);
-    });
-    sel.addEventListener("change", function () {
-      if (!sel.value) return;
-      setSign(sel.value);
-      var tiles = t.parentNode;
-      t.remove();
-      horoscopeTile(tiles);
-    });
-    t.appendChild(sel);
-  }
-
-  function goldenWindows(rise, set) {
-    function edge(from, dir) {
-      var best = null;
-      for (var m = -90; m <= 90; m += 2) {
-        var t = new Date(from.getTime() + m * 60000);
-        var a = sunAltitude(t);
-        if (a >= -4 && a <= 6) { if (best === null || (dir > 0 ? t > best : t < best)) best = t; }
-      }
-      return best;
-    }
-    function span(anchor) {
-      var lo = null, hi = null;
-      for (var m = -90; m <= 90; m += 2) {
-        var t = new Date(anchor.getTime() + m * 60000);
-        var a = sunAltitude(t);
-        if (a >= -4 && a <= 6) { if (!lo) lo = t; hi = t; }
-      }
-      return lo && hi ? hhmm(lo) + "–" + hhmm(hi) : "—";
-    }
-    return { am: span(rise), pm: span(set) };
   }
 
   /* ===================== data ===================== */
@@ -1155,7 +994,7 @@
   if ("serviceWorker" in navigator) {
     var reloadedForUpdate = false;
     navigator.serviceWorker.addEventListener("controllerchange", function () {
-      if (reloadedForUpdate) return;      // guard: skipWaiting would loop otherwise
+      if (reloadedForUpdate) return;
       reloadedForUpdate = true;
       location.reload();
     });
