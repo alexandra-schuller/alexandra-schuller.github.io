@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Sunrise</title>
+<meta name="description" content="Light, weather and air over Montréal, and what to put on before you go out.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0A0F1E">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --sky-top:   #070C18;
+    --sky-bot:   #101A30;
+    --ink:       #F3F6FB;
+    --ink-2:     #AEB9CD;
+    --ink-3:     #74809A;
+    --card:      rgba(255,255,255,.055);
+    --card-line: rgba(255,255,255,.11);
+    --gold:      #F5C451;
+    --gold-soft: #FFE1A0;
+    --rose:      #EC8C82;
+    --moon:      #9DCBEA;
+    --good:      #55C08A;
+    --moderate:  #E8C65E;
+    --serious:   #EFA05C;
+    --critical:  #E8706A;
+    --severe:    #BB86D6;
+    --r: 14px;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--sky-top);
+    background-image: linear-gradient(175deg, var(--sky-top) 0%, var(--sky-bot) 62%, var(--sky-top) 100%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: "Manrope", "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding-left: 20px; padding-right: 20px;
+    padding-block: 26px 56px;
+  }
+
+  /* ---------- masthead ---------- */
+  .top { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
+  .mark {
+    font-family: "Instrument Serif", Georgia, serif;
+    font-size: 34px; line-height: 1; letter-spacing: .01em;
+  }
+  .mark em { font-style: italic; color: var(--gold); }
+  .place {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .top .place:last-child { margin-left: auto; }
+
+  /* ---------- cards ---------- */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-line);
+    border-radius: var(--r);
+    padding: 20px;
+  }
+  .card + .card, .grid, .stack > * + * { margin-top: 14px; }
+  .stack > * + * { margin-top: 14px; }
+
+  .lbl {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 10px;
+  }
+
+  /* ---------- the arc ---------- */
+  .arc-card { padding: 20px 20px 16px; }
+  svg.arc { display: block; width: 100%; height: auto; max-width: 100%; overflow: visible; }
+
+  .ends {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 16px; margin-top: 6px;
+  }
+  .end .k {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--ink-3); display: block; margin-bottom: 2px;
+  }
+  .end .v {
+    font-family: "Instrument Serif", Georgia, serif;
+    font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .end.right { text-align: right; }
+  .end .v.rise { color: var(--gold-soft); }
+  .end .v.set  { color: var(--rose); }
+
+  .now-line {
+    margin-top: 16px; padding-top: 14px;
+    border-top: 1px solid var(--card-line);
+    display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline;
+  }
+  .headline { font-size: 17px; font-weight: 600; }
+  .headline b { color: var(--gold); font-weight: 700; }
+  .sub { color: var(--ink-2); font-size: 14.5px; }
+  .sub b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* ---------- advice ---------- */
+  .advice { border-color: rgba(245,196,81,.30); background: rgba(245,196,81,.075); }
+  .advice .lbl { color: var(--gold); }
+  .advice ul { margin: 0; padding: 0; list-style: none; }
+  .advice li { display: flex; gap: 11px; align-items: flex-start; }
+  .advice li + li { margin-top: 9px; }
+  .advice .dot {
+    flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--gold); margin-top: 8px;
+  }
+  .advice .lead { font-size: 17.5px; font-weight: 600; line-height: 1.4; }
+  .advice li + li span:last-child { color: var(--ink-2); font-size: 15px; }
+
+  /* ---------- condition tiles ---------- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(186px, 1fr)); gap: 12px; }
+  .tile {
+    background: var(--card); border: 1px solid var(--card-line);
+    border-radius: var(--r); padding: 15px 16px 14px;
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .tile .k {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .tile .v {
+    font-size: 27px; font-weight: 600; line-height: 1.05;
+    font-variant-numeric: tabular-nums; letter-spacing: -.01em;
+  }
+  .tile .v small { font-size: 15px; font-weight: 500; color: var(--ink-2); margin-left: 1px; }
+  .tile .note { font-size: 13px; color: var(--ink-2); line-height: 1.35; }
+
+  /* meters: a thin track with a filled span, plus a written label beside it */
+  .meter { height: 5px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
+  .meter i { display: block; height: 100%; border-radius: 3px; background: var(--ink-2); }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600;
+  }
+  .chip::before {
+    content: ""; width: 9px; height: 9px; border-radius: 2px; background: currentColor;
+  }
+  .c-good { color: var(--good); } .c-moderate { color: var(--moderate); }
+  .c-serious { color: var(--serious); } .c-critical { color: var(--critical); }
+  .c-severe { color: var(--severe); }
+
+  .gh { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .gh + .gh { margin-top: 2px; }
+  .gh-k {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px; letter-spacing: .13em; text-transform: uppercase; color: var(--ink-3);
+  }
+  .gh-v {
+    font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums;
+    color: var(--gold-soft); white-space: nowrap;
+  }
+
+  .compass { display: flex; align-items: center; gap: 9px; }
+  .compass svg { flex: 0 0 auto; }
+
+  /* ---------- hourly ---------- */
+  .hours svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+  /* ---------- outlook ---------- */
+  .days { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .d {
+    display: flex; flex-direction: column; gap: 5px;
+    padding: 13px 14px;
+    border: 1px solid var(--card-line); border-radius: 11px;
+    background: rgba(255,255,255,.03);
+  }
+  .d .n {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3);
+  }
+  .d .c { font-size: 13.5px; color: var(--ink-2); line-height: 1.3; min-height: 2.6em; }
+  .d .t { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .d .t span { color: var(--ink-3); font-weight: 500; }
+
+  /* ---------- footer ---------- */
+  .foot {
+    margin-top: 22px;
+    font-size: 12.5px; color: var(--ink-3); line-height: 1.6;
+  }
+  .foot a { color: var(--ink-2); }
+  .foot button {
+    font: inherit; font-size: 12.5px;
+    color: var(--ink-2); background: transparent;
+    border: 1px solid var(--card-line); border-radius: 6px;
+    padding: 5px 11px; cursor: pointer; margin-top: 8px;
+  }
+  .foot button:hover { color: var(--ink); border-color: var(--ink-3); }
+
+  .err {
+    border-color: rgba(232,112,106,.4); background: rgba(232,112,106,.1);
+    font-size: 14.5px;
+  }
+  [hidden] { display: none !important; }
+
+  @media (max-width: 560px) {
+    .wrap { padding-block: 20px 44px; }
+    .mark { font-size: 29px; }
+    .end .v { font-size: 33px; }
+    .days { grid-template-columns: 1fr; }
+    .top .place:last-child { margin-left: 0; width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="mark">Sun<em>rise</em></div>
+    <div class="place" id="today">—</div>
+    <div class="place" id="place">Montréal, QC</div>
+  </div>
+
+  <div class="card err" id="err" hidden></div>
+
+  <div class="stack">
+    <section class="card arc-card">
+      <svg class="arc" id="arc" viewBox="0 0 720 250" role="img" aria-labelledby="arcTitle"><title id="arcTitle">The sun's path today</title></svg>
+      <div class="ends">
+        <div class="end"><span class="k">Sunrise</span><span class="v rise" id="riseT">—</span></div>
+        <div class="end right"><span class="k">Sunset</span><span class="v set" id="setT">—</span></div>
+      </div>
+      <div class="now-line">
+        <div class="headline" id="headline">Loading…</div>
+        <div class="sub" id="daylight"></div>
+      </div>
+    </section>
+
+    <section class="card advice">
+      <p class="lbl">Before you go out</p>
+      <ul id="advice"><li><span class="dot"></span><span class="lead">Checking the sky…</span></li></ul>
+    </section>
+
+    <div class="grid" id="tiles"></div>
+
+    <section class="card hours">
+      <p class="lbl">Next twelve hours</p>
+      <svg id="hours" viewBox="0 0 720 150" role="img" aria-labelledby="hTitle"><title id="hTitle">Temperature and chance of precipitation, hour by hour</title></svg>
+    </section>
+
+    <section class="card">
+      <p class="lbl">The next few days</p>
+      <div class="days" id="days"></div>
+    </section>
+  </div>
+
+  <p class="foot">
+    Light times calculated for Montréal; weather and air quality from
+    <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>.
+    <span id="stamp"></span><br>
+    <button id="refresh">Refresh</button>
+  </p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var LAT = 45.5019, LON = -73.5674, TZ = "America/Montreal";
+  var KEY = "sunrise:last";
+
+  /* ===================== sun position =====================
+     Standard low-precision solar position (Meeus). Good to well under a
+     minute for our purposes, and it runs offline. */
+  var rad = Math.PI / 180, OBL = 23.4397 * rad;
+
+  function toDays(date) { return date.valueOf() / 86400000 - 0.5 + 2440588 - 2451545; }
+  function meanAnomaly(d) { return rad * (357.5291 + 0.98560028 * d); }
+  function eclipticLon(M) {
+    var C = rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
+    return M + C + rad * 102.9372 + Math.PI;
+  }
+  function sunAltitude(date) {
+    var d = toDays(date), M = meanAnomaly(d), l = eclipticLon(M);
+    var dec = Math.asin(Math.sin(OBL) * Math.sin(l));
+    var ra = Math.atan2(Math.sin(l) * Math.cos(OBL), Math.cos(l));
+    var H = rad * (280.16 + 360.9856235 * d) - rad * -LON - ra;
+    var phi = rad * LAT;
+    return Math.asin(Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H)) / rad;
+  }
+
+  var SYNODIC = 29.530588853, NEW_MOON = Date.UTC(2000, 0, 6, 18, 14);
+  function moon() {
+    var age = (((Date.now() - NEW_MOON) / 86400000) % SYNODIC + SYNODIC) % SYNODIC;
+    var f = age / SYNODIC;
+    var names = ["New moon","Waxing crescent","First quarter","Waxing gibbous",
+                 "Full moon","Waning gibbous","Last quarter","Waning crescent"];
+    var i = Math.floor(f * 8 + 0.5) % 8;
+    return { name: names[i], lit: Math.round((1 - Math.cos(2 * Math.PI * f)) / 2 * 100) };
+  }
+
+  /* ===================== helpers ===================== */
+  function $(id) { return document.getElementById(id); }
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function hhmm(d) { return d.getHours() + ":" + pad(d.getMinutes()); }
+  function parseLocal(s) {                       // "2026-09-15T06:32" in Montréal time
+    var m = s.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+    return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]);
+  }
+  function dur(sec) {
+    var h = Math.floor(sec / 3600), m = Math.round((sec % 3600) / 60);
+    if (m === 60) { h++; m = 0; }
+    return h + " h " + pad(m);
+  }
+  function until(ms) {
+    var s = Math.max(0, Math.round(ms / 1000));
+    var h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+    if (m === 60) { h++; m = 0; }
+    return h ? h + " h " + m + " min" : m + " min";
+  }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  var NS = "http://www.w3.org/2000/svg";
+  function svg(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  var WMO = {
+    0:  ["Clear", "clear"],
+    1:  ["Mostly clear", "clear"],
+    2:  ["Partly cloudy", "cloud"],
+    3:  ["Overcast", "cloud"],
+    45: ["Fog", "fog"], 48: ["Freezing fog", "fog"],
+    51: ["Light drizzle", "rain"], 53: ["Drizzle", "rain"], 55: ["Heavy drizzle", "rain"],
+    56: ["Freezing drizzle", "ice"], 57: ["Freezing drizzle", "ice"],
+    61: ["Light rain", "rain"], 63: ["Rain", "rain"], 65: ["Heavy rain", "rain"],
+    66: ["Freezing rain", "ice"], 67: ["Freezing rain", "ice"],
+    71: ["Light snow", "snow"], 73: ["Snow", "snow"], 75: ["Heavy snow", "snow"],
+    77: ["Snow grains", "snow"],
+    80: ["Rain showers", "rain"], 81: ["Rain showers", "rain"], 82: ["Heavy showers", "rain"],
+    85: ["Snow showers", "snow"], 86: ["Snow showers", "snow"],
+    95: ["Thunderstorms", "storm"], 96: ["Thunderstorms, hail", "storm"], 99: ["Thunderstorms, hail", "storm"]
+  };
+  function wx(code) { return WMO[code] || ["—", "cloud"]; }
+
+  function aqiBand(v) {
+    if (v == null) return null;
+    if (v <= 50)  return { name: "Good", cls: "c-good", note: "Nothing to think about." };
+    if (v <= 100) return { name: "Moderate", cls: "c-moderate", note: "Fine for most people." };
+    if (v <= 150) return { name: "Poor for some", cls: "c-serious", note: "Ease off if you're sensitive." };
+    if (v <= 200) return { name: "Unhealthy", cls: "c-critical", note: "Keep hard exercise indoors." };
+    if (v <= 300) return { name: "Very unhealthy", cls: "c-severe", note: "Stay in if you can." };
+    return { name: "Hazardous", cls: "c-severe", note: "Stay indoors." };
+  }
+  function uvBand(v) {
+    if (v == null) return null;
+    if (v < 3)  return { name: "Low", cls: "c-good", note: "No sunscreen needed." };
+    if (v < 6)  return { name: "Moderate", cls: "c-moderate", note: "Sunscreen if you're out a while." };
+    if (v < 8)  return { name: "High", cls: "c-serious", note: "Sunscreen and a hat." };
+    if (v < 11) return { name: "Very high", cls: "c-critical", note: "Cover up around midday." };
+    return { name: "Extreme", cls: "c-severe", note: "Avoid midday sun." };
+  }
+  function compass(deg) {
+    var pts = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+    return pts[Math.round(deg / 22.5) % 16];
+  }
+  function windWord(k) {
+    if (k < 2)  return "Still";
+    if (k < 12) return "Light";
+    if (k < 20) return "A breeze";
+    if (k < 30) return "Breezy";
+    if (k < 40) return "Windy";
+    if (k < 62) return "Strong";
+    return "Gale";
+  }
+
+  /* Québec's pollen calendar. Open-Meteo's pollen model covers Europe only and
+     every North-American source needs a paid key, so this is the season — not a
+     live count — and it says so on the tile. */
+  function pollenSeason(date) {
+    var m = date.getMonth() + 1, d = date.getDate();
+    var doy = m * 100 + d;
+    if (doy >= 815 && doy <= 1015)
+      return { what: "Ragweed", peak: doy <= 920,
+               note: "Peak season in Québec until the first hard frost." };
+    if (doy >= 325 && doy <= 605)
+      return { what: "Tree pollen", peak: doy >= 415 && doy <= 525,
+               note: "Birch, maple, poplar and oak through the spring." };
+    if (doy >= 520 && doy <= 810)
+      return { what: "Grass pollen", peak: doy >= 605 && doy <= 710,
+               note: "Grasses run from late spring into the summer." };
+    return { what: "Quiet", peak: false, note: "Little is in season right now." };
+  }
+
+  /* ===================== the arc ===================== */
+  function drawArc(rise, set, now) {
+    var S = $("arc");
+    while (S.childNodes.length > 1) S.removeChild(S.lastChild);
+    var Wd = 720, Ht = 250, padX = 26, padTop = 22, padBot = 54;
+
+    var t0 = rise.getTime() - 60 * 60000, t1 = set.getTime() + 60 * 60000;
+    var span = t1 - t0;
+    var N = 160, pts = [], maxAlt = -90, minAlt = 90;
+    for (var i = 0; i <= N; i++) {
+      var t = t0 + span * (i / N);
+      var a = sunAltitude(new Date(t));
+      pts.push([t, a]);
+      if (a > maxAlt) maxAlt = a;
+      if (a < minAlt) minAlt = a;
+    }
+    var aTop = Math.max(maxAlt + 5, 8), aBot = Math.min(minAlt - 2, -11);
+
+    function X(t) { return padX + (t - t0) / span * (Wd - 2 * padX); }
+    function Y(a) { return padTop + (aTop - a) / (aTop - aBot) * (Ht - padTop - padBot); }
+
+    var defs = svg("defs");
+    var g1 = svg("linearGradient", { id: "dayfill", x1: "0", y1: "0", x2: "0", y2: "1" });
+    g1.appendChild(svg("stop", { offset: "0", "stop-color": "#F5C451", "stop-opacity": ".26" }));
+    g1.appendChild(svg("stop", { offset: "1", "stop-color": "#F5C451", "stop-opacity": "0" }));
+    defs.appendChild(g1);
+    var g2 = svg("linearGradient", { id: "arcline", x1: "0", y1: "0", x2: "1", y2: "0" });
+    g2.appendChild(svg("stop", { offset: "0", "stop-color": "#FFE1A0" }));
+    g2.appendChild(svg("stop", { offset: ".5", "stop-color": "#F5C451" }));
+    g2.appendChild(svg("stop", { offset: "1", "stop-color": "#EC8C82" }));
+    defs.appendChild(g2);
+    var glow = svg("radialGradient", { id: "glow" });
+    glow.appendChild(svg("stop", { offset: "0", "stop-color": "#FFE1A0", "stop-opacity": ".85" }));
+    glow.appendChild(svg("stop", { offset: "1", "stop-color": "#FFE1A0", "stop-opacity": "0" }));
+    defs.appendChild(glow);
+    S.appendChild(defs);
+
+    var yH = Y(0);
+
+    // golden hour bands, where the light is between -4° and +6°
+    var bands = [], inb = false, bs = 0;
+    pts.forEach(function (p) {
+      var g = p[1] >= -4 && p[1] <= 6;
+      if (g && !inb) { inb = true; bs = p[0]; }
+      if (!g && inb) { inb = false; bands.push([bs, p[0]]); }
+    });
+    if (inb) bands.push([bs, pts[pts.length - 1][0]]);
+    bands.forEach(function (b) {
+      S.appendChild(svg("rect", {
+        x: X(b[0]), y: padTop, width: Math.max(1, X(b[1]) - X(b[0])), height: Ht - padTop - padBot,
+        fill: "#F5C451", opacity: ".07"
+      }));
+    });
+
+    // daylight fill under the curve
+    var dayPts = pts.filter(function (p) { return p[1] >= 0; });
+    if (dayPts.length > 1) {
+      var fp = "M " + X(dayPts[0][0]) + " " + yH;
+      dayPts.forEach(function (p) { fp += " L " + X(p[0]) + " " + Y(p[1]); });
+      fp += " L " + X(dayPts[dayPts.length - 1][0]) + " " + yH + " Z";
+      S.appendChild(svg("path", { d: fp, fill: "url(#dayfill)" }));
+    }
+
+    // horizon
+    S.appendChild(svg("line", {
+      x1: padX - 6, y1: yH, x2: Wd - padX + 6, y2: yH,
+      stroke: "rgba(255,255,255,.34)", "stroke-width": "1"
+    }));
+    var hl = svg("text", { x: padX - 6, y: yH + 17, fill: "#74809A",
+      "font-family": "IBM Plex Mono, monospace", "font-size": "10.5", "letter-spacing": "1.4" });
+    hl.textContent = "HORIZON";
+    S.appendChild(hl);
+
+    // the path itself, dashed where the sun is down
+    function seg(list, dash, op) {
+      if (list.length < 2) return;
+      var d = "M " + X(list[0][0]) + " " + Y(list[0][1]);
+      list.forEach(function (p, i) { if (i) d += " L " + X(p[0]) + " " + Y(p[1]); });
+      var o = { d: d, fill: "none", stroke: "url(#arcline)", "stroke-width": "2.5",
+                "stroke-linecap": "round", opacity: op };
+      if (dash) o["stroke-dasharray"] = "2 7";
+      S.appendChild(svg("path", o));
+    }
+    var below1 = [], above = [], below2 = [], phase = 0;
+    pts.forEach(function (p) {
+      if (p[1] >= 0) { phase = 1; above.push(p); }
+      else if (phase === 0) below1.push(p);
+      else below2.push(p);
+    });
+    if (below1.length) below1.push(above[0] || below1[below1.length - 1]);
+    if (below2.length && above.length) below2.unshift(above[above.length - 1]);
+    seg(below1, true, ".55"); seg(above, false, "1"); seg(below2, true, ".55");
+
+    // solar noon
+    var peak = pts.reduce(function (a, b) { return b[1] > a[1] ? b : a; });
+    S.appendChild(svg("line", {
+      x1: X(peak[0]), y1: Y(peak[1]) + 6, x2: X(peak[0]), y2: yH,
+      stroke: "rgba(255,255,255,.14)", "stroke-width": "1", "stroke-dasharray": "2 5"
+    }));
+    var nl = svg("text", { x: X(peak[0]), y: Y(peak[1]) - 11, fill: "#74809A", "text-anchor": "middle",
+      "font-family": "IBM Plex Mono, monospace", "font-size": "10.5", "letter-spacing": "1.2" });
+    nl.textContent = "NOON " + hhmm(new Date(peak[0]));
+    S.appendChild(nl);
+
+    // the sun, where it is right now
+    var nt = now.getTime();
+    if (nt >= t0 && nt <= t1) {
+      var na = sunAltitude(now), nx = X(nt), ny = Y(na);
+      S.appendChild(svg("circle", { cx: nx, cy: ny, r: 30, fill: "url(#glow)" }));
+      S.appendChild(svg("circle", { cx: nx, cy: ny, r: 8, fill: na >= 0 ? "#FFD98A" : "#9DCBEA" }));
+      S.appendChild(svg("circle", { cx: nx, cy: ny, r: 8, fill: "none",
+        stroke: "rgba(10,15,30,.55)", "stroke-width": "1.5" }));
+      var t = svg("text", { x: nx, y: ny - 19, fill: "#F3F6FB", "text-anchor": "middle",
+        "font-family": "IBM Plex Mono, monospace", "font-size": "11", "letter-spacing": "1" });
+      t.textContent = "NOW";
+      S.appendChild(t);
+    }
+
+    // where the sun crosses the horizon
+    [[rise, "rise"], [set, "set"]].forEach(function (p) {
+      var x = X(p[0].getTime());
+      if (x < padX - 4 || x > Wd - padX + 4) return;
+      S.appendChild(svg("circle", { cx: x, cy: yH, r: 3.5,
+        fill: p[1] === "rise" ? "#FFE1A0" : "#EC8C82" }));
+    });
+
+    return { golden: bands };
+  }
+
+  /* ===================== hourly ===================== */
+  function drawHours(times, temps, pops, now) {
+    var S = $("hours");
+    while (S.childNodes.length > 1) S.removeChild(S.lastChild);
+    var Wd = 720, padL = 8, padR = 30, topH = 76, gap = 16, barH = 26, baseY = topH + gap + barH;
+
+    var start = 0;
+    for (var i = 0; i < times.length; i++) { if (times[i].getTime() >= now.getTime() - 3600000) { start = i; break; } }
+    var T = times.slice(start, start + 13), C = temps.slice(start, start + 13), P = pops.slice(start, start + 13);
+    if (T.length < 2) return;
+
+    var lo = Math.min.apply(null, C), hi = Math.max.apply(null, C);
+    if (hi - lo < 4) { var mid = (hi + lo) / 2; lo = mid - 2; hi = mid + 2; }
+    function X(i) { return padL + i / (T.length - 1) * (Wd - padL - padR); }
+    function Y(v) { return 20 + (hi - v) / (hi - lo) * (topH - 30); }
+
+    // chance of precipitation — its own row, its own scale, labelled
+    P.forEach(function (p, i) {
+      var h = Math.max(1.5, (p || 0) / 100 * barH);
+      S.appendChild(svg("rect", {
+        x: X(i) - 9, y: baseY - h, width: 18, height: h, rx: "2",
+        fill: "#9DCBEA", opacity: (p || 0) > 0 ? ".55" : ".16"
+      }));
+      if (p >= 30) {
+        var pt = svg("text", { x: X(i), y: baseY - h - 5, fill: "#9DCBEA", "text-anchor": "middle",
+          "font-family": "IBM Plex Mono, monospace", "font-size": "9.5" });
+        pt.textContent = p + "%";
+        S.appendChild(pt);
+      }
+    });
+    S.appendChild(svg("line", { x1: padL - 4, y1: baseY, x2: Wd - padR + 4, y2: baseY,
+      stroke: "rgba(255,255,255,.16)", "stroke-width": "1" }));
+
+    // temperature line
+    var d = "";
+    C.forEach(function (v, i) { d += (i ? " L " : "M ") + X(i) + " " + Y(v); });
+    S.appendChild(svg("path", { d: d, fill: "none", stroke: "#F5C451", "stroke-width": "2",
+      "stroke-linecap": "round", "stroke-linejoin": "round" }));
+
+    C.forEach(function (v, i) {
+      if (i % 3 !== 0 && i !== C.length - 1) return;
+      S.appendChild(svg("circle", { cx: X(i), cy: Y(v), r: 4, fill: "#F5C451",
+        stroke: "#0A0F1E", "stroke-width": "2" }));
+      var lt = svg("text", { x: X(i), y: Y(v) - 11, fill: "#F3F6FB", "text-anchor": "middle",
+        "font-family": "IBM Plex Mono, monospace", "font-size": "11.5" });
+      lt.textContent = Math.round(v) + "°";
+      S.appendChild(lt);
+      var ht = svg("text", { x: X(i), y: baseY + 17, fill: "#74809A", "text-anchor": "middle",
+        "font-family": "IBM Plex Mono, monospace", "font-size": "10.5" });
+      ht.textContent = T[i].getHours() + "h";
+      S.appendChild(ht);
+    });
+
+    var leg = svg("text", { x: padL - 4, y: topH + gap - 3, fill: "#74809A",
+      "font-family": "IBM Plex Mono, monospace", "font-size": "9.5", "letter-spacing": "1.2" });
+    leg.textContent = "CHANCE OF RAIN";
+    S.appendChild(leg);
+  }
+
+  /* ===================== what to wear ===================== */
+  function advise(c, day, aqi, pol, rise, set, now) {
+    var out = [], feels = c.apparent_temperature, code = c.weather_code;
+    var wind = c.wind_speed_10m, gust = c.wind_gusts_10m;
+    var kind = wx(code)[1];
+    var lowTonight = day.temperature_2m_min[0];
+
+    if (feels <= -25) out.push("Everything you own. Cover your face — skin freezes fast at this.");
+    else if (feels <= -15) out.push("Parka, toque, mitts and a scarf. Nothing exposed for long.");
+    else if (feels <= -5) out.push("Winter coat, hat and gloves.");
+    else if (feels < 2) out.push("A proper coat, and a hat if you'll be out more than a few minutes.");
+    else if (feels < 9) out.push("A warm jacket. A sweater under it if you're out past dark.");
+    else if (feels < 15) out.push("A jacket or a solid sweater.");
+    else if (feels < 21) out.push("Long sleeves, or a light layer for later.");
+    else if (feels < 27) out.push("T-shirt weather.");
+    else out.push("Dress light and take water — it's genuinely hot.");
+
+    if (kind === "ice") out.push("Freezing rain. Ice underfoot — boots with grip, and give yourself extra time.");
+    else if (kind === "snow") out.push("Snow. Boots, and assume everything takes longer.");
+    else if (kind === "storm") out.push("Thunderstorms around. Worth waiting out rather than walking through.");
+    else if (day.precipitation_probability_max[0] >= 50 || c.precipitation > 0)
+      out.push("Take an umbrella — rain is more likely than not today.");
+    else if (day.precipitation_probability_max[0] >= 30)
+      out.push("Maybe an umbrella: about a " + day.precipitation_probability_max[0] + "% chance of rain.");
+
+    if (gust >= 45) out.push("Gusts to " + Math.round(gust) + " km/h. A windproof shell beats a thick one.");
+    else if (wind >= 28) out.push("Windy at " + Math.round(wind) + " km/h — it'll feel colder than the number.");
+
+    var uv = day.uv_index_max[0];
+    if (uv >= 6) out.push("UV reaches " + Math.round(uv) + " today. Sunscreen if you're out around midday.");
+
+    if (aqi != null && aqi > 100) {
+      var b = aqiBand(aqi);
+      out.push("Air quality is " + b.name.toLowerCase() + " (AQI " + Math.round(aqi) + "). " + b.note);
+    }
+
+    if (pol.what === "Ragweed" || pol.what === "Tree pollen" || pol.what === "Grass pollen") {
+      var wet = c.precipitation > 0 || day.precipitation_probability_max[0] >= 60;
+      if (wet) out.push(pol.what + " is in season, but the rain should keep it down today.");
+      else if (wind >= 12) out.push(pol.what + " is in season and the wind is spreading it. Antihistamine if you react.");
+    }
+
+    var toSet = set.getTime() - now.getTime();
+    if (toSet > 0 && toSet < 2 * 3600000)
+      out.push("Sun sets in " + until(toSet) + " — lights if you're cycling home.");
+
+    if (feels >= 12 && lowTonight <= 6)
+      out.push("It drops to " + Math.round(lowTonight) + "° tonight, so bring the layer you won't want now.");
+
+    return out.slice(0, 5);
+  }
+
+  /* ===================== render ===================== */
+  function render(f, a) {
+    var now = new Date();
+    var c = f.current, day = f.daily;
+    var rise = parseLocal(day.sunrise[0]), set = parseLocal(day.sunset[0]);
+
+    $("today").textContent = now.toLocaleDateString("en-CA", {
+      weekday: "long", month: "long", day: "numeric" });
+
+    drawArc(rise, set, now);
+    $("riseT").textContent = hhmm(rise);
+    $("setT").textContent = hhmm(set);
+
+    // headline: the next thing the sun does
+    var head;
+    if (now < rise) head = "Sunrise in <b>" + until(rise - now) + "</b>";
+    else if (now < set) head = "Sunset in <b>" + until(set - now) + "</b>";
+    else {
+      var tomorrow = day.sunrise[1] ? parseLocal(day.sunrise[1]) : null;
+      head = tomorrow ? "Sun's down. Back up at <b>" + hhmm(tomorrow) + "</b>" : "Sun's down.";
+    }
+    $("headline").innerHTML = head;
+
+    var change = day.daylight_duration[1] != null
+      ? Math.round(day.daylight_duration[1] - day.daylight_duration[0]) : null;
+    var dl = "<b>" + dur(day.daylight_duration[0]) + "</b> of daylight";
+    if (change != null && Math.abs(change) >= 30)
+      dl += " · <b>" + Math.abs(Math.round(change / 60)) + " min</b> " +
+            (change < 0 ? "shorter" : "longer") + " tomorrow";
+    $("daylight").innerHTML = dl;
+
+    // advice
+    var aqi = a && a.current ? a.current.us_aqi : null;
+    var pol = pollenSeason(now);
+    var lines = advise(c, day, aqi, pol, rise, set, now);
+    var ul = $("advice");
+    ul.textContent = "";
+    lines.forEach(function (line, i) {
+      var li = el("li");
+      li.appendChild(el("span", "dot"));
+      li.appendChild(el("span", i === 0 ? "lead" : null, line));
+      ul.appendChild(li);
+    });
+
+    // tiles
+    var tiles = $("tiles");
+    tiles.textContent = "";
+
+    function tile(k, build) {
+      var t = el("div", "tile");
+      t.appendChild(el("div", "k", k));
+      build(t);
+      tiles.appendChild(t);
+      return t;
+    }
+    function meter(t, frac, color) {
+      var m = el("div", "meter"), i = el("i");
+      i.style.width = Math.max(2, Math.min(100, frac * 100)) + "%";
+      if (color) i.style.background = color;
+      m.appendChild(i); t.appendChild(m);
+    }
+
+    tile("Right now", function (t) {
+      var v = el("div", "v");
+      v.innerHTML = Math.round(c.temperature_2m) + "°<small>C</small>";
+      t.appendChild(v);
+      t.appendChild(el("div", "note", wx(c.weather_code)[0] + " · feels like " +
+        Math.round(c.apparent_temperature) + "°"));
+    });
+
+    tile("Humidity", function (t) {
+      var v = el("div", "v");
+      v.innerHTML = Math.round(c.relative_humidity_2m) + "<small>%</small>";
+      t.appendChild(v);
+      meter(t, c.relative_humidity_2m / 100, "#9DCBEA");
+      var h = c.relative_humidity_2m;
+      t.appendChild(el("div", "note",
+        h < 30 ? "Dry — lip balm weather." : h > 75 ? "Damp. Cold bites harder, heat sits heavier." : "Comfortable."));
+    });
+
+    tile("Wind", function (t) {
+      var row = el("div", "compass");
+      var arrow = svg("svg", { width: "26", height: "26", viewBox: "0 0 26 26" });
+      arrow.appendChild(svg("circle", { cx: "13", cy: "13", r: "11.5", fill: "none",
+        stroke: "rgba(255,255,255,.18)", "stroke-width": "1" }));
+      var g = svg("g", { transform: "rotate(" + ((c.wind_direction_10m + 180) % 360) + " 13 13)" });
+      g.appendChild(svg("path", { d: "M13 4 L17.4 20 L13 16.6 L8.6 20 Z", fill: "#9DCBEA" }));
+      arrow.appendChild(g);
+      row.appendChild(arrow);
+      var v = el("div", "v");
+      v.innerHTML = Math.round(c.wind_speed_10m) + "<small> km/h</small>";
+      row.appendChild(v);
+      t.appendChild(row);
+      t.appendChild(el("div", "note", windWord(c.wind_speed_10m) + " from the " +
+        compass(c.wind_direction_10m) + " · gusts " + Math.round(c.wind_gusts_10m)));
+    });
+
+    tile("UV index", function (t) {
+      var u = Math.max(c.uv_index, 0), b = uvBand(day.uv_index_max[0]);
+      var v = el("div", "v");
+      v.innerHTML = u.toFixed(1) + "<small> now</small>";
+      t.appendChild(v);
+      meter(t, day.uv_index_max[0] / 11, "var(--" + b.cls.slice(2) + ")");
+      var chip = el("div", "chip " + b.cls, b.name + " · peaks at " + day.uv_index_max[0].toFixed(1));
+      t.appendChild(chip);
+    });
+
+    tile("Air quality", function (t) {
+      if (aqi == null) { t.appendChild(el("div", "note", "Unavailable right now.")); return; }
+      var b = aqiBand(aqi);
+      var v = el("div", "v");
+      v.innerHTML = Math.round(aqi) + "<small> AQI</small>";
+      t.appendChild(v);
+      meter(t, aqi / 200, "var(--" + b.cls.slice(2) + ")");
+      t.appendChild(el("div", "chip " + b.cls, b.name));
+      if (a.current.pm2_5 != null)
+        t.appendChild(el("div", "note", "PM2.5 " + a.current.pm2_5.toFixed(1) + " µg/m³ · " + b.note));
+    });
+
+    tile("Pollen", function (t) {
+      var v = el("div", "v");
+      v.style.fontSize = "22px";
+      v.textContent = pol.what;
+      t.appendChild(v);
+      if (pol.what !== "Quiet")
+        t.appendChild(el("div", "chip " + (pol.peak ? "c-serious" : "c-moderate"),
+          pol.peak ? "Peak" : "In season"));
+      t.appendChild(el("div", "note", pol.note + " Seasonal guide, not a live count."));
+    });
+
+    tile("Golden hour", function (t) {
+      var g = goldenWindows(rise, set);
+      [["Morning", g.am], ["Evening", g.pm]].forEach(function (row) {
+        var r = el("div", "gh");
+        r.appendChild(el("span", "gh-k", row[0]));
+        r.appendChild(el("span", "gh-v", row[1]));
+        t.appendChild(r);
+      });
+      var m = moon();
+      t.appendChild(el("div", "note", m.name + ", " + m.lit + "% lit."));
+    });
+
+    // hourly
+    if (f.hourly) {
+      drawHours(f.hourly.time.map(parseLocal), f.hourly.temperature_2m,
+                f.hourly.precipitation_probability, now);
+    }
+
+    // outlook
+    var days = $("days");
+    days.textContent = "";
+    for (var i = 0; i < Math.min(3, day.time.length); i++) {
+      var d = el("div", "d");
+      var dt = parseLocal(day.time[i] + "T12:00");
+      d.appendChild(el("div", "n", i === 0 ? "Today" :
+        dt.toLocaleDateString("en-CA", { weekday: "long" })));
+      d.appendChild(el("div", "c", wx(day.weather_code[i])[0]));
+      var tt = el("div", "t");
+      tt.innerHTML = Math.round(day.temperature_2m_max[i]) + "° <span>" +
+                     Math.round(day.temperature_2m_min[i]) + "°</span>";
+      d.appendChild(tt);
+      d.appendChild(el("div", "note", "Sun " + hhmm(parseLocal(day.sunrise[i])) +
+        " – " + hhmm(parseLocal(day.sunset[i]))));
+      days.appendChild(d);
+    }
+  }
+
+  function goldenWindows(rise, set) {
+    function edge(from, dir) {
+      var best = null;
+      for (var m = -90; m <= 90; m += 2) {
+        var t = new Date(from.getTime() + m * 60000);
+        var a = sunAltitude(t);
+        if (a >= -4 && a <= 6) { if (best === null || (dir > 0 ? t > best : t < best)) best = t; }
+      }
+      return best;
+    }
+    function span(anchor) {
+      var lo = null, hi = null;
+      for (var m = -90; m <= 90; m += 2) {
+        var t = new Date(anchor.getTime() + m * 60000);
+        var a = sunAltitude(t);
+        if (a >= -4 && a <= 6) { if (!lo) lo = t; hi = t; }
+      }
+      return lo && hi ? hhmm(lo) + "–" + hhmm(hi) : "—";
+    }
+    return { am: span(rise), pm: span(set) };
+  }
+
+  /* ===================== data ===================== */
+  var F_URL = "https://api.open-meteo.com/v1/forecast?latitude=" + LAT + "&longitude=" + LON +
+    "&current=temperature_2m,apparent_temperature,relative_humidity_2m,is_day,precipitation," +
+    "weather_code,cloud_cover,wind_speed_10m,wind_gusts_10m,wind_direction_10m,uv_index" +
+    "&hourly=temperature_2m,precipitation_probability" +
+    "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration," +
+    "uv_index_max,precipitation_probability_max,precipitation_sum" +
+    "&timezone=" + encodeURIComponent(TZ) + "&forecast_days=3&wind_speed_unit=kmh";
+
+  var A_URL = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + LAT +
+    "&longitude=" + LON + "&current=us_aqi,pm2_5,pm10,ozone,nitrogen_dioxide" +
+    "&timezone=" + encodeURIComponent(TZ) + "&forecast_days=1";
+
+  function stamp(when, live) {
+    $("stamp").textContent = live
+      ? "Updated " + hhmm(when) + "."
+      : "Showing the last reading, from " + hhmm(when) + " — no connection.";
+  }
+
+  function showCached() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return false;
+      var o = JSON.parse(raw);
+      render(o.f, o.a);
+      stamp(new Date(o.at), false);
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function load() {
+    $("err").hidden = true;
+    return Promise.all([
+      fetch(F_URL).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }),
+      fetch(A_URL).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+    ]).then(function (res) {
+      render(res[0], res[1]);
+      stamp(new Date(), true);
+      try { localStorage.setItem(KEY, JSON.stringify({ f: res[0], a: res[1], at: Date.now() })); } catch (e) {}
+    }).catch(function () {
+      if (!showCached()) {
+        var e = $("err");
+        e.hidden = false;
+        e.textContent = "Couldn't reach the weather service, and there's nothing saved to fall back on. Try Refresh in a moment.";
+        $("headline").textContent = "No data yet";
+      }
+    });
+  }
+
+  $("refresh").addEventListener("click", load);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) load(); });
+  setInterval(load, 10 * 60 * 1000);
+
+  showCached();
+  load();
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+  }
+})();
+</script>
+</body>
+</html>
