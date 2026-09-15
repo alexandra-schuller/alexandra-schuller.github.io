@@ -254,6 +254,7 @@
   var DOW = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   var MON = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   var INKS = [{ name: "navy", css: "#1F3A5F" }, { name: "pine", css: "#2E5F4C" }];
+  var DONE_FILL = "#33594A", DONE_TICK = "#FCFCFA", DONE_STRIKE = "rgba(51,89,74,.8)";
 
   var L = {};
   function layout() {
@@ -278,6 +279,24 @@
     return Math.round(Math.min(Math.max(W * a, 580), 2400));
   }
 
+  /* Where a to-do tick box sits, and how far around it a tap still counts. */
+  function boxRect(i) {
+    var top = L.todoTop + i * L.r;
+    var s = Math.min(Math.max(L.r * 0.42, 14), 26, L.r - 6);
+    return { x: L.rightCol + 6, y: top + (L.r - s) / 2, s: s, top: top, bot: top + L.r };
+  }
+  function boxIndexAt(x, y) {
+    for (var i = 0; i < L.todoRows; i++) {
+      var r = boxRect(i);
+      if (x >= L.rightCol - 6 && x <= r.x + r.s + 12 && y >= r.top && y <= r.bot) return i;
+    }
+    return -1;
+  }
+  function anyDone() {
+    for (var i = 0; i < done.length; i++) if (done[i]) return true;
+    return false;
+  }
+
   /* Move ink from one page shape to another. Rows scale with the page, so
      what you wrote on the 3pm line stays on the 3pm line. */
   function rescale(list, fw, fh, tw, th) {
@@ -297,6 +316,7 @@
   var today = startOfDay(new Date());
   var cur = today;
   var strokes = [];
+  var done = [];                      // which to-do rows are struck out
   var undoStack = [], redoStack = [];
   var inkIdx = 0, erasing = false;
   var dirty = false, saveTimer = null;
@@ -498,11 +518,10 @@
     // to do
     tplX.strokeStyle = STRONG; line(L.rightCol, L.todoTop, L.right, L.todoTop);
     for (var i = 0; i < L.todoRows; i++) {
-      var top = L.todoTop + i * L.r, bot2 = top + L.r;
-      tplX.strokeStyle = RULE; line(L.rightCol, bot2, L.right, bot2);
+      var br = boxRect(i);
+      tplX.strokeStyle = RULE; line(L.rightCol, br.bot, L.right, br.bot);
       tplX.strokeStyle = STRONG; tplX.lineWidth = 1.4 / view.k;
-      var bs = Math.min(Math.max(L.r * 0.42, 14), 26, L.r - 6);
-      tplX.strokeRect(L.rightCol + 6, top + (L.r - bs) / 2, bs, bs);
+      tplX.strokeRect(br.x, br.y, br.s, br.s);
     }
 
     // notes
@@ -534,6 +553,42 @@
     applyView(inkX);
     for (var i = 0; i < strokes.length; i++) paintStroke(strokes[i]);
     if (live && !live.erase) paintStroke(live);
+    drawDone();
+  }
+
+  /* Ticked rows are drawn last, so the line crosses out what you wrote. */
+  function drawDone() {
+    for (var i = 0; i < L.todoRows; i++) {
+      if (!done[i]) continue;
+      var r = boxRect(i);
+
+      inkX.fillStyle = DONE_FILL;
+      inkX.fillRect(r.x, r.y, r.s, r.s);
+
+      inkX.strokeStyle = DONE_TICK;
+      inkX.lineWidth = Math.max(1.6, r.s * 0.14);
+      inkX.lineCap = "round"; inkX.lineJoin = "round";
+      inkX.beginPath();
+      inkX.moveTo(r.x + r.s * 0.22, r.y + r.s * 0.53);
+      inkX.lineTo(r.x + r.s * 0.42, r.y + r.s * 0.73);
+      inkX.lineTo(r.x + r.s * 0.79, r.y + r.s * 0.27);
+      inkX.stroke();
+
+      inkX.strokeStyle = DONE_STRIKE;
+      inkX.lineWidth = Math.max(1.8, L.r * 0.06);
+      inkX.beginPath();
+      inkX.moveTo(r.x + r.s + 10, r.top + L.r * 0.55);
+      inkX.lineTo(L.right - 6, r.top + L.r * 0.55);
+      inkX.stroke();
+    }
+  }
+
+  function toggleBox(i) {
+    if (i < 0) return;
+    done[i] = !done[i];
+    undoStack.push({ type: "done", i: i });
+    redoStack.length = 0;
+    markDirty(); redrawInk(); syncButtons();
   }
 
   function paintStroke(s) {
@@ -570,9 +625,23 @@
   }
   function isEraser(e) { return erasing || e.pointerType === "eraser" || (e.buttons & 32) === 32; }
 
+  /* A tap is a touch that goes down and up in the same place. Anything that
+     moves is writing, or panning — never a tick. */
+  var tapRec = null;
+  function noteTap(e, pt) {
+    tapRec = { id: e.pointerId, t: performance.now(), cx: e.clientX, cy: e.clientY, i: boxIndexAt(pt.x, pt.y) };
+  }
+  function tapLands(e) {
+    if (!tapRec || tapRec.id !== e.pointerId || tapRec.i < 0) return false;
+    var dx = e.clientX - tapRec.cx, dy = e.clientY - tapRec.cy;
+    return performance.now() - tapRec.t < 500 && dx * dx + dy * dy < 200;
+  }
+
   inkC.addEventListener("pointerdown", function (e) {
     if (e.pointerType === "touch") {
       touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (touches.size === 1) noteTap(e, toSheet(e.clientX, e.clientY));
+      else tapRec = null;                      // a second finger means a pinch
       startGesture();
       return;
     }
@@ -580,7 +649,8 @@
     e.preventDefault();
     inkC.setPointerCapture(e.pointerId);
     var pt = toSheet(e.clientX, e.clientY);
-    if (isEraser(e)) { live = { erase: true, hit: [] }; eraseAt(pt.x, pt.y); return; }
+    if (isEraser(e)) { tapRec = null; live = { erase: true, hit: [] }; eraseAt(pt.x, pt.y); return; }
+    noteTap(e, pt);
     lastT = performance.now();
     live = { c: inkIdx, p: [] };
     push(live, pt.x, pt.y, e.pressure, 0);
@@ -613,9 +683,18 @@
     if (e.pointerType === "touch") {
       touches.delete(e.pointerId);
       startGesture();
+      if (tapLands(e)) { var ti = tapRec.i; tapRec = null; toggleBox(ti); }
       return;
     }
     if (!live) return;
+    // A pen tap on a box ticks it rather than leaving a dot.
+    if (!live.erase && tapLands(e)) {
+      var bi = tapRec.i;
+      tapRec = null; live = null;
+      redrawInk(); toggleBox(bi);
+      return;
+    }
+    tapRec = null;
     if (live.erase) {
       if (live.hit.length) { undoStack.push({ type: "erase", items: live.hit }); redoStack.length = 0; markDirty(); }
     } else if (live.p.length >= 4) {
@@ -701,12 +780,14 @@
   function undo() {
     var op = undoStack.pop(); if (!op) return;
     if (op.type === "add") redoStack.push({ type: "add", s: strokes.pop() });
+    else if (op.type === "done") { done[op.i] = !done[op.i]; redoStack.push(op); }
     else { op.items.forEach(function (it) { strokes.splice(it.i, 0, it.s); }); redoStack.push(op); }
     markDirty(); redrawInk(); syncButtons();
   }
   function redo() {
     var op = redoStack.pop(); if (!op) return;
     if (op.type === "add") { strokes.push(op.s); undoStack.push({ type: "add" }); }
+    else if (op.type === "done") { done[op.i] = !done[op.i]; undoStack.push(op); }
     else {
       op.items.forEach(function (it) { var k = strokes.indexOf(it.s); if (k >= 0) strokes.splice(k, 1); });
       undoStack.push(op);
@@ -728,30 +809,31 @@
     clearTimeout(saveTimer); saveTimer = null;
     if (!dirty) return Promise.resolve();
     dirty = false;
-    var k = key(cur), done;
-    if (!strokes.length) { delete dayKeys[k]; done = delDay(k); }
+    var k = key(cur), written = strokes.length || anyDone(), op;
+    if (!written) { delete dayKeys[k]; op = delDay(k); }
     else {
       dayKeys[k] = true;
-      done = putDay({ ymd: k, v: 1, w: W, h: H, strokes: strokes, updated: Date.now() });
+      op = putDay({ ymd: k, v: 2, w: W, h: H, strokes: strokes, done: done, updated: Date.now() });
     }
-    return done.then(function () { setStatus(strokes.length ? "Saved" : ""); },
+    return op.then(function () { setStatus(written ? "Saved" : ""); },
                      function () { setStatus("Not saved"); toast("Couldn't save. Your browser may be out of storage."); });
   }
 
   function loadDay(d) {
     cur = d;
     monthAnchor = new Date(cur.getFullYear(), cur.getMonth(), 1);
-    strokes = []; undoStack = []; redoStack = [];
+    strokes = []; done = []; undoStack = []; redoStack = [];
     syncButtons(); renderDateBtn(); setStatus("");
     var k = key(cur);
     H = screenAspectH(); layout(); fitView();
     return getDay(k).then(function (rec) {
       if (key(cur) !== k) return;
       strokes = (rec && Array.isArray(rec.strokes)) ? rec.strokes : [];
+      done = (rec && Array.isArray(rec.done)) ? rec.done.slice(0, L.todoRows) : [];
       // The page always takes the shape of the screen; older ink comes with it.
       if (rec && rec.h && strokes.length && rescale(strokes, rec.w || W, rec.h, W, H)) markDirty();
       redrawInk();
-      setStatus(strokes.length ? "Saved" : "");
+      setStatus((strokes.length || anyDone()) ? "Saved" : "");
     }, function () {});
   }
   function goto(d) { flush().then(function () { loadDay(d); }); }
@@ -828,6 +910,7 @@
   function redrawInkNow() {
     clearAll(inkX, inkC); applyView(inkX);
     for (var i = 0; i < strokes.length; i++) paintStroke(strokes[i]);
+    drawDone();
   }
 
   function saveImage() {
@@ -895,10 +978,10 @@
   };
   document.getElementById("mSave").onclick = function () { menu.hidden = true; saveImage(); };
   document.getElementById("mClear").onclick = function () {
-    if (!strokes.length) { toast("This page is already blank."); return; }
+    if (!strokes.length && !anyDone()) { toast("This page is already blank."); return; }
     if (!confirm("Clear everything written on this page? Undo will bring it back.")) return;
     undoStack.push({ type: "erase", items: strokes.map(function (s, i) { return { i: i, s: s }; }) });
-    redoStack.length = 0; strokes = [];
+    redoStack.length = 0; strokes = []; done = [];
     markDirty(); redrawInk(); syncButtons(); menu.hidden = true;
   };
   document.getElementById("mBackup").onclick = function () {
