@@ -180,6 +180,24 @@
   .compass { display: flex; align-items: center; gap: 9px; }
   .compass svg { flex: 0 0 auto; }
 
+  /* ---------- horoscope ---------- */
+  .tile.wide { grid-column: 1 / -1; }
+  .horo-head { display: flex; align-items: baseline; gap: 12px; }
+  .horo-body { margin: 0; font-size: 15.5px; line-height: 1.6; color: var(--ink-2); max-width: 68ch; }
+  .linkish {
+    font: inherit; font-size: 12.5px; color: var(--ink-3);
+    background: transparent; border: 0; border-bottom: 1px solid var(--card-line);
+    padding: 0 0 1px; cursor: pointer; margin-left: auto;
+  }
+  .linkish:hover { color: var(--ink); border-bottom-color: var(--ink-3); }
+  .sign-select {
+    font: inherit; font-size: 15px; color: var(--ink);
+    background: #121A2E; border: 1px solid var(--card-line);
+    border-radius: 8px; padding: 9px 11px; max-width: 280px; cursor: pointer;
+  }
+  .sign-select option { background: #121A2E; color: var(--ink); }
+  .sign-select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
   /* ---------- hourly ---------- */
   .hours svg { display: block; width: 100%; height: auto; overflow: visible; }
 
@@ -274,6 +292,8 @@
   <p class="foot">
     Light times calculated for Montréal; weather and air quality from
     <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>.
+    Horoscope via <a href="https://ohmanda.com" target="_blank" rel="noopener">ohmanda</a>,
+    relayed through a public proxy because it sends no CORS headers.
     <span id="stamp"></span><br>
     <button id="refresh">Refresh</button>
   </p>
@@ -306,14 +326,58 @@
     return Math.asin(Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H)) / rad;
   }
 
-  var SYNODIC = 29.530588853, NEW_MOON = Date.UTC(2000, 0, 6, 18, 14);
-  function moon() {
-    var age = (((Date.now() - NEW_MOON) / 86400000) % SYNODIC + SYNODIC) % SYNODIC;
-    var f = age / SYNODIC;
+  /* Moon by elongation — the angle between moon and sun along the ecliptic.
+     0° is new, 180° is full. More faithful than counting off a mean cycle,
+     which can be most of a day out. */
+  function moonLon(d) {
+    var L = rad * (218.316 + 13.176396 * d);
+    var M = rad * (134.963 + 13.064993 * d);
+    return L + rad * 6.289 * Math.sin(M);
+  }
+  function elongation(date) {
+    var d = toDays(date);
+    var e = (moonLon(d) - eclipticLon(meanAnomaly(d))) / rad;
+    return ((e % 360) + 360) % 360;
+  }
+  function moon(when) {
+    var e = elongation(when || new Date());
     var names = ["New moon","Waxing crescent","First quarter","Waxing gibbous",
                  "Full moon","Waning gibbous","Last quarter","Waning crescent"];
-    var i = Math.floor(f * 8 + 0.5) % 8;
-    return { name: names[i], lit: Math.round((1 - Math.cos(2 * Math.PI * f)) / 2 * 100) };
+    var i = Math.floor((e + 22.5) / 45) % 8;
+    return { name: names[i], lit: Math.round((1 - Math.cos(e * rad)) / 2 * 100) };
+  }
+
+  var SYNODIC = 29.530588853;
+  function nextFullMoon(from) {
+    var step = 6 * 3600000, prev = elongation(from);
+    for (var t = from.getTime() + step; t < from.getTime() + 40 * 86400000; t += step) {
+      var cur = elongation(new Date(t));
+      if (prev < 180 && cur >= 180) {            // 180° sits far from the 0/360 wrap
+        var lo = t - step, hi = t;
+        for (var k = 0; k < 30; k++) {
+          var mid = (lo + hi) / 2;
+          if (elongation(new Date(mid)) < 180) lo = mid; else hi = mid;
+        }
+        return new Date((lo + hi) / 2);
+      }
+      prev = cur;
+    }
+    return null;
+  }
+
+  /* The old almanac names. The Harvest Moon isn't September's by rule — it's
+     whichever full moon falls nearest the autumn equinox, so October steals it
+     some years. And a second full moon inside one calendar month is a Blue Moon. */
+  var MOON_NAMES = ["Wolf Moon","Snow Moon","Worm Moon","Pink Moon","Flower Moon",
+                    "Strawberry Moon","Buck Moon","Sturgeon Moon","Corn Moon",
+                    "Hunter's Moon","Beaver Moon","Cold Moon"];
+  function fullMoonName(d) {
+    var prev = new Date(d.getTime() - SYNODIC * 86400000);
+    if (prev.getMonth() === d.getMonth() && prev.getFullYear() === d.getFullYear())
+      return "Blue Moon";
+    var equinox = new Date(d.getFullYear(), 8, 22, 12);
+    if (Math.abs(d - equinox) <= SYNODIC / 2 * 86400000) return "Harvest Moon";
+    return MOON_NAMES[d.getMonth()];
   }
 
   /* ===================== helpers ===================== */
@@ -725,14 +789,13 @@
         Math.round(c.apparent_temperature) + "°"));
     });
 
-    tile("Humidity", function (t) {
+    tile("UV index", function (t) {
+      var u = Math.max(c.uv_index, 0), b = uvBand(day.uv_index_max[0]);
       var v = el("div", "v");
-      v.innerHTML = Math.round(c.relative_humidity_2m) + "<small>%</small>";
+      v.innerHTML = u.toFixed(1) + "<small> now</small>";
       t.appendChild(v);
-      meter(t, c.relative_humidity_2m / 100, "#9DCBEA");
-      var h = c.relative_humidity_2m;
-      t.appendChild(el("div", "note",
-        h < 30 ? "Dry — lip balm weather." : h > 75 ? "Damp. Cold bites harder, heat sits heavier." : "Comfortable."));
+      meter(t, day.uv_index_max[0] / 11, "var(--" + b.cls.slice(2) + ")");
+      t.appendChild(el("div", "chip " + b.cls, b.name + " · peaks at " + day.uv_index_max[0].toFixed(1)));
     });
 
     tile("Wind", function (t) {
@@ -752,14 +815,14 @@
         compass(c.wind_direction_10m) + " · gusts " + Math.round(c.wind_gusts_10m)));
     });
 
-    tile("UV index", function (t) {
-      var u = Math.max(c.uv_index, 0), b = uvBand(day.uv_index_max[0]);
+    tile("Humidity", function (t) {
       var v = el("div", "v");
-      v.innerHTML = u.toFixed(1) + "<small> now</small>";
+      v.innerHTML = Math.round(c.relative_humidity_2m) + "<small>%</small>";
       t.appendChild(v);
-      meter(t, day.uv_index_max[0] / 11, "var(--" + b.cls.slice(2) + ")");
-      var chip = el("div", "chip " + b.cls, b.name + " · peaks at " + day.uv_index_max[0].toFixed(1));
-      t.appendChild(chip);
+      meter(t, c.relative_humidity_2m / 100, "#9DCBEA");
+      var h = c.relative_humidity_2m;
+      t.appendChild(el("div", "note",
+        h < 30 ? "Dry — lip balm weather." : h > 75 ? "Damp. Cold bites harder, heat sits heavier." : "Comfortable."));
     });
 
     tile("Air quality", function (t) {
@@ -793,9 +856,33 @@
         r.appendChild(el("span", "gh-v", row[1]));
         t.appendChild(r);
       });
-      var m = moon();
-      t.appendChild(el("div", "note", m.name + ", " + m.lit + "% lit."));
+      t.appendChild(el("div", "note", "The best light of the day."));
     });
+
+    tile("Moon", function (t) {
+      var m = moon(now);
+      var v = el("div", "v");
+      v.style.fontSize = "20px";
+      v.textContent = m.name;
+      t.appendChild(v);
+      meter(t, m.lit / 100, "#9DCBEA");
+      var full = nextFullMoon(now);
+      if (full) {
+        var days = Math.round((full - now) / 86400000);
+        var r = el("div", "gh");
+        r.appendChild(el("span", "gh-k", "Next full"));
+        r.appendChild(el("span", "gh-v",
+          full.toLocaleDateString("en-CA", { month: "short", day: "numeric" })));
+        t.appendChild(r);
+        t.appendChild(el("div", "note", fullMoonName(full) + " · " +
+          (days <= 0 ? "tonight" : days === 1 ? "tomorrow" : "in " + days + " days") +
+          " · " + m.lit + "% lit now"));
+      } else {
+        t.appendChild(el("div", "note", m.lit + "% lit."));
+      }
+    });
+
+    horoscopeTile(tiles);
 
     // hourly
     if (f.hourly) {
@@ -820,6 +907,170 @@
         " – " + hhmm(parseLocal(day.sunset[i]))));
       days.appendChild(d);
     }
+  }
+
+  /* ===================== horoscope =====================
+     Neither horoscope source sends CORS headers, so the browser can't call
+     them straight. They go through a public read-only proxy, which is flaky —
+     hence two sources, two proxies, and a cache that holds the day's reading
+     so a bad minute never shows. */
+  var SIGNS = [
+    ["aries","Aries","Mar 21 – Apr 19"], ["taurus","Taurus","Apr 20 – May 20"],
+    ["gemini","Gemini","May 21 – Jun 20"], ["cancer","Cancer","Jun 21 – Jul 22"],
+    ["leo","Leo","Jul 23 – Aug 22"], ["virgo","Virgo","Aug 23 – Sep 22"],
+    ["libra","Libra","Sep 23 – Oct 22"], ["scorpio","Scorpio","Oct 23 – Nov 21"],
+    ["sagittarius","Sagittarius","Nov 22 – Dec 21"], ["capricorn","Capricorn","Dec 22 – Jan 19"],
+    ["aquarius","Aquarius","Jan 20 – Feb 18"], ["pisces","Pisces","Feb 19 – Mar 20"]
+  ];
+  var SIGN_KEY = "sunrise:sign", HORO_KEY = "sunrise:horoscope";
+
+  var PROXIES = [
+    function (u) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
+    function (u) { return "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u); }
+  ];
+  var SOURCES = [
+    { name: "ohmanda.com",
+      url:  function (s) { return "https://ohmanda.com/api/horoscope/" + s + "/"; },
+      pick: function (j) { return j && j.horoscope; } },
+    { name: "horoscope-app-api",
+      url:  function (s) { return "https://horoscope-app-api.vercel.app/api/v1/get-horoscope/daily?sign=" + s + "&day=TODAY"; },
+      pick: function (j) { return j && j.data && j.data.horoscope; } }
+  ];
+
+  function dayStamp(d) {
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  }
+  /* Remember the sign in memory too, so a browser that blocks storage
+     (private window, blocked site data) still keeps it for the visit. */
+  var signMem = "";
+  function getSign() {
+    if (signMem) return signMem;
+    try { return localStorage.getItem(SIGN_KEY) || ""; } catch (e) { return ""; }
+  }
+  function setSign(v) {
+    signMem = v;
+    try { localStorage.setItem(SIGN_KEY, v); } catch (e) {}
+  }
+  function clearSign() {
+    signMem = "";
+    try { localStorage.removeItem(SIGN_KEY); } catch (e) {}
+  }
+
+  /* The page re-renders on every refresh; don't start a second request for a
+     reading already on its way. */
+  var horoInflight = null, horoInflightKey = "";
+  function horoscopeFor(sign, today) {
+    var k = sign + "|" + today;
+    if (horoInflight && horoInflightKey === k) return horoInflight;
+    horoInflightKey = k;
+    horoInflight = fetchHoroscope(sign);
+    horoInflight.catch(function () { if (horoInflightKey === k) horoInflight = null; });
+    return horoInflight;
+  }
+
+  function fetchJSON(url, ms) {
+    var ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, ms || 9000);
+    return fetch(url, ctl ? { signal: ctl.signal } : undefined)
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (j) { clearTimeout(timer); return j; },
+            function (e) { clearTimeout(timer); throw e; });
+  }
+
+  function fetchHoroscope(sign) {
+    var attempts = [];
+    PROXIES.forEach(function (p) {
+      SOURCES.forEach(function (s) {
+        attempts.push({ url: p(s.url(sign)), pick: s.pick, name: s.name });
+      });
+    });
+    return attempts.reduce(function (chain, a) {
+      return chain.catch(function () {
+        return fetchJSON(a.url).then(function (j) {
+          var text = a.pick(j);
+          if (!text || String(text).length < 20) throw new Error("empty");
+          return { text: String(text).trim(), source: a.name };
+        });
+      });
+    }, Promise.reject());
+  }
+
+  function horoscopeTile(tiles) {
+    var t = el("div", "tile wide horo");
+    t.appendChild(el("div", "k", "Horoscope"));
+    tiles.appendChild(t);
+
+    var sign = getSign();
+    if (!sign) { renderPicker(t); return; }
+
+    var meta = SIGNS.filter(function (s) { return s[0] === sign; })[0] || SIGNS[0];
+    var head = el("div", "horo-head");
+    var name = el("div", "v");
+    name.style.fontSize = "21px";
+    name.textContent = meta[1];
+    head.appendChild(name);
+    var change = el("button", "linkish", "change");
+    change.addEventListener("click", function () {
+      clearSign();
+      t.textContent = "";
+      t.appendChild(el("div", "k", "Horoscope"));
+      renderPicker(t);
+    });
+    head.appendChild(change);
+    t.appendChild(head);
+
+    var body = el("p", "horo-body", "Reading the stars…");
+    t.appendChild(body);
+    var credit = el("div", "note");
+    t.appendChild(credit);
+
+    var today = dayStamp(new Date()), cached = null;
+    try { cached = JSON.parse(localStorage.getItem(HORO_KEY) || "null"); } catch (e) {}
+    if (cached && cached.sign === sign && cached.date === today) {
+      body.textContent = cached.text;
+      credit.textContent = "Daily reading via " + cached.source + ".";
+      return;
+    }
+
+    horoscopeFor(sign, today).then(function (r) {
+      body.textContent = r.text;
+      credit.textContent = "Daily reading via " + r.source + ".";
+      try {
+        localStorage.setItem(HORO_KEY, JSON.stringify({
+          sign: sign, date: today, text: r.text, source: r.source }));
+      } catch (e) {}
+    }, function () {
+      if (cached && cached.sign === sign) {
+        body.textContent = cached.text;
+        credit.textContent = "From " + cached.date + " — couldn't reach today's reading.";
+      } else {
+        body.textContent = "The horoscope service isn't answering right now. It's a free one, so it sulks occasionally — try Refresh in a bit.";
+        credit.textContent = "";
+      }
+    });
+  }
+
+  function renderPicker(t) {
+    t.appendChild(el("div", "horo-body", "Pick your sign and it'll remember — it's kept on this device, not published."));
+    var sel = document.createElement("select");
+    sel.className = "sign-select";
+    sel.setAttribute("aria-label", "Your star sign");
+    var ph = document.createElement("option");
+    ph.value = ""; ph.textContent = "Choose your sign…";
+    sel.appendChild(ph);
+    SIGNS.forEach(function (s) {
+      var o = document.createElement("option");
+      o.value = s[0]; o.textContent = s[1] + "  ·  " + s[2];
+      sel.appendChild(o);
+    });
+    sel.addEventListener("change", function () {
+      if (!sel.value) return;
+      setSign(sel.value);
+      var tiles = t.parentNode;
+      t.remove();
+      horoscopeTile(tiles);
+    });
+    t.appendChild(sel);
   }
 
   function goldenWindows(rise, set) {
