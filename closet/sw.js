@@ -1,11 +1,13 @@
-/* Sunrise — offline shell. Weather itself is fetched live and cached in
-   localStorage by the page; this only keeps the app openable with no signal. */
-var CACHE = "sunrise-v5";
-var SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
+/* The Closet — offline shell.
+   Bump CACHE when index.html changes so installed copies pick it up. */
+var CACHE = "closet-v2";
+var SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg",
+             "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", function (e) {
-  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); })
-    .then(function () { return self.skipWaiting(); }));
+  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); }).then(function () {
+    return self.skipWaiting();
+  }));
 });
 
 self.addEventListener("activate", function (e) {
@@ -17,11 +19,10 @@ self.addEventListener("activate", function (e) {
 self.addEventListener("fetch", function (e) {
   if (e.request.method !== "GET") return;
   var url = new URL(e.request.url);
+  var isFont = url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com";
 
-  // never cache the forecast — stale weather is worse than none
-  if (url.hostname.indexOf("open-meteo.com") !== -1) return;
-
-  if (url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com") {
+  if (isFont) {
+    // Fonts rarely change: serve from cache, refill in the background.
     e.respondWith(caches.open(CACHE).then(function (c) {
       return c.match(e.request).then(function (hit) {
         var live = fetch(e.request).then(function (res) {
@@ -36,14 +37,21 @@ self.addEventListener("fetch", function (e) {
 
   if (url.origin !== self.location.origin) return;
 
+  // App shell: always revalidate HTML, or GitHub's CDN cache pins the app to
+  // an old version long after a deploy.
   var wantsHTML = e.request.mode === "navigate" ||
                   (e.request.headers.get("accept") || "").indexOf("text/html") !== -1;
   var net = wantsHTML ? fetch(e.request.url, { cache: "no-store" }) : fetch(e.request);
 
   e.respondWith(net.then(function (res) {
-    if (res && res.ok) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put(e.request, copy); }); }
+    if (res && res.ok) {
+      var copy = res.clone();
+      caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
+    }
     return res;
   }).catch(function () {
-    return caches.match(e.request).then(function (hit) { return hit || caches.match("./index.html"); });
+    return caches.match(e.request).then(function (hit) {
+      return hit || caches.match("./index.html");
+    });
   }));
 });

@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>The Closet</title>
+<meta name="description" content="A paper-doll wardrobe: log every garment, swipe to build outfits.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#F6F7F4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121614" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=DM+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300&display=swap">
+<style>
+  :root {
+    --paper:        #F6F7F4;
+    --sheet:        #FCFCFA;
+    --ink:          #1B2421;
+    --ink-soft:     #5C6763;
+    --ink-faint:    #8B9490;
+    --rule:         #DCE1DB;
+    --rule-strong:  #BFC7C0;
+    --pine:         #3F6B5B;
+    --pine-wash:    #E6EEE9;
+    --brass:        #A8813A;
+    --focus:        #3F6B5B;
+    --form-line:    #1B2421;
+    --stage:        #EFF1EC;
+    --shadow:       0 1px 2px rgba(27,36,33,.05), 0 12px 32px -12px rgba(27,36,33,.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:       #121614;
+      --sheet:       #1A201D;
+      --ink:         #E8EDE9;
+      --ink-soft:    #9AA5A0;
+      --ink-faint:   #6B7672;
+      --rule:        #2C3531;
+      --rule-strong: #3E4A45;
+      --pine:        #8CC4AC;
+      --pine-wash:   #22302A;
+      --brass:       #D2AC6B;
+      --focus:       #8CC4AC;
+      --form-line:   #0E1211;
+      --stage:       #232B27;
+      --shadow:      0 1px 2px rgba(0,0,0,.4), 0 16px 40px -16px rgba(0,0,0,.6);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px; line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- toolbar ---------- */
+  .bar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 12px 20px;
+    padding-top: calc(12px + env(safe-area-inset-top));
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+  }
+  .brand {
+    font-family: "Newsreader", Georgia, serif;
+    font-size: 19px; letter-spacing: .01em; margin-right: auto;
+  }
+  .brand em { font-style: italic; color: var(--pine); }
+
+  button {
+    font: inherit; font-size: 15px; color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--rule-strong);
+    border-radius: 3px;
+    padding: 7px 12px;
+    cursor: pointer; touch-action: manipulation;
+    transition: background .12s ease, border-color .12s ease, color .12s ease;
+  }
+  button:hover { background: var(--pine-wash); border-color: var(--pine); }
+  button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  button.primary { background: var(--pine); border-color: var(--pine); color: var(--sheet); }
+  button.primary:hover { filter: brightness(1.08); }
+  .ghost { border-color: transparent; color: var(--ink-soft); }
+  .ghost:hover { color: var(--ink); }
+  .status {
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: 11.5px; color: var(--ink-faint);
+    letter-spacing: .02em; min-width: 76px; text-align: right;
+  }
+
+  /* ---------- layout ---------- */
+  .wrap {
+    display: grid; gap: 28px;
+    grid-template-columns: minmax(300px, 1fr) minmax(300px, 400px);
+    max-width: 1020px; margin: 0 auto;
+    padding: 26px 20px 80px;
+  }
+  @media (max-width: 880px) { .wrap { grid-template-columns: 1fr; gap: 22px; } }
+
+  .card {
+    background: var(--sheet);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    box-shadow: var(--shadow);
+  }
+
+  /* ---------- the figure ---------- */
+  .stage {
+    position: relative;
+    background: var(--stage);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 24px;
+    touch-action: pan-y;
+    user-select: none; -webkit-user-select: none;
+  }
+  .stage svg { display: block; width: 100%; height: clamp(400px, 64vh, 660px); cursor: grab; }
+  .stage.dragging svg { cursor: grabbing; }
+  .hint {
+    position: absolute; left: 0; right: 0; bottom: 7px;
+    text-align: center; padding: 0 12px;
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: 10.5px; color: var(--ink-faint); letter-spacing: .02em;
+    pointer-events: none;
+  }
+  .flash {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: var(--paper);
+    font-size: 12.5px; padding: 4px 11px; border-radius: 999px;
+    opacity: 0; transition: opacity .18s ease; pointer-events: none;
+    white-space: nowrap; max-width: 90%; overflow: hidden; text-overflow: ellipsis;
+    z-index: 2;
+  }
+  .flash.on { opacity: .92; }
+
+  .stagefoot {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 12px 14px;
+  }
+  .warmth { display: flex; margin-left: auto; }
+  .warmth button {
+    border-radius: 0; margin-left: -1px;
+    font-size: 13px; padding: 5px 10px; color: var(--ink-soft);
+  }
+  .warmth button:first-child { border-radius: 3px 0 0 3px; }
+  .warmth button:last-child { border-radius: 0 3px 3px 0; }
+  .warmth button[aria-pressed="true"] {
+    background: var(--pine-wash); border-color: var(--pine);
+    color: var(--pine); position: relative; z-index: 1;
+  }
+
+  /* ---------- layer rail ---------- */
+  .row {
+    display: grid;
+    grid-template-columns: 30px 1fr auto auto;
+    align-items: center; gap: 9px;
+    padding: 11px 14px 11px 10px;
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid var(--rule);
+    cursor: pointer;
+  }
+  .row:last-child { border-bottom: 0; }
+  .row[aria-current="true"] { border-left-color: var(--pine); background: var(--pine-wash); }
+  .swatch {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 1px solid var(--rule-strong);
+    background: var(--stage);
+  }
+  .meta { min-width: 0; }
+  .meta .lab {
+    display: block;
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .meta .val {
+    display: block;
+    font-size: 15.5px; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .meta .val.empty { color: var(--ink-faint); font-style: italic; }
+  .cyc { display: flex; }
+  .cyc button { width: 32px; padding: 6px 0; border-radius: 0; margin-left: -1px; }
+  .cyc button:first-child { border-radius: 3px 0 0 3px; }
+  .cyc button:last-child { border-radius: 0 3px 3px 0; }
+  .lock { width: 34px; padding: 6px 0; font-size: 14px; }
+  .lock[aria-pressed="true"] { background: var(--brass); border-color: var(--brass); color: var(--sheet); }
+
+  /* ---------- sections ---------- */
+  .sec { margin-top: 22px; }
+  .sechead { display: flex; align-items: baseline; gap: 10px; padding: 0 2px 8px; }
+  .sechead h2 {
+    font-family: "Newsreader", Georgia, serif;
+    font-weight: 400; font-size: 17px; margin: 0;
+  }
+  .sechead .n {
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: 11px; color: var(--ink-faint);
+  }
+  .strip {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 10px; padding: 12px;
+  }
+  .fit {
+    border: 1px solid var(--rule); border-radius: 2px;
+    background: var(--stage); padding: 4px 4px 0; cursor: pointer;
+    position: relative;
+  }
+  .fit:hover { border-color: var(--pine); }
+  .fit svg { display: block; width: 100%; height: auto; }
+  .fit .nm {
+    display: block; width: 100%;
+    font: inherit; font-size: 11.5px; text-align: center;
+    padding: 3px 2px 5px; border: 0; border-radius: 2px;
+    background: transparent; color: var(--ink-soft);
+    text-overflow: ellipsis;
+  }
+  .fit .nm:hover { background: var(--sheet); }
+  .fit .nm:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; background: var(--sheet); }
+  .fit .x {
+    position: absolute; top: 2px; right: 2px;
+    border: 0; background: transparent; color: var(--ink-faint);
+    font-size: 15px; line-height: 1; padding: 2px 4px; opacity: 0;
+  }
+  .fit:hover .x, .fit .x:focus-visible { opacity: 1; }
+  .fit .x:hover { color: var(--brass); background: transparent; }
+  .blank { grid-column: 1 / -1; padding: 16px 6px; color: var(--ink-faint); font-size: 14px; margin: 0; }
+
+  /* ---------- drawer ---------- */
+  .scrim {
+    position: fixed; inset: 0; z-index: 40;
+    background: rgba(16,22,19,.42);
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 24px 16px; overflow: auto;
+  }
+  .scrim[hidden] { display: none; }
+  .drawer {
+    width: 100%; max-width: 640px; background: var(--sheet);
+    border: 1px solid var(--rule); border-radius: 2px; box-shadow: var(--shadow);
+  }
+  .dhead {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px; border-bottom: 1px solid var(--rule);
+    position: sticky; top: 0; background: var(--sheet); z-index: 1;
+  }
+  .dhead h2 {
+    font-family: "Newsreader", Georgia, serif; font-weight: 400;
+    font-size: 19px; margin: 0 auto 0 0;
+  }
+  .group { padding: 14px 16px; border-bottom: 1px solid var(--rule); }
+  .group > h3 {
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-faint); margin: 0 0 10px; font-weight: 500;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    border: 1px solid var(--rule-strong); border-radius: 999px;
+    padding: 5px 6px 5px 6px; font-size: 14px;
+    background: transparent; cursor: pointer;
+  }
+  .chip:hover { border-color: var(--pine); background: var(--pine-wash); }
+  .chip[aria-pressed="true"] { border-color: var(--pine); background: var(--pine-wash); color: var(--pine); }
+  .chip i { width: 15px; height: 15px; border-radius: 50%; border: 1px solid rgba(0,0,0,.18); flex: none; }
+  .chip b { font-weight: 400; }
+  .chip .ed {
+    color: var(--ink-faint); font-size: 11.5px; padding: 1px 6px;
+    border-left: 1px solid var(--rule-strong); margin-left: 2px;
+  }
+  .chip .ed:hover { color: var(--pine); }
+
+  .form { display: grid; gap: 10px; }
+  .form .line { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; }
+  label.f { display: grid; gap: 4px; flex: 1 1 150px; min-width: 0; }
+  label.f span {
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint);
+  }
+  input[type="text"], select {
+    font: inherit; font-size: 15px; color: var(--ink);
+    background: var(--paper); border: 1px solid var(--rule-strong);
+    border-radius: 3px; padding: 7px 9px; width: 100%;
+  }
+  input[type="color"] {
+    width: 100%; height: 36px; padding: 2px;
+    border: 1px solid var(--rule-strong); border-radius: 3px;
+    background: var(--paper); cursor: pointer;
+  }
+  input:focus-visible, select:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+  .tones { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tone { width: 28px; height: 28px; border-radius: 50%; padding: 0; border: 1px solid var(--rule-strong); }
+  .tone[aria-pressed="true"] { outline: 2px solid var(--pine); outline-offset: 2px; }
+  .note { font-size: 13px; color: var(--ink-faint); padding: 14px 16px; margin: 0; }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="brand">The <em>Closet</em></div>
+  <button id="shuffle" class="primary">Shuffle</button>
+  <button id="saveFit">Save outfit</button>
+  <button id="openItems">Items</button>
+  <button id="backup" class="ghost">Backup</button>
+  <div class="status" id="status"></div>
+</div>
+
+<div class="wrap">
+
+  <div>
+    <div class="card">
+      <div class="stage" id="stage">
+        <div class="flash" id="flash"></div>
+        <div class="hint">swipe to change &middot; tap to pick a layer</div>
+      </div>
+      <div class="stagefoot">
+        <button id="undress" class="ghost">Strip</button>
+        <div class="warmth" id="warmth">
+          <button data-w="0" aria-pressed="true">Any</button>
+          <button data-w="1" aria-pressed="false">Warm</button>
+          <button data-w="2" aria-pressed="false">Mild</button>
+          <button data-w="3" aria-pressed="false">Cold</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card" id="rail"></div>
+
+    <div class="sec">
+      <div class="sechead"><h2>Saved outfits</h2><span class="n" id="fitCount"></span></div>
+      <div class="card"><div class="strip" id="fits"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="scrim" id="scrim" hidden>
+  <div class="drawer" role="dialog" aria-modal="true" aria-label="Wardrobe">
+    <div class="dhead">
+      <h2>Wardrobe</h2>
+      <span class="status" id="wcount"></span>
+      <button id="closeItems" class="ghost">Close</button>
+    </div>
+    <div id="groups"></div>
+    <div class="group">
+      <h3 id="formTitle">Add an item</h3>
+      <div class="form">
+        <div class="line">
+          <label class="f"><span>Name</span><input type="text" id="fName" placeholder="Navy striped tee" autocomplete="off"></label>
+          <label class="f"><span>Shape</span><select id="fShape"></select></label>
+        </div>
+        <div class="line">
+          <label class="f" style="flex:0 0 92px"><span>Colour</span><input type="color" id="fColor" value="#3F6B5B"></label>
+          <label class="f"><span>Pattern</span><select id="fPattern">
+            <option value="solid">Solid</option>
+            <option value="stripe">Stripes</option>
+            <option value="dot">Dots</option>
+            <option value="check">Check</option>
+          </select></label>
+          <label class="f"><span>Warmth</span><select id="fWarmth">
+            <option value="1">1 &middot; warm weather</option>
+            <option value="2" selected>2 &middot; mild</option>
+            <option value="3">3 &middot; cold</option>
+          </select></label>
+        </div>
+        <div class="line">
+          <button id="fSave" class="primary">Add to wardrobe</button>
+          <button id="fCancel" class="ghost" hidden>Cancel</button>
+          <button id="fDelete" class="ghost" hidden>Delete item</button>
+        </div>
+      </div>
+    </div>
+    <div class="group">
+      <h3>The mannequin</h3>
+      <div class="tones" id="tones"></div>
+    </div>
+    <p class="note">Prototype &mdash; 15 garment shapes, recoloured and patterned per item.
+    Everything lives in this browser only; use <strong>Backup</strong> to export a copy.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var NS = "closet:";
+  var LAYERS = ["outer", "top", "bottom", "shoes"];
+  var LAYER_LABEL = { outer: "Outerwear", top: "Top", bottom: "Bottom", shoes: "Shoes" };
+  /* Paint order, back to front. */
+  var Z = ["bottom", "top", "outer", "shoes"];
+
+  /* ------------------------------------------------------------------
+     Garment shapes.
+
+     Every shape is authored against one 400x760 body, so any item can be
+     worn with any other without per-item alignment work. Primitives:
+       f = filled panel       s = stroked tube (sleeves), w = width
+       d = ink detail line    b = button
+       m = also draw a copy mirrored about x=200
+     Each garment paints in three passes -- outlines, fills, details -- so
+     neighbouring pieces never cut into each other's linework.
+  ------------------------------------------------------------------ */
+  var SHAPES = {
+    tee: { layer: "top", label: "T-shirt", parts: [
+      { t: "s", d: "M136 174 C126 206 120 232 116 258", w: 44, m: 1 },
+      { t: "f", d: "M136 158 Q156 148 176 148 Q200 176 224 148 Q244 148 264 158 Q272 250 266 352 Q200 364 134 352 Q128 250 136 158 Z" },
+      { t: "d", d: "M176 148 Q200 176 224 148", o: .45 }
+    ]},
+    vee: { layer: "top", label: "V-neck", parts: [
+      { t: "s", d: "M136 174 C128 202 122 226 117 250", w: 44, m: 1 },
+      { t: "f", d: "M136 158 Q156 148 174 148 L200 202 L226 148 Q244 148 264 158 Q274 250 270 348 Q200 360 130 348 Q126 250 136 158 Z" },
+      { t: "d", d: "M174 148 L200 202 L226 148", o: .45 }
+    ]},
+    tank: { layer: "top", label: "Tank", parts: [
+      { t: "f", d: "M164 150 L186 152 Q188 178 200 188 Q212 178 214 152 L236 150 Q250 190 248 232 Q254 300 250 346 Q200 358 150 346 Q146 300 152 232 Q150 190 164 150 Z" },
+      { t: "d", d: "M186 152 Q188 178 200 188 Q212 178 214 152", o: .4 }
+    ]},
+    shirt: { layer: "top", label: "Button-down", parts: [
+      { t: "s", d: "M134 172 C116 240 106 320 103 392", w: 36, m: 1 },
+      { t: "f", d: "M134 158 Q156 148 178 148 L200 176 L222 148 Q244 148 266 158 Q272 250 268 356 Q200 368 132 356 Q128 250 134 158 Z" },
+      { t: "d", d: "M178 148 L166 192 L200 176 Z", m: 1 },
+      { t: "d", d: "M200 176 L200 362", o: .5 },
+      { t: "d", d: "M86 374 L120 379", o: .4, m: 1 },
+      { t: "b", x: 200, y: 214 }, { t: "b", x: 200, y: 256 },
+      { t: "b", x: 200, y: 298 }, { t: "b", x: 200, y: 340 }
+    ]},
+    sweater: { layer: "top", label: "Sweater", parts: [
+      { t: "s", d: "M132 174 C114 242 104 322 101 390", w: 46, m: 1 },
+      { t: "f", d: "M132 156 Q158 144 178 146 Q200 172 222 146 Q242 144 268 156 Q276 250 272 356 Q200 370 128 356 Q124 250 132 156 Z" },
+      { t: "d", d: "M178 146 Q200 172 222 146", o: .45 },
+      { t: "d", d: "M130 338 L270 338", o: .3 },
+      { t: "d", d: "M80 368 L122 374", o: .3, m: 1 }
+    ]},
+
+    jeans: { layer: "bottom", label: "Jeans", parts: [
+      { t: "f", d: "M146 344 L254 344 Q258 520 266 688 L214 688 Q208 570 202 470 Q198 570 192 688 L134 688 Q142 520 146 344 Z" },
+      { t: "d", d: "M146 378 L254 378", o: .4 },
+      { t: "d", d: "M200 378 L200 430", o: .35 },
+      { t: "d", d: "M158 412 Q172 426 176 446", o: .32, m: 1 }
+    ]},
+    trouser: { layer: "bottom", label: "Wide trousers", parts: [
+      { t: "f", d: "M146 344 L254 344 Q262 530 270 688 L208 688 Q205 570 202 470 Q199 570 192 688 L130 688 Q138 530 146 344 Z" },
+      { t: "d", d: "M146 376 L254 376", o: .4 },
+      { t: "d", d: "M172 390 L160 684", o: .26, m: 1 }
+    ]},
+    skirt: { layer: "bottom", label: "A-line skirt", parts: [
+      { t: "f", d: "M150 344 L250 344 Q272 468 288 556 Q200 580 112 556 Q128 468 150 344 Z" },
+      { t: "d", d: "M150 376 L250 376", o: .4 },
+      { t: "d", d: "M186 390 Q180 490 172 566", o: .26, m: 1 }
+    ]},
+    shorts: { layer: "bottom", label: "Shorts", parts: [
+      { t: "f", d: "M148 344 L252 344 Q256 450 260 522 L208 522 Q206 496 202 468 Q198 496 192 522 L140 522 Q144 450 148 344 Z" },
+      { t: "d", d: "M148 376 L252 376", o: .4 },
+      { t: "d", d: "M152 508 L190 508", o: .3, m: 1 }
+    ]},
+
+    trench: { layer: "outer", label: "Trench coat", parts: [
+      { t: "s", d: "M128 172 C108 244 98 324 95 398", w: 44, m: 1 },
+      { t: "f", d: "M132 156 Q158 144 182 150 L196 190 Q198 400 200 596 L122 596 Q114 380 132 156 Z", m: 1 },
+      { t: "d", d: "M182 150 L164 200 L196 190 Z", m: 1 },
+      { t: "d", d: "M118 380 L282 380", o: .5 },
+      { t: "d", d: "M118 396 L282 396", o: .5 },
+      { t: "b", x: 176, y: 292 }, { t: "b", x: 224, y: 292 },
+      { t: "b", x: 176, y: 336 }, { t: "b", x: 224, y: 336 }
+    ]},
+    jacket: { layer: "outer", label: "Denim jacket", parts: [
+      { t: "s", d: "M130 172 C112 240 102 320 99 392", w: 42, m: 1 },
+      { t: "f", d: "M132 156 Q158 144 182 150 L196 186 L200 352 L126 352 Q120 250 132 156 Z", m: 1 },
+      { t: "d", d: "M182 150 L166 194 L196 186 Z", m: 1 },
+      { t: "d", d: "M126 324 L200 324", o: .4, m: 1 },
+      { t: "d", d: "M150 212 L182 218", o: .35, m: 1 },
+      { t: "b", x: 190, y: 240 }, { t: "b", x: 190, y: 288 }
+    ]},
+    cardigan: { layer: "outer", label: "Cardigan", parts: [
+      { t: "s", d: "M130 174 C112 244 102 322 99 394", w: 46, m: 1 },
+      { t: "f", d: "M134 158 Q158 146 184 152 L194 196 Q196 320 198 420 L126 420 Q120 260 134 158 Z", m: 1 },
+      { t: "d", d: "M184 152 L194 196 Q196 320 198 420", o: .35, m: 1 },
+      { t: "d", d: "M78 374 L122 380", o: .3, m: 1 }
+    ]},
+
+    sneaker: { layer: "shoes", label: "Sneakers", parts: [
+      { t: "f", d: "M148 682 L192 682 Q196 702 194 714 L126 714 Q110 712 110 702 Q112 692 132 688 Q142 688 148 682 Z", m: 1 },
+      { t: "d", d: "M111 706 L194 706", o: .5, m: 1 },
+      { t: "d", d: "M150 690 L170 697", o: .35, m: 1 },
+      { t: "d", d: "M147 699 L167 706", o: .35, m: 1 }
+    ]},
+    boot: { layer: "shoes", label: "Ankle boots", parts: [
+      { t: "f", d: "M150 610 L192 610 Q194 660 192 688 Q196 704 194 714 L130 714 Q116 712 116 702 Q118 692 146 686 Q150 650 150 610 Z", m: 1 },
+      { t: "d", d: "M117 706 L194 706", o: .5, m: 1 },
+      { t: "d", d: "M150 626 L192 626", o: .3, m: 1 }
+    ]},
+    flat: { layer: "shoes", label: "Flats", parts: [
+      { t: "f", d: "M150 686 L190 686 Q192 702 188 712 L128 712 Q116 710 118 700 Q128 690 150 686 Z", m: 1 },
+      { t: "d", d: "M118 706 L190 706", o: .45, m: 1 }
+    ]}
+  };
+
+  var SHAPE_KEYS = Object.keys(SHAPES);
+  var TONES = ["#E8CDB4", "#D9AE86", "#B9855C", "#8A5A3B", "#5C3A26", "#D9CFC2"];
+
+  /* ---------- seed wardrobe ---------- */
+  function seed() {
+    var rows = [
+      ["White tee", "tee", "#F2F0EA", "solid", 1],
+      ["Breton stripe tee", "tee", "#25406B", "stripe", 1],
+      ["Black v-neck", "vee", "#22211F", "solid", 2],
+      ["Rust tank", "tank", "#B4552F", "solid", 1],
+      ["Olive button-down", "shirt", "#6E7245", "solid", 2],
+      ["Gingham shirt", "shirt", "#4E7FA8", "check", 2],
+      ["Oatmeal sweater", "sweater", "#D6C6AC", "solid", 3],
+      ["Dark jeans", "jeans", "#2E3F58", "solid", 2],
+      ["Black wide trousers", "trouser", "#26262B", "solid", 2],
+      ["Camel a-line skirt", "skirt", "#B08453", "solid", 2],
+      ["Polka skirt", "skirt", "#2B3A45", "dot", 2],
+      ["Denim shorts", "shorts", "#6A86A6", "solid", 1],
+      ["Camel trench", "trench", "#C2A173", "solid", 2],
+      ["Denim jacket", "jacket", "#5B7EA6", "solid", 2],
+      ["Charcoal cardigan", "cardigan", "#44484A", "solid", 3],
+      ["White sneakers", "sneaker", "#EFEDE6", "solid", 1],
+      ["Black ankle boots", "boot", "#232326", "solid", 3],
+      ["Tan flats", "flat", "#A9784D", "solid", 2]
+    ];
+    return rows.map(function (r, i) {
+      return { id: "s" + i, name: r[0], shape: r[1], color: r[2], pattern: r[3], warmth: r[4] };
+    });
+  }
+
+  /* ---------- storage ---------- */
+  function lsGet(k) {
+    try { var raw = localStorage.getItem(NS + k); return raw ? JSON.parse(raw) : null; }
+    catch (e) { return null; }
+  }
+  function lsSet(k, v) {
+    try { localStorage.setItem(NS + k, JSON.stringify(v)); return true; }
+    catch (e) { return false; }
+  }
+
+  /* ---------- state ---------- */
+  var wardrobe = lsGet("wardrobe");
+  if (!Array.isArray(wardrobe) || !wardrobe.length) wardrobe = seed();
+  var outfits = lsGet("outfits") || [];
+  var tone = lsGet("tone") || TONES[0];
+  var worn = lsGet("worn") || {};
+  var locks = { outer: false, top: false, bottom: false, shoes: false };
+  var active = "top";
+  var warmth = 0;
+  var editing = null;
+  var saveTimer = null;
+
+  function setStatus(t) { document.getElementById("status").textContent = t; }
+  function scheduleSave() {
+    clearTimeout(saveTimer);
+    setStatus("Saving…");
+    saveTimer = setTimeout(save, 400);
+  }
+  function save() {
+    saveTimer = null;
+    var ok = lsSet("wardrobe", wardrobe) && lsSet("outfits", outfits) &&
+             lsSet("worn", worn) && lsSet("tone", tone);
+    setStatus(ok ? "Saved" : "Storage blocked");
+  }
+
+  /* ---------- colour helpers ---------- */
+  function rgb(c) {
+    var h = String(c || "#888888").replace("#", "");
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+  }
+  function hex(a) {
+    return "#" + a.map(function (v) {
+      v = Math.max(0, Math.min(255, Math.round(v)));
+      return (v < 16 ? "0" : "") + v.toString(16);
+    }).join("");
+  }
+  function lum(c) { var a = rgb(c); return (a[0] * .299 + a[1] * .587 + a[2] * .114) / 255; }
+  /* Darken a light colour, lighten a dark one, so a motif stays visible
+     whatever the garment is. */
+  function accent(c) {
+    var light = lum(c) > .45;
+    var target = light ? 0 : 255, k = light ? .34 : .30;
+    return hex(rgb(c).map(function (v) { return v + (target - v) * k; }));
+  }
+
+  var patSeq = 0;
+  function paint(item, defs) {
+    if (!item.pattern || item.pattern === "solid") return item.color;
+    var id = "p" + (patSeq++);
+    var a = accent(item.color), motif;
+    if (item.pattern === "stripe") {
+      motif = '<path d="M0 5 H20 M0 15 H20" stroke="' + a + '" stroke-width="6" fill="none"/>';
+    } else if (item.pattern === "dot") {
+      motif = '<circle cx="5" cy="5" r="2.6" fill="' + a + '"/><circle cx="15" cy="15" r="2.6" fill="' + a + '"/>';
+    } else {
+      motif = '<path d="M0 6 H20 M0 14 H20 M6 0 V20 M14 0 V20" stroke="' + a +
+              '" stroke-width="4" fill="none" opacity=".75"/>';
+    }
+    defs.push('<pattern id="' + id + '" width="20" height="20" patternUnits="userSpaceOnUse">' +
+      '<rect width="20" height="20" fill="' + item.color + '"/>' + motif + '</pattern>');
+    return "url(#" + id + ")";
+  }
+
+  /* ---------- figure rendering ---------- */
+  var MIRROR = ' transform="translate(400,0) scale(-1,1)"';
+  function twice(svg, mirrored) {
+    return svg + (mirrored ? "<g" + MIRROR + ">" + svg + "</g>" : "");
+  }
+
+  function garment(item, defs) {
+    var sh = SHAPES[item.shape];
+    if (!sh) return "";
+    var f = paint(item, defs), out = "", i, p;
+
+    for (i = 0; i < sh.parts.length; i++) {          /* outlines */
+      p = sh.parts[i];
+      if (p.t === "f") {
+        out += twice('<path d="' + p.d + '" fill="var(--form-line)" stroke="var(--form-line)" stroke-width="7" stroke-linejoin="round"/>', p.m);
+      } else if (p.t === "s") {
+        out += twice('<path d="' + p.d + '" fill="none" stroke="var(--form-line)" stroke-width="' + (p.w + 7) + '" stroke-linecap="round"/>', p.m);
+      }
+    }
+    for (i = 0; i < sh.parts.length; i++) {          /* fills */
+      p = sh.parts[i];
+      if (p.t === "f") {
+        out += twice('<path d="' + p.d + '" fill="' + f + '"/>', p.m);
+      } else if (p.t === "s") {
+        out += twice('<path d="' + p.d + '" fill="none" stroke="' + f + '" stroke-width="' + p.w + '" stroke-linecap="round"/>', p.m);
+      }
+    }
+    for (i = 0; i < sh.parts.length; i++) {          /* details */
+      p = sh.parts[i];
+      if (p.t === "d") {
+        out += twice('<path d="' + p.d + '" fill="none" stroke="var(--form-line)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" opacity="' + (p.o || .6) + '"/>', p.m);
+      } else if (p.t === "b") {
+        out += '<circle cx="' + p.x + '" cy="' + p.y + '" r="4" fill="var(--form-line)" opacity=".55"/>';
+      }
+    }
+    return out;
+  }
+
+  var ARM = "M130 166 C112 232 102 320 100 396";
+  var LEG = "M174 396 C168 480 162 584 160 692";
+  var TORSO = "M132 158 Q126 240 158 318 Q148 356 146 398 L254 398 Q252 356 242 318 Q274 240 268 158 Q234 140 200 140 Q166 140 132 158 Z";
+
+  function mannequin(skin) {
+    return (
+      twice('<path d="' + ARM + '" fill="none" stroke="var(--form-line)" stroke-width="33" stroke-linecap="round"/>', 1) +
+      twice('<path d="' + LEG + '" fill="none" stroke="var(--form-line)" stroke-width="51" stroke-linecap="round"/>', 1) +
+      '<path d="' + TORSO + '" fill="var(--form-line)" stroke="var(--form-line)" stroke-width="7" stroke-linejoin="round"/>' +
+      '<rect x="182" y="110" width="36" height="48" rx="6" fill="var(--form-line)"/>' +
+      '<ellipse cx="200" cy="84" rx="44" ry="50" fill="var(--form-line)"/>' +
+      twice('<path d="' + ARM + '" fill="none" stroke="' + skin + '" stroke-width="26" stroke-linecap="round"/>', 1) +
+      twice('<path d="' + LEG + '" fill="none" stroke="' + skin + '" stroke-width="44" stroke-linecap="round"/>', 1) +
+      '<rect x="186" y="112" width="28" height="44" fill="' + skin + '"/>' +
+      '<path d="' + TORSO + '" fill="' + skin + '"/>' +
+      '<ellipse cx="200" cy="84" rx="40" ry="46" fill="' + skin + '"/>' +
+      '<path d="M156 66 Q166 30 200 30 Q234 30 244 66 Q250 104 244 132 Q236 96 226 84 Q200 100 174 84 Q164 96 156 132 Q150 104 156 66 Z" fill="var(--form-line)" opacity=".85"/>'
+    );
+  }
+
+  function byId(id) {
+    for (var i = 0; i < wardrobe.length; i++) if (wardrobe[i].id === id) return wardrobe[i];
+    return null;
+  }
+
+  function figureSVG(outfit, label) {
+    var defs = [], inner = "", i, item;
+    for (i = 0; i < Z.length; i++) {
+      item = outfit[Z[i]] && byId(outfit[Z[i]]);
+      if (item) inner += garment(item, defs);
+    }
+    return '<svg viewBox="0 0 400 760" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' +
+      esc(label || "Outfit") + '">' +
+      (defs.length ? "<defs>" + defs.join("") + "</defs>" : "") +
+      mannequin(tone) + inner + "</svg>";
+  }
+
+  function pool(layer) {
+    return wardrobe.filter(function (it) {
+      var sh = SHAPES[it.shape];
+      if (!sh || sh.layer !== layer) return false;
+      if (warmth && Math.abs(it.warmth - warmth) > 1) return false;
+      return true;
+    });
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  /* ---------- render ---------- */
+  var stage = document.getElementById("stage");
+  var railEl = document.getElementById("rail");
+
+  function renderFigure() {
+    var old = stage.querySelector("svg");
+    if (old) old.remove();
+    stage.insertAdjacentHTML("afterbegin", figureSVG(worn, "Current outfit"));
+  }
+
+  function renderRail() {
+    railEl.innerHTML = LAYERS.map(function (L) {
+      var item = worn[L] && byId(worn[L]);
+      return '<div class="row" data-layer="' + L + '" aria-current="' + (active === L) + '">' +
+        '<span class="swatch"' + (item ? ' style="background:' + item.color + '"' : "") + '></span>' +
+        '<span class="meta"><span class="lab">' + LAYER_LABEL[L] + "</span>" +
+        '<span class="val' + (item ? "" : " empty") + '">' + (item ? esc(item.name) : "nothing") + "</span></span>" +
+        '<span class="cyc"><button data-cyc="-1" aria-label="Previous ' + LAYER_LABEL[L] + '">&lsaquo;</button>' +
+        '<button data-cyc="1" aria-label="Next ' + LAYER_LABEL[L] + '">&rsaquo;</button></span>' +
+        '<button class="lock" data-lock="1" aria-pressed="' + locks[L] + '" aria-label="Lock ' + LAYER_LABEL[L] + '">' +
+        (locks[L] ? "🔒" : "🔓") + "</button></div>";
+    }).join("");
+  }
+
+  function renderFits() {
+    var el = document.getElementById("fits");
+    document.getElementById("fitCount").textContent = outfits.length ? outfits.length + " saved" : "";
+    if (!outfits.length) {
+      el.innerHTML = '<p class="blank">Nothing saved yet. Build something you like, then hit <strong>Save outfit</strong>.</p>';
+      return;
+    }
+    el.innerHTML = outfits.map(function (o, i) {
+      return '<div class="fit" data-fit="' + i + '" title="Wear this">' +
+        '<button class="x" data-del="' + i + '" aria-label="Delete outfit">×</button>' +
+        figureSVG(o.worn, o.name) +
+        '<input class="nm" data-rename="' + i + '" value="' + esc(o.name) +
+        '" aria-label="Outfit name" maxlength="60"></div>';
+    }).join("");
+  }
+
+  function renderAll() { renderFigure(); renderRail(); renderFits(); }
+
+  /* ---------- wearing ---------- */
+  function cycle(layer, dir) {
+    var p = pool(layer);
+    if (!p.length) { flash("No " + LAYER_LABEL[layer].toLowerCase() + " matches"); return; }
+    /* Outerwear can be left off, so its ring includes an empty slot. */
+    var ring = layer === "outer" ? [null].concat(p) : p;
+    var cur = worn[layer] || null, at = 0;
+    for (var i = 0; i < ring.length; i++) {
+      if (ring[i] ? ring[i].id === cur : !cur) { at = i; break; }
+    }
+    var next = ring[(at + dir + ring.length) % ring.length];
+    worn[layer] = next ? next.id : null;
+    active = layer;
+    renderAll();
+    flash(next ? next.name : "No " + LAYER_LABEL[layer].toLowerCase());
+    scheduleSave();
+  }
+
+  function shuffle() {
+    LAYERS.forEach(function (L) {
+      if (locks[L]) return;
+      var p = pool(L);
+      if (!p.length) { worn[L] = null; return; }
+      if (L === "outer") {
+        /* Skip a coat on warm days, nearly always wear one when it's cold. */
+        var skip = warmth === 1 ? .8 : warmth === 3 ? .1 : .45;
+        if (Math.random() < skip) { worn[L] = null; return; }
+      }
+      worn[L] = p[Math.floor(Math.random() * p.length)].id;
+    });
+    renderAll();
+    flash("Shuffled");
+    scheduleSave();
+  }
+
+  var flashTimer = null;
+  function flash(msg) {
+    var el = document.getElementById("flash");
+    el.textContent = msg;
+    el.classList.add("on");
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(function () { el.classList.remove("on"); }, 1100);
+  }
+
+  /* ---------- swipe / tap on the figure ---------- */
+  var drag = null;
+
+  function svgPoint(e) {
+    var svg = stage.querySelector("svg");
+    if (!svg) return { x: 200, y: 0 };
+    var r = svg.getBoundingClientRect();
+    return {
+      x: (e.clientX - r.left) / r.width * 400,
+      y: (e.clientY - r.top) / r.height * 760
+    };
+  }
+  function layerAt(p) {
+    if (p.y < 140) return null;
+    /* The sleeves either side of the torso are the coat's handle. */
+    if (p.y < 420 && (p.x < 148 || p.x > 252)) return "outer";
+    if (p.y < 372) return "top";
+    if (p.y < 660) return "bottom";
+    return "shoes";
+  }
+
+  stage.addEventListener("pointerdown", function (e) {
+    if (e.target.closest("button")) return;
+    drag = { x: e.clientX, y: e.clientY, moved: false, id: e.pointerId };
+    stage.classList.add("dragging");
+    stage.setPointerCapture(e.pointerId);
+  });
+
+  stage.addEventListener("pointermove", function (e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    var dx = e.clientX - drag.x;
+    if (Math.abs(dx) > 46 && Math.abs(dx) > Math.abs(e.clientY - drag.y)) {
+      cycle(active, dx > 0 ? 1 : -1);
+      drag.x = e.clientX;
+      drag.moved = true;
+    }
+  });
+
+  function endDrag(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    stage.classList.remove("dragging");
+    if (!drag.moved) {
+      var L = layerAt(svgPoint(e));
+      if (L) { active = L; renderRail(); flash(LAYER_LABEL[L]); }
+    }
+    drag = null;
+  }
+  stage.addEventListener("pointerup", endDrag);
+  stage.addEventListener("pointercancel", endDrag);
+
+  /* ---------- rail ---------- */
+  railEl.addEventListener("click", function (e) {
+    var row = e.target.closest(".row");
+    if (!row) return;
+    var L = row.dataset.layer;
+    var cyc = e.target.closest("[data-cyc]");
+    if (cyc) { cycle(L, +cyc.dataset.cyc); return; }
+    if (e.target.closest("[data-lock]")) { locks[L] = !locks[L]; renderRail(); return; }
+    active = L;
+    renderRail();
+  });
+
+  /* ---------- toolbar ---------- */
+  document.getElementById("shuffle").addEventListener("click", shuffle);
+
+  document.getElementById("undress").addEventListener("click", function () {
+    LAYERS.forEach(function (L) { if (!locks[L]) worn[L] = null; });
+    renderAll();
+    scheduleSave();
+  });
+
+  document.getElementById("saveFit").addEventListener("click", function () {
+    if (!LAYERS.some(function (L) { return worn[L]; })) { flash("Nothing to save"); return; }
+    var top = worn.top && byId(worn.top), bot = worn.bottom && byId(worn.bottom);
+    var name = [top && top.name, bot && bot.name].filter(Boolean).join(" + ") || "Outfit";
+    outfits.unshift({
+      name: name.slice(0, 60),
+      worn: JSON.parse(JSON.stringify(worn)),
+      at: new Date().toISOString()
+    });
+    renderFits();
+    save();
+    /* Drop straight into the caption so it can be renamed by typing. */
+    var field = document.querySelector('.fit .nm');
+    if (field) field.select();
+    flash("Saved — type to rename");
+  });
+
+  document.getElementById("fits").addEventListener("click", function (e) {
+    var del = e.target.closest("[data-del]");
+    if (del) { outfits.splice(+del.dataset.del, 1); renderFits(); save(); return; }
+    if (e.target.closest("[data-rename]")) return;
+    var f = e.target.closest("[data-fit]");
+    if (!f) return;
+    var o = outfits[+f.dataset.fit];
+    worn = JSON.parse(JSON.stringify(o.worn));
+    renderAll();
+    scheduleSave();
+    flash("Wearing " + o.name);
+  });
+
+  document.getElementById("fits").addEventListener("input", function (e) {
+    var r = e.target.closest("[data-rename]");
+    if (!r) return;
+    outfits[+r.dataset.rename].name = r.value.slice(0, 60);
+    scheduleSave();
+  });
+
+  document.getElementById("backup").addEventListener("click", function () {
+    if (saveTimer) { clearTimeout(saveTimer); save(); }
+    var blob = new Blob([JSON.stringify({ app: "closet", wardrobe: wardrobe, outfits: outfits, tone: tone }, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "closet-" + new Date().toISOString().slice(0, 10) + ".json";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  });
+
+  document.getElementById("warmth").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-w]");
+    if (!b) return;
+    warmth = +b.dataset.w;
+    [].forEach.call(this.children, function (c) {
+      c.setAttribute("aria-pressed", String(+c.dataset.w === warmth));
+    });
+  });
+
+  /* ---------- keyboard ---------- */
+  document.addEventListener("keydown", function (e) {
+    if (/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+    if (!document.getElementById("scrim").hidden) {
+      if (e.key === "Escape") closeItems();
+      return;
+    }
+    var i = LAYERS.indexOf(active);
+    if (e.key === "ArrowLeft") { e.preventDefault(); cycle(active, -1); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); cycle(active, 1); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); active = LAYERS[(i + LAYERS.length - 1) % LAYERS.length]; renderRail(); }
+    else if (e.key === "ArrowDown") { e.preventDefault(); active = LAYERS[(i + 1) % LAYERS.length]; renderRail(); }
+    else if (e.key === " ") { e.preventDefault(); shuffle(); }
+    else if (e.key.toLowerCase() === "l") { locks[active] = !locks[active]; renderRail(); }
+  });
+
+  /* ---------- wardrobe drawer ---------- */
+  var scrim = document.getElementById("scrim");
+  function openItems() { scrim.hidden = false; renderGroups(); renderTones(); }
+  function closeItems() { scrim.hidden = true; resetForm(); }
+
+  document.getElementById("openItems").addEventListener("click", openItems);
+  document.getElementById("closeItems").addEventListener("click", closeItems);
+  scrim.addEventListener("click", function (e) { if (e.target === scrim) closeItems(); });
+
+  function renderGroups() {
+    document.getElementById("wcount").textContent = wardrobe.length + " items";
+    document.getElementById("groups").innerHTML = LAYERS.map(function (L) {
+      var items = wardrobe.filter(function (it) {
+        return SHAPES[it.shape] && SHAPES[it.shape].layer === L;
+      });
+      var chips = items.map(function (it) {
+        return '<span class="chip" data-wear="' + it.id + '" role="button" tabindex="0" aria-pressed="' + (worn[L] === it.id) + '">' +
+          '<i style="background:' + it.color + '"></i><b>' + esc(it.name) + "</b>" +
+          '<span class="ed" data-edit="' + it.id + '" role="button" title="Edit">edit</span></span>';
+      }).join("");
+      return '<div class="group"><h3>' + LAYER_LABEL[L] + " &middot; " + items.length + "</h3>" +
+        '<div class="chips">' + (chips || '<span class="blank" style="padding:0">Nothing here yet.</span>') + "</div></div>";
+    }).join("");
+  }
+
+  document.getElementById("groups").addEventListener("click", function (e) {
+    var ed = e.target.closest("[data-edit]");
+    if (ed) { loadForm(byId(ed.dataset.edit)); return; }
+    var w = e.target.closest("[data-wear]");
+    if (!w) return;
+    var it = byId(w.dataset.wear);
+    if (!it) return;
+    var L = SHAPES[it.shape].layer;
+    worn[L] = worn[L] === it.id ? null : it.id;
+    active = L;
+    renderAll(); renderGroups(); scheduleSave();
+  });
+
+  function renderTones() {
+    document.getElementById("tones").innerHTML = TONES.map(function (t) {
+      return '<button class="tone" data-tone="' + t + '" style="background:' + t +
+        '" aria-pressed="' + (t === tone) + '" aria-label="Mannequin tone ' + t + '"></button>';
+    }).join("");
+  }
+  document.getElementById("tones").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-tone]");
+    if (!b) return;
+    tone = b.dataset.tone;
+    renderTones(); renderAll(); scheduleSave();
+  });
+
+  /* ---------- item form ---------- */
+  var fName = document.getElementById("fName"),
+      fShape = document.getElementById("fShape"),
+      fColor = document.getElementById("fColor"),
+      fPattern = document.getElementById("fPattern"),
+      fWarmth = document.getElementById("fWarmth");
+
+  fShape.innerHTML = LAYERS.map(function (L) {
+    return '<optgroup label="' + LAYER_LABEL[L] + '">' +
+      SHAPE_KEYS.filter(function (k) { return SHAPES[k].layer === L; })
+        .map(function (k) { return '<option value="' + k + '">' + SHAPES[k].label + "</option>"; })
+        .join("") + "</optgroup>";
+  }).join("");
+
+  function resetForm() {
+    editing = null;
+    fName.value = "";
+    fColor.value = "#3F6B5B";
+    fPattern.value = "solid";
+    fWarmth.value = "2";
+    document.getElementById("formTitle").textContent = "Add an item";
+    document.getElementById("fSave").textContent = "Add to wardrobe";
+    document.getElementById("fCancel").hidden = true;
+    var del = document.getElementById("fDelete");
+    del.hidden = true;
+    del.textContent = "Delete item";
+    del.style.color = "";
+  }
+
+  function loadForm(it) {
+    if (!it) return;
+    editing = it.id;
+    fName.value = it.name;
+    fShape.value = it.shape;
+    fColor.value = it.color;
+    fPattern.value = it.pattern;
+    fWarmth.value = String(it.warmth);
+    document.getElementById("formTitle").textContent = "Edit item";
+    document.getElementById("fSave").textContent = "Save changes";
+    document.getElementById("fCancel").hidden = false;
+    document.getElementById("fDelete").hidden = false;
+    fName.focus();
+  }
+
+  document.getElementById("fSave").addEventListener("click", function () {
+    var name = fName.value.trim();
+    if (!name) { fName.focus(); return; }
+    var data = {
+      name: name, shape: fShape.value, color: fColor.value,
+      pattern: fPattern.value, warmth: +fWarmth.value
+    };
+    if (editing) {
+      var it = byId(editing);
+      var oldLayer = SHAPES[it.shape].layer;
+      Object.keys(data).forEach(function (k) { it[k] = data[k]; });
+      /* Re-shaping an item can move it to another layer; take it off the
+         old one so it can't render on two layers at once. */
+      if (SHAPES[it.shape].layer !== oldLayer && worn[oldLayer] === it.id) worn[oldLayer] = null;
+    } else {
+      data.id = "i" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
+      wardrobe.push(data);
+    }
+    resetForm();
+    renderGroups(); renderAll(); save();
+  });
+
+  document.getElementById("fCancel").addEventListener("click", resetForm);
+
+  var armedDelete = null;
+  document.getElementById("fDelete").addEventListener("click", function () {
+    var it = byId(editing);
+    if (!it) return;
+    /* First press arms, second press commits -- confirm() is blocked in
+       some contexts and a stray click shouldn't destroy an item. */
+    if (armedDelete !== it.id) {
+      armedDelete = it.id;
+      this.textContent = "Really delete?";
+      this.style.color = "var(--brass)";
+      var btn = this;
+      setTimeout(function () {
+        if (armedDelete !== it.id) return;
+        armedDelete = null;
+        btn.textContent = "Delete item";
+        btn.style.color = "";
+      }, 4000);
+      return;
+    }
+    armedDelete = null;
+    wardrobe = wardrobe.filter(function (x) { return x.id !== it.id; });
+    LAYERS.forEach(function (L) { if (worn[L] === it.id) worn[L] = null; });
+    outfits.forEach(function (o) {
+      LAYERS.forEach(function (L) { if (o.worn[L] === it.id) o.worn[L] = null; });
+    });
+    resetForm();
+    renderGroups(); renderAll(); save();
+  });
+
+  /* ---------- go ---------- */
+  if (LAYERS.some(function (L) { return worn[L]; })) renderAll();
+  else shuffle();
+  setStatus("");
+
+  if ("serviceWorker" in navigator) {
+    var reloadedForUpdate = false;
+    navigator.serviceWorker.addEventListener("controllerchange", function () {
+      if (reloadedForUpdate) return;
+      reloadedForUpdate = true;
+      if (!saveTimer) location.reload();     // never reload over an unsaved edit
+    });
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").then(function (reg) {
+        reg.update();
+        setInterval(function () { reg.update(); }, 30 * 60 * 1000);
+      }).catch(function () {});
+    });
+  }
+})();
+</script>
+</body>
+</html>
