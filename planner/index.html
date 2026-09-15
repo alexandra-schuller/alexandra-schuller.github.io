@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="robots" content="noindex, nofollow">
 <title>One Day Per Page</title>
-<meta name="description" content="A one-day-per-page daily planner.">
+<meta name="description" content="A one-day-per-page daily planner you write on with a pen.">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#F6F7F4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#121614" media="(prefers-color-scheme: dark)">
@@ -17,266 +17,135 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=DM+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300&display=swap">
 <style>
   :root {
-    --paper:        #F6F7F4;
-    --sheet:        #FCFCFA;
-    --ink:          #1B2421;
-    --ink-soft:     #5C6763;
-    --ink-faint:    #8B9490;
-    --rule:         #DCE1DB;
-    --rule-strong:  #BFC7C0;
-    --pine:         #3F6B5B;
-    --pine-wash:    #E6EEE9;
-    --brass:        #A8813A;
-    --hole:         #E9ECE6;
-    --focus:        #3F6B5B;
-    --shadow:       0 1px 2px rgba(27,36,33,.05), 0 12px 32px -12px rgba(27,36,33,.18);
+    --paper:       #F6F7F4;
+    --sheet:       #FCFCFA;
+    --ink:         #1B2421;
+    --ink-soft:    #5C6763;
+    --ink-faint:   #8B9490;
+    --rule:        #DCE1DB;
+    --rule-strong: #BFC7C0;
+    --pine:        #3F6B5B;
+    --pine-wash:   #E6EEE9;
+    --brass:       #A8813A;
+    --pen:         #1F3A5F;
+    --shadow:      0 1px 2px rgba(27,36,33,.06), 0 14px 36px -14px rgba(27,36,33,.22);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --paper:       #121614;
-      --sheet:       #1A201D;
+      --paper:       #101413;
+      --sheet:       #FCFCFA;   /* the sheet stays paper-white; you write on paper */
       --ink:         #E8EDE9;
       --ink-soft:    #9AA5A0;
       --ink-faint:   #6B7672;
-      --rule:        #2C3531;
-      --rule-strong: #3E4A45;
+      --rule:        #DCE1DB;
+      --rule-strong: #BFC7C0;
       --pine:        #8CC4AC;
       --pine-wash:   #22302A;
       --brass:       #D2AC6B;
-      --hole:        #0D100F;
-      --focus:       #8CC4AC;
-      --shadow:      0 1px 2px rgba(0,0,0,.4), 0 16px 40px -16px rgba(0,0,0,.6);
+      --shadow:      0 1px 2px rgba(0,0,0,.5), 0 18px 44px -16px rgba(0,0,0,.7);
     }
   }
 
   * { box-sizing: border-box; }
-
+  html, body { height: 100%; }
   html { -webkit-text-size-adjust: 100%; }
 
   body {
     margin: 0;
+    display: flex; flex-direction: column;
     background: var(--paper);
     color: var(--ink);
     font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
-    font-size: 16px;
-    line-height: 1.45;
+    font-size: 15px;
+    overflow: hidden;                 /* the sheet always fits; nothing scrolls */
+    overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* ---------- toolbar ---------- */
   .bar {
-    position: sticky; top: 0; z-index: 20;
-    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    padding-block: 12px;
-    padding-left: 20px; padding-right: 20px;
-    padding-top: calc(12px + env(safe-area-inset-top));
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 8px 14px;
+    padding-top: calc(8px + env(safe-area-inset-top));
+    border-bottom: 1px solid var(--rule-strong);
     background: var(--paper);
-    border-bottom: 1px solid var(--rule);
   }
-  .brand {
-    font-family: "Newsreader", Georgia, serif;
-    font-size: 19px; font-weight: 400; letter-spacing: .01em;
-    margin-right: auto;
-  }
-  .brand em { font-style: italic; color: var(--pine); }
-
-  .nav { display: flex; align-items: center; gap: 6px; }
+  .grp { display: flex; align-items: center; gap: 5px; }
+  .grp + .grp { margin-left: 4px; padding-left: 10px; border-left: 1px solid var(--rule-strong); }
+  .spacer { margin-left: auto; }
 
   button {
-    font: inherit; font-size: 15px; color: var(--ink);
+    font: inherit; font-size: 14px; color: var(--ink);
     background: transparent;
     border: 1px solid var(--rule-strong);
-    border-radius: 3px;
-    padding: 7px 12px;
+    border-radius: 4px;
+    padding: 7px 11px; min-height: 40px;
     cursor: pointer;
     touch-action: manipulation;
-    transition: background .12s ease, border-color .12s ease;
+    display: inline-flex; align-items: center; gap: 6px;
   }
-  button:hover { background: var(--pine-wash); border-color: var(--pine); }
-  button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-  .arrow { width: 40px; padding: 7px 0; }
+  button:hover:not(:disabled) { background: var(--pine-wash); border-color: var(--pine); }
+  button:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
+  button:disabled { opacity: .35; cursor: default; }
+  button[aria-pressed="true"] {
+    background: var(--pine); border-color: var(--pine); color: #FCFCFA;
+  }
+  .arrow { width: 42px; padding: 7px 0; justify-content: center; font-size: 16px; }
   .ghost { border-color: transparent; color: var(--ink-soft); }
-  .ghost:hover { color: var(--ink); }
+  .ghost:hover:not(:disabled) { color: var(--ink); }
+
+  .datebtn {
+    font-family: "Newsreader", Georgia, serif;
+    font-size: 17px; min-width: 176px; justify-content: center;
+  }
+
+  .swatch { width: 15px; height: 15px; border-radius: 50%; border: 1px solid rgba(0,0,0,.22); }
 
   .status {
     font-family: "DM Mono", ui-monospace, monospace;
-    font-size: 11.5px; color: var(--ink-faint);
-    letter-spacing: .02em;
-    min-width: 88px; text-align: right;
+    font-size: 11px; color: var(--ink-faint); letter-spacing: .02em;
+    min-width: 76px; text-align: right;
   }
-  .status[data-state="saving"] { color: var(--brass); }
 
   /* ---------- the sheet ---------- */
-  .stage { padding: 28px 20px 64px; display: flex; justify-content: center; }
-
+  .stage {
+    flex: 1 1 auto; min-height: 0;
+    display: grid; place-items: center;
+    padding: 12px;
+  }
   .sheet {
-    display: flex;
-    width: 100%; max-width: 880px;
+    position: relative;
     background: var(--sheet);
-    border: 1px solid var(--rule);
-    border-radius: 2px;
+    border-radius: 3px;
     box-shadow: var(--shadow);
+    touch-action: pan-y;              /* finger can still nudge; pen never scrolls */
   }
-
-  .coil {
-    flex: 0 0 38px;
-    border-right: 1px solid var(--rule);
-    background-color: var(--paper);
-    background-image: radial-gradient(circle at 19px 17px, var(--hole) 0 5.5px, transparent 6px),
-                      radial-gradient(circle at 19px 17px, var(--rule) 0 6.5px, transparent 7px);
-    background-size: 100% 34px;
-    background-repeat: repeat-y;
-    border-radius: 2px 0 0 2px;
+  .sheet canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    border-radius: 3px;
   }
-
-  .page { flex: 1 1 auto; min-width: 0; padding: 26px 30px 34px; }
-
-  /* ---------- date head ---------- */
-  .datehead {
-    display: flex; align-items: baseline; gap: 14px;
-    padding-bottom: 14px;
-    border-bottom: 2px solid var(--brass);
-  }
-  .dnum {
-    font-family: "Newsreader", Georgia, serif;
-    font-size: 58px; font-weight: 300; line-height: .8;
-    letter-spacing: -.02em;
-    font-variant-numeric: tabular-nums;
-  }
-  .dstack { display: flex; flex-direction: column; gap: 1px; }
-  .dow {
-    font-family: "Newsreader", Georgia, serif;
-    font-size: 25px; font-weight: 400; font-style: italic;
-    color: var(--pine); line-height: 1.1;
-  }
-  .dmon {
-    font-family: "DM Mono", ui-monospace, monospace;
-    font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase;
-    color: var(--ink-faint);
-  }
-  .today-tag {
-    margin-left: auto; align-self: center;
-    font-family: "DM Mono", ui-monospace, monospace;
-    font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
-    color: var(--brass);
-    border: 1px solid var(--brass); border-radius: 2px;
-    padding: 2px 7px;
-  }
-  .today-tag[hidden] { display: none !important; }
-
-  /* ---------- columns ---------- */
-  .cols {
-    display: grid;
-    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
-    gap: 0 34px;
-    margin-top: 22px;
-  }
-  .side { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
-
-  .lbl {
-    margin: 0 0 8px;
-    font-family: "DM Mono", ui-monospace, monospace;
-    font-size: 11px; font-weight: 500;
-    letter-spacing: .16em; text-transform: uppercase;
-    color: var(--ink-soft);
-    display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
-  }
-  .count { color: var(--ink-faint); letter-spacing: .06em; font-weight: 400; }
-
-  /* ---------- ruled rows ---------- */
-  .rows { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule-strong); }
-  .rows li { display: flex; align-items: stretch; border-bottom: 1px solid var(--rule); }
-
-  .hour {
-    flex: 0 0 42px;
-    display: flex; align-items: center; gap: 2px;
-    font-family: "DM Mono", ui-monospace, monospace;
-    font-size: 12px; color: var(--ink-faint);
-    font-variant-numeric: tabular-nums;
-  }
-  .hour .mer { font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--brass); }
-
-  input[type="text"] {
-    flex: 1 1 auto; min-width: 0; width: 100%;
-    font: inherit; font-size: 16px; color: var(--ink);
-    background: transparent; border: 0; border-radius: 0;
-    padding: 9px 4px;
-  }
-  input[type="text"]::placeholder { color: var(--ink-faint); opacity: .55; }
-  input[type="text"]:focus { outline: 0; background: var(--pine-wash); }
-
-  .rows li:focus-within .hour { color: var(--pine); }
-
-  /* Pen and finger need a bigger target than a mouse does. */
-  @media (pointer: coarse) {
-    input[type="text"] { padding: 15px 6px; }
-    textarea { line-height: 34px; }
-  }
-
-  /* ---------- to do ---------- */
-  .box { flex: 0 0 28px; display: flex; align-items: center; }
-  .box input[type="checkbox"] {
-    appearance: none; -webkit-appearance: none;
-    width: 16px; height: 16px; margin: 0;
-    border: 1px solid var(--rule-strong); border-radius: 2px;
-    background: transparent; cursor: pointer;
-    display: grid; place-content: center;
-    touch-action: manipulation;
-  }
-  .box input[type="checkbox"]:checked { border-color: var(--pine); background: var(--pine); }
-  .box input[type="checkbox"]:checked::after {
-    content: ""; width: 8px; height: 4px;
-    border-left: 2px solid var(--sheet); border-bottom: 2px solid var(--sheet);
-    transform: rotate(-45deg) translate(1px, -1px);
-  }
-  .box input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-  li.done input[type="text"] { color: var(--ink-faint); text-decoration: line-through; text-decoration-color: var(--rule-strong); }
-
-  .meal-lbl {
-    flex: 0 0 28px;
-    display: flex; align-items: center;
-    font-family: "DM Mono", ui-monospace, monospace;
-    font-size: 11px; letter-spacing: .1em; color: var(--ink-faint);
-  }
-
-  /* ---------- notes ---------- */
-  textarea {
-    width: 100%; min-height: 168px;
-    font: inherit; font-size: 16px; color: var(--ink);
-    background: transparent;
-    border: 0; border-top: 1px solid var(--rule-strong); border-radius: 0;
-    padding: 0; resize: vertical;
-    line-height: 28px;
-    background-image: repeating-linear-gradient(to bottom, transparent 0 27px, var(--rule) 27px 28px);
-  }
-  @media (pointer: coarse) {
-    textarea { background-image: repeating-linear-gradient(to bottom, transparent 0 33px, var(--rule) 33px 34px); }
-  }
-  textarea:focus { outline: 0; }
-  textarea::placeholder { color: var(--ink-faint); opacity: .55; }
+  #ink { touch-action: none; }
+  .sheet.erasing { cursor: cell; }
 
   /* ---------- month overlay ---------- */
   .scrim {
     position: fixed; inset: 0; z-index: 40;
-    background: rgba(27,36,33,.42);
-    display: grid; place-items: center;
-    padding: 20px;
+    background: rgba(20,26,24,.5);
+    display: grid; place-items: center; padding: 20px;
   }
   .scrim[hidden] { display: none !important; }
-  .month {
-    width: 100%; max-width: 440px;
-    background: var(--sheet);
-    border: 1px solid var(--rule-strong);
-    border-radius: 3px;
+  .card {
+    width: 100%; max-width: 430px;
+    background: var(--paper); color: var(--ink);
+    border: 1px solid var(--rule-strong); border-radius: 4px;
     box-shadow: var(--shadow);
-    padding: 18px 20px 22px;
+    padding: 16px 18px 20px;
   }
-  .mhead { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-  .mtitle {
-    flex: 1 1 auto; text-align: center;
-    font-family: "Newsreader", Georgia, serif;
-    font-size: 21px;
-  }
+  .mhead { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .mtitle { flex: 1 1 auto; text-align: center; font-family: "Newsreader", Georgia, serif; font-size: 20px; }
   .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
   .dowlbl {
     font-family: "DM Mono", ui-monospace, monospace;
@@ -284,386 +153,635 @@
     color: var(--ink-faint); text-align: center; padding-bottom: 6px;
   }
   .day {
-    position: relative;
-    aspect-ratio: 1 / 1;
+    position: relative; aspect-ratio: 1/1;
     display: grid; place-items: center;
     font-family: "DM Mono", ui-monospace, monospace;
     font-size: 14px; font-variant-numeric: tabular-nums;
-    border: 1px solid transparent; border-radius: 2px;
+    border: 1px solid transparent; border-radius: 3px;
     background: transparent; color: var(--ink);
-    cursor: pointer; padding: 0;
+    min-height: 0; padding: 0;
   }
-  .day:hover { background: var(--pine-wash); }
-  .day.blank { cursor: default; }
-  .day.blank:hover { background: transparent; }
+  .day:hover:not(.blank) { background: var(--pine-wash); }
+  .day.blank { visibility: hidden; }
   .day.today { color: var(--brass); border-color: var(--brass); }
-  .day.sel { background: var(--pine); color: var(--sheet); }
+  .day.sel { background: var(--pine); border-color: var(--pine); color: #FCFCFA; }
   .day.has::after {
     content: ""; position: absolute; bottom: 5px;
-    width: 3px; height: 3px; border-radius: 50%;
-    background: var(--pine);
+    width: 4px; height: 4px; border-radius: 50%; background: var(--pine);
   }
-  .day.sel.has::after { background: var(--sheet); }
+  .day.sel.has::after { background: #FCFCFA; }
 
-  /* ---------- responsive ---------- */
-  @media (max-width: 760px) {
-    .cols { grid-template-columns: minmax(0, 1fr); gap: 26px; }
-    .coil { display: none; }
-    .page { padding: 20px 18px 28px; }
-    .stage { padding: 18px 16px 48px; }
-    .dnum { font-size: 46px; }
-    .dow { font-size: 21px; }
-    .brand { font-size: 17px; width: 100%; margin-right: 0; }
+  .hint {
+    margin: 14px 0 0; padding-top: 12px;
+    border-top: 1px solid var(--rule-strong);
+    font-size: 13px; line-height: 1.5; color: var(--ink-soft);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; animation: none !important; }
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+    z-index: 60;
+    background: var(--ink); color: var(--paper);
+    font-size: 13px; padding: 10px 16px; border-radius: 4px;
+    box-shadow: var(--shadow);
+    max-width: calc(100% - 32px);
   }
+  .toast[hidden] { display: none !important; }
 
-  /* ---------- print ---------- */
-  @media print {
-    .bar, .coil, .scrim, .today-tag { display: none !important; }
-    body { background: #fff; color: #000; }
-    .stage { padding: 0; }
-    .sheet { border: 0; box-shadow: none; max-width: none; }
-    .page { padding: 0; }
-    input[type="text"], textarea { color: #000; }
+  @media (max-width: 640px) {
+    .datebtn { min-width: 0; font-size: 15px; }
+    .bar { gap: 6px; padding: 6px 10px; }
+    .grp + .grp { margin-left: 0; padding-left: 6px; }
+    .status { display: none; }
   }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
 
 <header class="bar">
-  <div class="brand">One Day <em>per</em> Page</div>
-  <div class="nav">
-    <button class="arrow" id="prev" title="Previous day (Alt + ←)" aria-label="Previous day">←</button>
-    <button id="pick" title="Choose a date">Sep 14, 2026</button>
-    <button class="arrow" id="next" title="Next day (Alt + →)" aria-label="Next day">→</button>
-    <button class="ghost" id="today">Today</button>
-    <button class="ghost" id="backup" title="Download every day as a file">Backup</button>
+  <div class="grp">
+    <button class="arrow" id="prev" aria-label="Previous day" title="Previous day">←</button>
+    <button class="datebtn" id="pick" title="Choose a date">—</button>
+    <button class="arrow" id="next" aria-label="Next day" title="Next day">→</button>
+    <button class="ghost" id="today" title="Jump to today">Today</button>
   </div>
-  <span class="status" id="status" aria-live="polite"></span>
+
+  <div class="grp">
+    <button id="tPen" aria-pressed="true" title="Pen"><span class="swatch" id="penSw"></span>Pen</button>
+    <button id="tErase" aria-pressed="false" title="Eraser — or flip the pen / hold its button">Eraser</button>
+  </div>
+
+  <div class="grp">
+    <button class="ghost" id="undo" aria-label="Undo" title="Undo" disabled>↶</button>
+    <button class="ghost" id="redo" aria-label="Redo" title="Redo" disabled>↷</button>
+  </div>
+
+  <div class="grp spacer">
+    <button class="ghost" id="save" title="Save this day as an image">Save image</button>
+    <button class="ghost" id="more" title="More">⋯</button>
+  </div>
+  <span class="status" id="status"></span>
 </header>
 
 <main class="stage">
-  <article class="sheet">
-    <div class="coil" aria-hidden="true"></div>
-    <div class="page">
-      <div class="datehead">
-        <div class="dnum" id="dnum">1</div>
-        <div class="dstack">
-          <div class="dow" id="dow">Monday</div>
-          <div class="dmon" id="dmon">January 2026</div>
-        </div>
-        <div class="today-tag" id="todayTag" hidden>Today</div>
-      </div>
-
-      <div class="cols">
-        <section>
-          <h2 class="lbl">Today's Schedule</h2>
-          <ol class="rows" id="sched"></ol>
-        </section>
-
-        <div class="side">
-          <section>
-            <h2 class="lbl">To Do <span class="count" id="todoCount"></span></h2>
-            <ol class="rows" id="todos"></ol>
-          </section>
-
-          <section>
-            <h2 class="lbl">Notes</h2>
-            <textarea id="notes" aria-label="Notes"></textarea>
-          </section>
-
-          <section>
-            <h2 class="lbl">Meals</h2>
-            <ol class="rows" id="meals"></ol>
-          </section>
-        </div>
-      </div>
-    </div>
-  </article>
+  <div class="sheet" id="sheet">
+    <canvas id="tpl"></canvas>
+    <canvas id="ink"></canvas>
+  </div>
 </main>
 
 <div class="scrim" id="scrim" hidden>
-  <div class="month" role="dialog" aria-modal="true" aria-label="Choose a date">
+  <div class="card" role="dialog" aria-modal="true" aria-label="Choose a date">
     <div class="mhead">
       <button class="arrow" id="mprev" aria-label="Previous month">←</button>
-      <div class="mtitle" id="mtitle">September 2026</div>
+      <div class="mtitle" id="mtitle"></div>
       <button class="arrow" id="mnext" aria-label="Next month">→</button>
     </div>
     <div class="grid" id="mgrid"></div>
+    <p class="hint">A dot marks a day you've written on.</p>
   </div>
 </div>
+
+<div class="scrim" id="menu" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-label="More">
+    <div class="mhead"><div class="mtitle">This planner</div></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button id="mInk">Ink colour — switch between navy and pine</button>
+      <button id="mClear">Clear this day</button>
+      <button id="mBackup">Back up every day to a file</button>
+      <button id="mClose" class="ghost">Close</button>
+    </div>
+    <p class="hint" id="usage"></p>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
 
 <script>
 (function () {
   "use strict";
 
+  /* ============ the printed page, in its own coordinate system ============ */
+  var W = 1120, H = 840;                 // logical sheet units; strokes are stored in these
   var HOURS = [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
-  var TODO_LINES = 12;
-  var MEALS = [["b","B","Breakfast"],["l","L","Lunch"],["d","D","Dinner"]];
   var DOW = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   var MON = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  var NS = "odpp:";
 
+  var L = {
+    gutter: 56, holeX: 28, holeR: 7, holeGap: 52,
+    left: 76, right: 1090,
+    colGap: 50, colSplit: 560, rightCol: 610,
+    ruleY: 106,
+    schedTop: 152, schedRow: 39,
+    todoTop: 152, todoRow: 31, todoRows: 10,
+    notesLabel: 496, notesTop: 510, notesRow: 31, notesRows: 5,
+    mealsLabel: 700, mealsTop: 714, mealsRow: 31
+  };
+
+  var INKS = [
+    { name: "navy", css: "#1F3A5F" },
+    { name: "pine", css: "#2E5F4C" }
+  ];
+
+  /* ============ state ============ */
+  var today = startOfDay(new Date());
+  var cur = today;
+  var strokes = [];                      // [{c, p:[x,y,pressure,dt, ...]}]
+  var undoStack = [], redoStack = [];
+  var inkIdx = 0;
+  var erasing = false;
+  var dirty = false, saveTimer = null;
+  var monthAnchor = new Date(cur.getFullYear(), cur.getMonth(), 1);
+  var dayKeys = {};                      // ymd -> true, for the month dots
+
+  function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
   function key(d) {
     return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
   }
   function fromKey(k) { var p = k.split("-"); return new Date(+p[0], +p[1]-1, +p[2]); }
   function shift(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()+n); }
-  function hourLabel(h) {
-    var n = h % 12; if (n === 0) n = 12;
-    return { n: n, mer: (h === 6) ? "am" : (h === 12) ? "pm" : "" };
-  }
 
-  var today = new Date();
-  var cur = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  var model = blank(key(cur));
-  var saveTimer = null;
-  var monthAnchor = new Date(cur.getFullYear(), cur.getMonth(), 1);
-
-  function blank(k) {
-    return { ymd: k, ym: k.slice(0,7), sched: {}, todos: [], notes: "", meals: {} };
-  }
-  function isEmpty(m) {
-    if (m.notes.trim()) return false;
-    var i, v;
-    for (i in m.sched) { if (m.sched[i] && m.sched[i].trim()) return false; }
-    for (i in m.meals) { if (m.meals[i] && m.meals[i].trim()) return false; }
-    for (i = 0; i < m.todos.length; i++) {
-      v = m.todos[i];
-      if (v && ((v.t && v.t.trim()) || v.d)) return false;
-    }
-    return true;
-  }
-
-  /* ---------- build the sheet ---------- */
-  var schedEl = document.getElementById("sched");
-  var todosEl = document.getElementById("todos");
-  var mealsEl = document.getElementById("meals");
-  var notesEl = document.getElementById("notes");
-
-  HOURS.forEach(function (h) {
-    var li = document.createElement("li");
-    var lab = hourLabel(h);
-    var span = document.createElement("span");
-    span.className = "hour";
-    span.innerHTML = "<span>" + lab.n + "</span>" + (lab.mer ? '<span class="mer">' + lab.mer + "</span>" : "");
-    var inp = document.createElement("input");
-    inp.type = "text"; inp.id = "s-" + h; inp.dataset.hour = h;
-    inp.setAttribute("aria-label", lab.n + (lab.mer || (h < 12 ? "am" : "pm")));
-    li.appendChild(span); li.appendChild(inp);
-    schedEl.appendChild(li);
-  });
-
-  for (var i = 0; i < TODO_LINES; i++) {
-    var tli = document.createElement("li");
-    var box = document.createElement("span");
-    box.className = "box";
-    var cb = document.createElement("input");
-    cb.type = "checkbox"; cb.id = "tc-" + i; cb.dataset.idx = i;
-    cb.setAttribute("aria-label", "Task " + (i+1) + " done");
-    box.appendChild(cb);
-    var ti = document.createElement("input");
-    ti.type = "text"; ti.id = "tt-" + i; ti.dataset.idx = i;
-    ti.setAttribute("aria-label", "Task " + (i+1));
-    tli.appendChild(box); tli.appendChild(ti);
-    todosEl.appendChild(tli);
-  }
-
-  MEALS.forEach(function (m) {
-    var li = document.createElement("li");
-    var lab = document.createElement("span");
-    lab.className = "meal-lbl"; lab.textContent = m[1];
-    var inp = document.createElement("input");
-    inp.type = "text"; inp.id = "m-" + m[0]; inp.dataset.meal = m[0];
-    inp.setAttribute("aria-label", m[2]);
-    li.appendChild(lab); li.appendChild(inp);
-    mealsEl.appendChild(li);
-  });
-
-  /* ---------- render ---------- */
-  function renderHead() {
-    document.getElementById("dnum").textContent = cur.getDate();
-    document.getElementById("dow").textContent = DOW[cur.getDay()];
-    document.getElementById("dmon").textContent = MON[cur.getMonth()] + " " + cur.getFullYear();
-    document.getElementById("pick").textContent = MON[cur.getMonth()].slice(0,3) + " " + cur.getDate() + ", " + cur.getFullYear();
-    document.getElementById("todayTag").hidden = key(cur) !== key(today);
-  }
-
-  function renderBody() {
-    HOURS.forEach(function (h) { document.getElementById("s-" + h).value = model.sched[h] || ""; });
-    for (var i = 0; i < TODO_LINES; i++) {
-      var t = model.todos[i] || { t: "", d: false };
-      document.getElementById("tt-" + i).value = t.t || "";
-      document.getElementById("tc-" + i).checked = !!t.d;
-      todosEl.children[i].classList.toggle("done", !!t.d && !!(t.t || "").trim());
-    }
-    notesEl.value = model.notes || "";
-    MEALS.forEach(function (m) { document.getElementById("m-" + m[0]).value = model.meals[m[0]] || ""; });
-    renderCount();
-  }
-
-  function renderCount() {
-    var done = 0, total = 0;
-    for (var i = 0; i < TODO_LINES; i++) {
-      var t = model.todos[i];
-      if (t && (t.t || "").trim()) { total++; if (t.d) done++; }
-    }
-    document.getElementById("todoCount").textContent = total ? done + " / " + total + " done" : "";
-  }
-
-  /* ---------- storage ---------- */
-  var storageOK = true;
-  function lsGet(k) {
-    try { var raw = localStorage.getItem(NS + k); return raw ? JSON.parse(raw) : null; }
-    catch (e) { return null; }
-  }
-  function lsSet(k, v) {
-    try {
-      if (v === null) localStorage.removeItem(NS + k);
-      else localStorage.setItem(NS + k, JSON.stringify(v));
-      return true;
-    } catch (e) { storageOK = false; return false; }
-  }
-
-  function hydrate(k, raw) {
-    var m = blank(k);
-    if (!raw) return m;
-    m.sched = raw.sched && typeof raw.sched === "object" ? raw.sched : {};
-    m.meals = raw.meals && typeof raw.meals === "object" ? raw.meals : {};
-    m.notes = typeof raw.notes === "string" ? raw.notes : "";
-    m.todos = Array.isArray(raw.todos) ? raw.todos.slice(0, TODO_LINES).map(function (t) {
-      return { t: t && typeof t.t === "string" ? t.t : "", d: !!(t && t.d) };
-    }) : [];
-    return m;
-  }
-
-  function setStatus(text, state) {
-    var el = document.getElementById("status");
-    el.textContent = text;
-    if (state) el.dataset.state = state; else el.removeAttribute("data-state");
-  }
-
-  function scheduleSave() {
-    setStatus("Saving…", "saving");
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(save, 500);
-  }
-
-  function save() {
-    saveTimer = null;
-    var k = model.ymd;
-    var empty = isEmpty(model);
-    var ok = lsSet(k, empty ? null : {
-      ymd: k, ym: model.ym, sched: model.sched, todos: model.todos,
-      notes: model.notes, meals: model.meals, updated: new Date().toISOString()
+  /* ============ storage: IndexedDB, so a year of ink has room ============ */
+  var idb = null;
+  function openDB() {
+    return new Promise(function (res) {
+      if (!("indexedDB" in window)) return res(null);
+      var rq;
+      try { rq = indexedDB.open("odpp", 1); } catch (e) { return res(null); }
+      rq.onupgradeneeded = function () {
+        var d = rq.result;
+        if (!d.objectStoreNames.contains("days")) d.createObjectStore("days", { keyPath: "ymd" });
+      };
+      rq.onsuccess = function () { res(rq.result); };
+      rq.onerror = function () { res(null); };
     });
-    if (!ok) { setStatus("Not saved — storage blocked"); return; }
-    setStatus(empty ? "" : "Saved " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
+  }
+  function tx(mode, fn) {
+    return new Promise(function (res, rej) {
+      if (!idb) return rej(new Error("no store"));
+      var t = idb.transaction("days", mode);
+      var out = fn(t.objectStore("days"));
+      t.oncomplete = function () { res(out && out.result !== undefined ? out.result : undefined); };
+      t.onerror = function () { rej(t.error); };
+      t.onabort = function () { rej(t.error); };
+    });
+  }
+  function getDay(k) { return tx("readonly", function (s) { return s.get(k); }); }
+  function putDay(rec) { return tx("readwrite", function (s) { return s.put(rec); }); }
+  function delDay(k) { return tx("readwrite", function (s) { return s.delete(k); }); }
+  function allKeys() { return tx("readonly", function (s) { return s.getAllKeys(); }); }
+  function allDays() { return tx("readonly", function (s) { return s.getAll(); }); }
+
+  /* ============ canvases ============ */
+  var sheet = document.getElementById("sheet");
+  var tplC = document.getElementById("tpl"), tplX = tplC.getContext("2d");
+  var inkC = document.getElementById("ink"), inkX = inkC.getContext("2d");
+  var scale = 1, dpr = 1;
+
+  function fit() {
+    var stage = document.querySelector(".stage");
+    var availW = stage.clientWidth - 24, availH = stage.clientHeight - 24;
+    scale = Math.min(availW / W, availH / H);
+    if (!isFinite(scale) || scale <= 0) scale = 0.5;
+    var cssW = Math.floor(W * scale), cssH = Math.floor(H * scale);
+    sheet.style.width = cssW + "px";
+    sheet.style.height = cssH + "px";
+    dpr = Math.min(window.devicePixelRatio || 1, 3);
+    [tplC, inkC].forEach(function (c) {
+      c.width = Math.floor(cssW * dpr);
+      c.height = Math.floor(cssH * dpr);
+    });
+    var k = (cssW * dpr) / W;
+    tplX.setTransform(k, 0, 0, k, 0, 0);
+    inkX.setTransform(k, 0, 0, k, 0, 0);
+    drawTemplate();
+    redrawInk();
   }
 
-  /* ---------- editing ---------- */
-  schedEl.addEventListener("input", function (e) {
-    if (e.target.dataset.hour === undefined) return;
-    model.sched[e.target.dataset.hour] = e.target.value;
-    scheduleSave();
-  });
+  
 
-  todosEl.addEventListener("input", function (e) {
-    var idx = e.target.dataset.idx;
-    if (idx === undefined) return;
-    idx = +idx;
-    while (model.todos.length <= idx) model.todos.push({ t: "", d: false });
-    if (e.target.type === "checkbox") model.todos[idx].d = e.target.checked;
-    else model.todos[idx].t = e.target.value;
-    todosEl.children[idx].classList.toggle("done", model.todos[idx].d && !!model.todos[idx].t.trim());
-    renderCount();
-    scheduleSave();
-  });
+  function drawTemplate() {
+    var RULE = "#DCE1DB", STRONG = "#BFC7C0", FAINT = "#8B9490",
+        SOFT = "#5C6763", PINE = "#3F6B5B", BRASS = "#A8813A", DARK = "#1B2421",
+        PAPER = "#F1F3EE";
 
-  mealsEl.addEventListener("input", function (e) {
-    if (!e.target.dataset.meal) return;
-    model.meals[e.target.dataset.meal] = e.target.value;
-    scheduleSave();
-  });
+    tplX.clearRect(0, 0, W, H);
+    tplX.fillStyle = "#FCFCFA";
+    tplX.fillRect(0, 0, W, H);
 
-  notesEl.addEventListener("input", function () {
-    model.notes = notesEl.value;
-    scheduleSave();
-  });
-
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Enter" && e.target.type === "text") {
-      var li = e.target.closest("li");
-      var next = li && li.nextElementSibling && li.nextElementSibling.querySelector('input[type="text"]');
-      if (next) { e.preventDefault(); next.focus(); }
+    // coil gutter
+    tplX.fillStyle = PAPER;
+    tplX.fillRect(0, 0, L.gutter, H);
+    tplX.strokeStyle = RULE; tplX.lineWidth = 1;
+    tplX.beginPath(); tplX.moveTo(L.gutter + .5, 0); tplX.lineTo(L.gutter + .5, H); tplX.stroke();
+    for (var y = 34; y < H - 16; y += L.holeGap) {
+      tplX.beginPath(); tplX.arc(L.holeX, y, L.holeR, 0, 6.2832);
+      tplX.fillStyle = "#E4E8E1"; tplX.fill();
+      tplX.strokeStyle = "#D2D8D0"; tplX.stroke();
     }
-    if (e.altKey && e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
-    if (e.altKey && e.key === "ArrowRight") { e.preventDefault(); go(1); }
-    if (e.key === "Escape") closeMonth();
+
+    // date header
+    tplX.textBaseline = "alphabetic";
+    tplX.fillStyle = DARK;
+    tplX.font = '300 62px "Newsreader", Georgia, serif';
+    var dnum = String(cur.getDate());
+    tplX.fillText(dnum, L.left, 90);
+    var nw = tplX.measureText(dnum).width;
+
+    tplX.fillStyle = PINE;
+    tplX.font = 'italic 400 27px "Newsreader", Georgia, serif';
+    tplX.fillText(DOW[cur.getDay()], L.left + nw + 16, 74);
+
+    tplX.fillStyle = FAINT;
+    tplX.font = '400 12px "DM Mono", ui-monospace, monospace';
+    tplX.fillText(sp(MON[cur.getMonth()].toUpperCase() + " " + cur.getFullYear()), L.left + nw + 18, 93);
+
+    if (key(cur) === key(today)) {
+      tplX.strokeStyle = BRASS; tplX.fillStyle = BRASS;
+      tplX.font = '400 11px "DM Mono", ui-monospace, monospace';
+      var tw = tplX.measureText(sp("TODAY")).width;
+      tplX.lineWidth = 1;
+      tplX.strokeRect(L.right - tw - 17.5, 58.5, tw + 17, 22);
+      tplX.fillText(sp("TODAY"), L.right - tw - 9, 73);
+    }
+
+    tplX.fillStyle = BRASS;
+    tplX.fillRect(L.left, L.ruleY, L.right - L.left, 2);
+
+    // section labels
+    label("TODAY'S SCHEDULE", L.left, 138);
+    label("TO DO", L.rightCol, 138);
+    label("NOTES", L.rightCol, L.notesLabel);
+    label("MEALS", L.rightCol, L.mealsLabel);
+
+    function label(text, x, baseline) {
+      tplX.fillStyle = SOFT;
+      tplX.font = '500 11px "DM Mono", ui-monospace, monospace';
+      tplX.fillText(sp(text), x, baseline);
+    }
+
+    // schedule rows
+    tplX.strokeStyle = STRONG; tplX.lineWidth = 1;
+    line(L.left, L.schedTop, L.colSplit, L.schedTop);
+    tplX.strokeStyle = RULE;
+    HOURS.forEach(function (h, i) {
+      var top = L.schedTop + i * L.schedRow, bot = top + L.schedRow;
+      line(L.left, bot, L.colSplit, bot);
+      var n = String(h % 12 || 12);
+      tplX.fillStyle = FAINT;
+      tplX.font = '400 13px "DM Mono", ui-monospace, monospace';
+      tplX.fillText(n, L.left + 5, bot - 12);
+      var mer = h === 6 ? "AM" : h === 12 ? "PM" : "";
+      if (mer) {
+        var nw2 = tplX.measureText(n).width;
+        tplX.fillStyle = BRASS;
+        tplX.font = '400 9px "DM Mono", ui-monospace, monospace';
+        tplX.fillText(mer, L.left + 7 + nw2, bot - 12);
+      }
+    });
+
+    // to do
+    tplX.strokeStyle = STRONG;
+    line(L.rightCol, L.todoTop, L.right, L.todoTop);
+    for (var i = 0; i < L.todoRows; i++) {
+      var top = L.todoTop + i * L.todoRow, bot = top + L.todoRow;
+      tplX.strokeStyle = RULE; line(L.rightCol, bot, L.right, bot);
+      tplX.strokeStyle = STRONG; tplX.lineWidth = 1;
+      tplX.strokeRect(L.rightCol + 4.5, top + (L.todoRow - 14) / 2 + .5, 13, 13);
+    }
+
+    // notes
+    tplX.strokeStyle = STRONG;
+    line(L.rightCol, L.notesTop, L.right, L.notesTop);
+    tplX.strokeStyle = RULE;
+    for (var j = 1; j <= L.notesRows; j++) {
+      var yy = L.notesTop + j * L.notesRow;
+      line(L.rightCol, yy, L.right, yy);
+    }
+
+    // meals
+    tplX.strokeStyle = STRONG;
+    line(L.rightCol, L.mealsTop, L.right, L.mealsTop);
+    ["B","L","D"].forEach(function (m, i) {
+      var top = L.mealsTop + i * L.mealsRow, bot = top + L.mealsRow;
+      tplX.strokeStyle = RULE; line(L.rightCol, bot, L.right, bot);
+      tplX.fillStyle = FAINT;
+      tplX.font = '400 11px "DM Mono", ui-monospace, monospace';
+      tplX.fillText(m, L.rightCol + 5, bot - 11);
+    });
+
+    function line(x1, y1, x2, y2) {
+      tplX.beginPath();
+      tplX.moveTo(x1, Math.floor(y1) + .5);
+      tplX.lineTo(x2, Math.floor(y2) + .5);
+      tplX.stroke();
+    }
+  }
+
+  function sp(s) { return s.split("").join(" "); }   // letter-spacing, canvas-style
+
+  /* ============ ink ============ */
+  function redrawInk() {
+    inkX.clearRect(0, 0, W, H);
+    for (var i = 0; i < strokes.length; i++) paintStroke(strokes[i]);
+  }
+
+  function paintStroke(s) {
+    var p = s.p, n = p.length / 4;
+    if (n < 1) return;
+    inkX.strokeStyle = INKS[s.c] ? INKS[s.c].css : INKS[0].css;
+    inkX.lineCap = "round";
+    inkX.lineJoin = "round";
+    if (n === 1) {
+      inkX.beginPath();
+      inkX.arc(p[0], p[1], width(p[2]) / 2, 0, 6.2832);
+      inkX.fillStyle = inkX.strokeStyle;
+      inkX.fill();
+      return;
+    }
+    // Draw segment by segment so pressure can vary along the stroke.
+    for (var i = 1; i < n; i++) {
+      var x0 = p[(i-1)*4], y0 = p[(i-1)*4+1], pr0 = p[(i-1)*4+2];
+      var x1 = p[i*4],     y1 = p[i*4+1],     pr1 = p[i*4+2];
+      inkX.lineWidth = (width(pr0) + width(pr1)) / 2;
+      inkX.beginPath();
+      inkX.moveTo(x0, y0);
+      if (i < n - 1) {
+        var x2 = p[(i+1)*4], y2 = p[(i+1)*4+1];
+        inkX.quadraticCurveTo(x1, y1, (x1 + x2) / 2, (y1 + y2) / 2);
+      } else {
+        inkX.lineTo(x1, y1);
+      }
+      inkX.stroke();
+    }
+  }
+
+  function width(pr100) {
+    var pr = (pr100 || 50) / 100;
+    return 1.5 + pr * 2.6;
+  }
+
+  /* ---- pointer handling: pen draws, finger is ignored ---- */
+  var live = null, lastX = 0, lastY = 0, t0 = 0, lastT = 0;
+
+  function toLocal(e) {
+    var r = inkC.getBoundingClientRect();
+    return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H };
+  }
+  function isEraser(e) {
+    return erasing || e.pointerType === "eraser" || (e.buttons & 32) === 32;
+  }
+
+  inkC.addEventListener("pointerdown", function (e) {
+    if (e.pointerType === "touch") return;              // fingers don't write
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    e.preventDefault();
+    inkC.setPointerCapture(e.pointerId);
+    var pt = toLocal(e);
+
+    if (isEraser(e)) { live = { erase: true, hit: [] }; eraseAt(pt.x, pt.y); return; }
+
+    t0 = performance.now(); lastT = t0;
+    live = { c: inkIdx, p: [] };
+    push(live, pt.x, pt.y, e.pressure, 0);
+    lastX = pt.x; lastY = pt.y;
   });
 
-  /* ---------- navigation ---------- */
-  function go(n) { jump(shift(cur, n)); }
+  inkC.addEventListener("pointermove", function (e) {
+    if (!live) return;
+    e.preventDefault();
+    var pts = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    for (var i = 0; i < pts.length; i++) {
+      var pt = toLocal(pts[i]);
+      if (live.erase) { eraseAt(pt.x, pt.y); continue; }
+      var dx = pt.x - lastX, dy = pt.y - lastY;
+      if (dx * dx + dy * dy < 1.6) continue;            // thin out the sample stream
+      var now = performance.now();
+      push(live, pt.x, pt.y, pts[i].pressure, now - lastT);
+      lastT = now; lastX = pt.x; lastY = pt.y;
+    }
+    if (!live.erase) { inkX.clearRect(0,0,W,H); redrawLiveFast(); }
+  });
 
-  function jump(d) {
-    if (saveTimer) { clearTimeout(saveTimer); save(); }
+  function redrawLiveFast() {
+    for (var i = 0; i < strokes.length; i++) paintStroke(strokes[i]);
+    paintStroke(live);
+  }
+
+  function endStroke(e) {
+    if (!live) return;
+    if (live.erase) {
+      if (live.hit.length) {
+        undoStack.push({ type: "erase", items: live.hit });
+        redoStack.length = 0;
+        markDirty();
+      }
+    } else if (live.p.length >= 4) {
+      strokes.push(live);
+      undoStack.push({ type: "add" });
+      redoStack.length = 0;
+      markDirty();
+    }
+    live = null;
+    redrawInk();
+    syncButtons();
+  }
+  inkC.addEventListener("pointerup", endStroke);
+  inkC.addEventListener("pointercancel", endStroke);
+  inkC.addEventListener("pointerleave", function (e) { if (live) endStroke(e); });
+
+  function push(s, x, y, pressure, dt) {
+    var pr = pressure > 0 ? Math.round(pressure * 100) : 50;
+    s.p.push(Math.round(x), Math.round(y), pr, Math.round(dt));
+  }
+
+  var ERASE_R2 = 13 * 13;
+  function eraseAt(x, y) {
+    for (var i = strokes.length - 1; i >= 0; i--) {
+      var p = strokes[i].p, hit = false;
+      for (var j = 0; j < p.length; j += 4) {
+        var dx = p[j] - x, dy = p[j+1] - y;
+        if (dx*dx + dy*dy <= ERASE_R2) { hit = true; break; }
+      }
+      if (hit) {
+        live.hit.push({ i: i, s: strokes[i] });
+        strokes.splice(i, 1);
+        redrawInk();
+      }
+    }
+  }
+
+  /* ---- undo / redo ---- */
+  function undo() {
+    var op = undoStack.pop();
+    if (!op) return;
+    if (op.type === "add") {
+      redoStack.push({ type: "add", s: strokes.pop() });
+    } else {
+      op.items.forEach(function (it) { strokes.splice(it.i, 0, it.s); });
+      redoStack.push(op);
+    }
+    markDirty(); redrawInk(); syncButtons();
+  }
+  function redo() {
+    var op = redoStack.pop();
+    if (!op) return;
+    if (op.type === "add") {
+      strokes.push(op.s);
+      undoStack.push({ type: "add" });
+    } else {
+      op.items.forEach(function (it) {
+        var k = strokes.indexOf(it.s);
+        if (k >= 0) strokes.splice(k, 1);
+      });
+      undoStack.push(op);
+    }
+    markDirty(); redrawInk(); syncButtons();
+  }
+  function syncButtons() {
+    document.getElementById("undo").disabled = !undoStack.length;
+    document.getElementById("redo").disabled = !redoStack.length;
+  }
+
+  /* ============ save / load ============ */
+  function markDirty() {
+    dirty = true;
+    setStatus("Saving…");
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(flush, 500);
+  }
+
+  function flush() {
+    clearTimeout(saveTimer); saveTimer = null;
+    if (!dirty) return Promise.resolve();
+    dirty = false;
+    var k = key(cur);
+    var done;
+    if (!strokes.length) {
+      delete dayKeys[k];
+      done = delDay(k);
+    } else {
+      dayKeys[k] = true;
+      done = putDay({ ymd: k, v: 1, w: W, h: H, strokes: strokes, updated: Date.now() });
+    }
+    return done.then(function () {
+      setStatus(strokes.length ? "Saved" : "");
+    }, function () {
+      setStatus("Not saved");
+      toast("Couldn't save this page. Your browser may be out of storage.");
+    });
+  }
+
+  function loadDay(d) {
     cur = d;
     monthAnchor = new Date(cur.getFullYear(), cur.getMonth(), 1);
-    setStatus("");
-    renderHead();
-    model = hydrate(key(cur), lsGet(key(cur)));
-    renderBody();
+    strokes = []; undoStack = []; redoStack = [];
+    syncButtons(); drawTemplate(); redrawInk(); renderDateBtn(); setStatus("");
+    var k = key(cur);
+    return getDay(k).then(function (rec) {
+      if (key(cur) !== k) return;                       // moved on already
+      strokes = (rec && Array.isArray(rec.strokes)) ? rec.strokes : [];
+      redrawInk();
+      setStatus(strokes.length ? "Saved" : "");
+    }, function () {});
   }
 
-  document.getElementById("prev").addEventListener("click", function () { go(-1); });
-  document.getElementById("next").addEventListener("click", function () { go(1); });
-  document.getElementById("today").addEventListener("click", function () {
-    var now = new Date();
-    jump(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
+  function goto(d) { flush().then(function () { loadDay(d); }); }
+
+  function setStatus(t) { document.getElementById("status").textContent = t; }
+
+  var toastTimer = null;
+  function toast(msg) {
+    var el = document.getElementById("toast");
+    el.textContent = msg; el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.hidden = true; }, 4200);
+  }
+
+  function renderDateBtn() {
+    document.getElementById("pick").textContent =
+      DOW[cur.getDay()].slice(0,3) + " " + MON[cur.getMonth()].slice(0,3) + " " + cur.getDate() + ", " + cur.getFullYear();
+  }
+
+  /* ============ toolbar ============ */
+  document.getElementById("prev").onclick = function () { goto(shift(cur, -1)); };
+  document.getElementById("next").onclick = function () { goto(shift(cur, 1)); };
+  document.getElementById("today").onclick = function () { goto(startOfDay(new Date())); };
+  document.getElementById("undo").onclick = undo;
+  document.getElementById("redo").onclick = redo;
+
+  var bPen = document.getElementById("tPen"), bEr = document.getElementById("tErase");
+  function setTool(e) {
+    erasing = e;
+    bPen.setAttribute("aria-pressed", String(!e));
+    bEr.setAttribute("aria-pressed", String(e));
+    sheet.classList.toggle("erasing", e);
+  }
+  bPen.onclick = function () { setTool(false); };
+  bEr.onclick = function () { setTool(true); };
+
+  function paintSwatch() { document.getElementById("penSw").style.background = INKS[inkIdx].css; }
+
+  document.addEventListener("keydown", function (e) {
+    var mod = e.ctrlKey || e.metaKey;
+    if (mod && e.key.toLowerCase() === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
+    else if (mod && (e.key.toLowerCase() === "y" || (e.key.toLowerCase() === "z" && e.shiftKey))) { e.preventDefault(); redo(); }
+    else if (e.key === "ArrowLeft" && !mod) goto(shift(cur, -1));
+    else if (e.key === "ArrowRight" && !mod) goto(shift(cur, 1));
+    else if (e.key === "e") setTool(!erasing);
+    else if (e.key === "Escape") { closeAll(); }
   });
 
-  /* ---------- backup ---------- */
-  document.getElementById("backup").addEventListener("click", function () {
-    if (saveTimer) { clearTimeout(saveTimer); save(); }
-    var out = {};
-    try {
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        if (k && k.indexOf(NS) === 0) out[k.slice(NS.length)] = JSON.parse(localStorage.getItem(k));
-      }
-    } catch (e) { /* export what we could read */ }
-    var blob = new Blob([JSON.stringify({ app: "one-day-per-page", days: out }, null, 2)], { type: "application/json" });
+  /* ============ export ============ */
+  function renderToCanvas(mult) {
+    var c = document.createElement("canvas");
+    c.width = W * mult; c.height = H * mult;
+    var x = c.getContext("2d");
+    x.scale(mult, mult);
+    x.drawImage(tplC, 0, 0, W, H);
+    x.drawImage(inkC, 0, 0, W, H);
+    return c;
+  }
+
+  function download(blob, name) {
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "planner-" + key(new Date()) + ".json";
+    a.download = name;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
-  });
-
-  /* ---------- month picker ---------- */
-  var scrim = document.getElementById("scrim");
-  var mgrid = document.getElementById("mgrid");
-
-  function openMonth() {
-    monthAnchor = new Date(cur.getFullYear(), cur.getMonth(), 1);
-    scrim.hidden = false;
-    drawMonth();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
   }
-  function closeMonth() { scrim.hidden = true; }
 
-  document.getElementById("pick").addEventListener("click", openMonth);
-  scrim.addEventListener("click", function (e) { if (e.target === scrim) closeMonth(); });
-  document.getElementById("mprev").addEventListener("click", function () {
-    monthAnchor = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() - 1, 1);
-    drawMonth();
-  });
-  document.getElementById("mnext").addEventListener("click", function () {
-    monthAnchor = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() + 1, 1);
-    drawMonth();
-  });
+  document.getElementById("save").onclick = function () {
+    flush().then(function () {
+      renderToCanvas(2).toBlob(function (b) {
+        if (!b) return toast("Couldn't make the image.");
+        download(b, "planner-" + key(cur) + ".png");
+        toast("Saved to your downloads as an image.");
+      }, "image/png");
+    });
+  };
+
+  /* ============ month picker ============ */
+  var scrim = document.getElementById("scrim"), mgrid = document.getElementById("mgrid");
+
+  document.getElementById("pick").onclick = function () {
+    monthAnchor = new Date(cur.getFullYear(), cur.getMonth(), 1);
+    refreshKeys().then(function () { scrim.hidden = false; drawMonth(); });
+  };
+  document.getElementById("mprev").onclick = function () {
+    monthAnchor = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() - 1, 1); drawMonth();
+  };
+  document.getElementById("mnext").onclick = function () {
+    monthAnchor = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() + 1, 1); drawMonth();
+  };
+  scrim.addEventListener("click", function (e) { if (e.target === scrim) scrim.hidden = true; });
+
+  function refreshKeys() {
+    return allKeys().then(function (ks) {
+      dayKeys = {};
+      (ks || []).forEach(function (k) { dayKeys[k] = true; });
+    }, function () {});
+  }
 
   function drawMonth() {
     document.getElementById("mtitle").textContent = MON[monthAnchor.getMonth()] + " " + monthAnchor.getFullYear();
@@ -671,48 +789,97 @@
     ["S","M","T","W","T","F","S"].forEach(function (d) {
       var el = document.createElement("div");
       el.className = "dowlbl"; el.textContent = d;
-      el.setAttribute("aria-hidden", "true");
       mgrid.appendChild(el);
     });
     var first = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), 1);
     var last = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() + 1, 0).getDate();
-    for (var pad = 0; pad < first.getDay(); pad++) {
-      var b = document.createElement("div");
-      b.className = "day blank";
-      mgrid.appendChild(b);
+    for (var p = 0; p < first.getDay(); p++) {
+      var b = document.createElement("div"); b.className = "day blank"; mgrid.appendChild(b);
     }
     for (var n = 1; n <= last; n++) {
       var d = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), n);
       var k = key(d);
       var btn = document.createElement("button");
-      btn.className = "day";
-      btn.textContent = n;
-      btn.dataset.k = k;
+      btn.className = "day"; btn.textContent = n; btn.dataset.k = k;
       if (k === key(today)) btn.classList.add("today");
       if (k === key(cur)) btn.classList.add("sel");
-      if (lsGet(k)) btn.classList.add("has");
-      btn.addEventListener("click", function () {
-        jump(fromKey(this.dataset.k));
-        closeMonth();
-      });
+      if (dayKeys[k]) btn.classList.add("has");
+      btn.onclick = function () { scrim.hidden = true; goto(fromKey(this.dataset.k)); };
       mgrid.appendChild(btn);
     }
   }
 
-  /* ---------- boot ---------- */
-  renderHead();
-  model = hydrate(key(cur), lsGet(key(cur)));
-  renderBody();
-  if (!lsSet("__probe", { ok: 1 })) setStatus("Storage blocked — nothing will save");
-  else lsSet("__probe", null);
+  /* ============ more menu ============ */
+  var menu = document.getElementById("menu");
+  document.getElementById("more").onclick = function () {
+    menu.hidden = false;
+    showUsage();
+  };
+  document.getElementById("mClose").onclick = function () { menu.hidden = true; };
+  menu.addEventListener("click", function (e) { if (e.target === menu) menu.hidden = true; });
+  function closeAll() { menu.hidden = true; scrim.hidden = true; }
 
-  window.addEventListener("beforeunload", function () {
-    if (saveTimer) { clearTimeout(saveTimer); save(); }
+  document.getElementById("mInk").onclick = function () {
+    inkIdx = (inkIdx + 1) % INKS.length;
+    paintSwatch();
+    toast("Ink is now " + INKS[inkIdx].name + ".");
+  };
+
+  document.getElementById("mClear").onclick = function () {
+    if (!strokes.length) { toast("This page is already blank."); return; }
+    if (!confirm("Clear everything written on " + key(cur) + "? You can undo this straight after.")) return;
+    undoStack.push({ type: "erase", items: strokes.map(function (s, i) { return { i: i, s: s }; }) });
+    redoStack.length = 0;
+    strokes = [];
+    markDirty(); redrawInk(); syncButtons();
+    menu.hidden = true;
+  };
+
+  document.getElementById("mBackup").onclick = function () {
+    flush().then(allDays).then(function (rows) {
+      var blob = new Blob([JSON.stringify({ app: "one-day-per-page", v: 1, days: rows || [] })],
+                          { type: "application/json" });
+      download(blob, "planner-backup-" + key(new Date()) + ".json");
+      toast("Backed up " + ((rows || []).length) + " day" + ((rows || []).length === 1 ? "" : "s") + ".");
+    }, function () { toast("Couldn't read your days to back them up."); });
+  };
+
+  function showUsage() {
+    var el = document.getElementById("usage");
+    allKeys().then(function (ks) {
+      var n = (ks || []).length;
+      el.textContent = n + " day" + (n === 1 ? "" : "s") + " written, kept on this device only. "
+        + "Back up now and then — clearing your browser data erases them.";
+    }, function () {
+      el.textContent = "Your days are kept on this device only.";
+    });
+  }
+
+  /* ============ boot ============ */
+  paintSwatch();
+  renderDateBtn();
+  fit();
+
+  var rt = null;
+  window.addEventListener("resize", function () {
+    clearTimeout(rt); rt = setTimeout(fit, 120);
   });
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { drawTemplate(); });
+  }
+
+  openDB().then(function (d) {
+    idb = d;
+    if (!idb) { setStatus("No storage"); toast("This browser won't let the planner save. Private mode?"); return; }
+    return refreshKeys().then(function () { return loadDay(cur); });
+  });
+
+  window.addEventListener("beforeunload", function () { if (dirty) flush(); });
+  document.addEventListener("visibilitychange", function () { if (document.hidden && dirty) flush(); });
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
-      navigator.serviceWorker.register("sw.js").catch(function () { /* offline is a bonus, not a requirement */ });
+      navigator.serviceWorker.register("sw.js").catch(function () {});
     });
   }
 })();
