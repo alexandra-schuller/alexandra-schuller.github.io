@@ -18,27 +18,22 @@
 <style>
   :root {
     --paper:       #F6F7F4;
-    --sheet:       #FCFCFA;
     --ink:         #1B2421;
     --ink-soft:    #5C6763;
     --ink-faint:   #8B9490;
-    --rule:        #DCE1DB;
     --rule-strong: #BFC7C0;
     --pine:        #3F6B5B;
     --pine-wash:   #E6EEE9;
     --brass:       #A8813A;
-    --pen:         #1F3A5F;
     --shadow:      0 1px 2px rgba(27,36,33,.06), 0 14px 36px -14px rgba(27,36,33,.22);
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --paper:       #101413;
-      --sheet:       #FCFCFA;   /* the sheet stays paper-white; you write on paper */
       --ink:         #E8EDE9;
       --ink-soft:    #9AA5A0;
       --ink-faint:   #6B7672;
-      --rule:        #DCE1DB;
-      --rule-strong: #BFC7C0;
+      --rule-strong: #3E4A45;
       --pine:        #8CC4AC;
       --pine-wash:   #22302A;
       --brass:       #D2AC6B;
@@ -57,7 +52,7 @@
     color: var(--ink);
     font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
     font-size: 15px;
-    overflow: hidden;                 /* the sheet always fits; nothing scrolls */
+    overflow: hidden;
     overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
@@ -67,8 +62,8 @@
   .bar {
     flex: 0 0 auto;
     display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-    padding: 8px 14px;
-    padding-top: calc(8px + env(safe-area-inset-top));
+    padding: 6px 12px;
+    padding-top: calc(6px + env(safe-area-inset-top));
     border-bottom: 1px solid var(--rule-strong);
     background: var(--paper);
   }
@@ -81,7 +76,7 @@
     background: transparent;
     border: 1px solid var(--rule-strong);
     border-radius: 4px;
-    padding: 7px 11px; min-height: 40px;
+    padding: 6px 11px; min-height: 38px;
     cursor: pointer;
     touch-action: manipulation;
     display: inline-flex; align-items: center; gap: 6px;
@@ -89,48 +84,38 @@
   button:hover:not(:disabled) { background: var(--pine-wash); border-color: var(--pine); }
   button:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
   button:disabled { opacity: .35; cursor: default; }
-  button[aria-pressed="true"] {
-    background: var(--pine); border-color: var(--pine); color: #FCFCFA;
-  }
-  .arrow { width: 42px; padding: 7px 0; justify-content: center; font-size: 16px; }
+  button[aria-pressed="true"] { background: var(--pine); border-color: var(--pine); color: #FCFCFA; }
+  .arrow { width: 40px; padding: 6px 0; justify-content: center; font-size: 16px; }
   .ghost { border-color: transparent; color: var(--ink-soft); }
   .ghost:hover:not(:disabled) { color: var(--ink); }
 
-  .datebtn {
-    font-family: "Newsreader", Georgia, serif;
-    font-size: 17px; min-width: 176px; justify-content: center;
-  }
-
+  .datebtn { font-family: "Newsreader", Georgia, serif; font-size: 17px; min-width: 172px; justify-content: center; }
   .swatch { width: 15px; height: 15px; border-radius: 50%; border: 1px solid rgba(0,0,0,.22); }
-
   .status {
     font-family: "DM Mono", ui-monospace, monospace;
     font-size: 11px; color: var(--ink-faint); letter-spacing: .02em;
-    min-width: 76px; text-align: right;
+    min-width: 70px; text-align: right;
   }
 
-  /* ---------- the sheet ---------- */
-  .stage {
-    flex: 1 1 auto; min-height: 0;
-    display: grid; place-items: center;
-    padding: 12px;
-  }
-  .sheet {
-    position: relative;
-    background: var(--sheet);
-    border-radius: 3px;
-    box-shadow: var(--shadow);
-    touch-action: pan-y;              /* finger can still nudge; pen never scrolls */
-  }
-  .sheet canvas {
+  /* ---------- the page surface ---------- */
+  .stage { flex: 1 1 auto; min-height: 0; position: relative; overflow: hidden; }
+  .stage canvas {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
-    border-radius: 3px;
+    display: block;
+    touch-action: none;             /* we handle pan and pinch ourselves */
   }
-  #ink { touch-action: none; }
-  .sheet.erasing { cursor: cell; }
+  #zoomTag {
+    position: absolute; right: 10px; bottom: 10px;
+    font-family: "DM Mono", ui-monospace, monospace;
+    font-size: 11px; color: var(--ink-faint);
+    background: var(--paper); border: 1px solid var(--rule-strong);
+    border-radius: 3px; padding: 3px 7px;
+    pointer-events: none;
+  }
+  #zoomTag[hidden] { display: none !important; }
 
-  /* ---------- month overlay ---------- */
+  /* ---------- overlays ---------- */
   .scrim {
     position: fixed; inset: 0; z-index: 40;
     background: rgba(20,26,24,.5);
@@ -176,20 +161,18 @@
     border-top: 1px solid var(--rule-strong);
     font-size: 13px; line-height: 1.5; color: var(--ink-soft);
   }
-
   .toast {
     position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
     z-index: 60;
     background: var(--ink); color: var(--paper);
     font-size: 13px; padding: 10px 16px; border-radius: 4px;
-    box-shadow: var(--shadow);
-    max-width: calc(100% - 32px);
+    box-shadow: var(--shadow); max-width: calc(100% - 32px);
   }
   .toast[hidden] { display: none !important; }
 
-  @media (max-width: 640px) {
+  @media (max-width: 680px) {
     .datebtn { min-width: 0; font-size: 15px; }
-    .bar { gap: 6px; padding: 6px 10px; }
+    .bar { gap: 5px; padding: 5px 8px; }
     .grp + .grp { margin-left: 0; padding-left: 6px; }
     .status { display: none; }
   }
@@ -217,17 +200,16 @@
   </div>
 
   <div class="grp spacer">
-    <button class="ghost" id="save" title="Save this day as an image">Save image</button>
+    <button class="ghost" id="fit" title="Fit the whole page on screen">Fit</button>
     <button class="ghost" id="more" title="More">⋯</button>
   </div>
   <span class="status" id="status"></span>
 </header>
 
-<main class="stage">
-  <div class="sheet" id="sheet">
-    <canvas id="tpl"></canvas>
-    <canvas id="ink"></canvas>
-  </div>
+<main class="stage" id="stage">
+  <canvas id="tpl"></canvas>
+  <canvas id="ink"></canvas>
+  <div id="zoomTag" hidden>100%</div>
 </main>
 
 <div class="scrim" id="scrim" hidden>
@@ -246,7 +228,8 @@
   <div class="card" role="dialog" aria-modal="true" aria-label="More">
     <div class="mhead"><div class="mtitle">This planner</div></div>
     <div style="display:flex;flex-direction:column;gap:8px">
-      <button id="mInk">Ink colour — switch between navy and pine</button>
+      <button id="mInk">Ink colour — navy or pine</button>
+      <button id="mSave">Save this day as an image</button>
       <button id="mClear">Clear this day</button>
       <button id="mBackup">Back up every day to a file</button>
       <button id="mClose" class="ghost">Close</button>
@@ -261,38 +244,51 @@
 (function () {
   "use strict";
 
-  /* ============ the printed page, in its own coordinate system ============ */
-  var W = 1120, H = 840;                 // logical sheet units; strokes are stored in these
+  /* ================= the page ==================
+     A page is W units wide. Its height follows the shape of your screen,
+     so the sheet fills the tablet instead of sitting in a letterbox.
+     Each day remembers the shape it was written on. */
+  var W = 1120;
+  var H = 840;
   var HOURS = [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
   var DOW = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   var MON = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var INKS = [{ name: "navy", css: "#1F3A5F" }, { name: "pine", css: "#2E5F4C" }];
 
-  var L = {
-    gutter: 56, holeX: 28, holeR: 7, holeGap: 52,
-    left: 76, right: 1090,
-    colGap: 50, colSplit: 560, rightCol: 610,
-    ruleY: 106,
-    schedTop: 152, schedRow: 39,
-    todoTop: 152, todoRow: 31, todoRows: 10,
-    notesLabel: 496, notesTop: 510, notesRow: 31, notesRows: 5,
-    mealsLabel: 700, mealsTop: 714, mealsRow: 31
-  };
+  var L = {};
+  function layout() {
+    var rowsTop = 152, bottom = H - 30, avail = bottom - rowsTop, GAP = 34;
+    var r = (avail - 2 * GAP) / 18;
+    L = {
+      gutter: 56, holeX: 28, holeR: 7,
+      left: 76, right: 1090, colSplit: 560, rightCol: 610,
+      ruleY: 106, labelY: 138, rowsTop: rowsTop, bottom: bottom,
+      schedRow: avail / 16,
+      r: r,
+      todoTop: rowsTop, todoRows: 10,
+      notesTop: rowsTop + 10 * r + GAP, notesRows: 5,
+      mealsTop: rowsTop + 15 * r + 2 * GAP, mealsRows: 3
+    };
+    L.holeGap = Math.max(44, H / 16);
+  }
 
-  var INKS = [
-    { name: "navy", css: "#1F3A5F" },
-    { name: "pine", css: "#2E5F4C" }
-  ];
+  function screenAspectH() {
+    var st = document.getElementById("stage");
+    var a = st.clientHeight / Math.max(st.clientWidth, 1);
+    return Math.round(Math.min(Math.max(W * a, 620), 2100));
+  }
 
-  /* ============ state ============ */
+  /* ================= state ================= */
   var today = startOfDay(new Date());
   var cur = today;
-  var strokes = [];                      // [{c, p:[x,y,pressure,dt, ...]}]
+  var strokes = [];
   var undoStack = [], redoStack = [];
-  var inkIdx = 0;
-  var erasing = false;
+  var inkIdx = 0, erasing = false;
   var dirty = false, saveTimer = null;
   var monthAnchor = new Date(cur.getFullYear(), cur.getMonth(), 1);
-  var dayKeys = {};                      // ymd -> true, for the month dots
+  var dayKeys = {};
+  var view = { k: 1, tx: 0, ty: 0 };
+  var fitK = 1;
 
   function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
   function key(d) {
@@ -301,7 +297,7 @@
   function fromKey(k) { var p = k.split("-"); return new Date(+p[0], +p[1]-1, +p[2]); }
   function shift(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()+n); }
 
-  /* ============ storage: IndexedDB, so a year of ink has room ============ */
+  /* ================= storage ================= */
   var idb = null;
   function openDB() {
     return new Promise(function (res) {
@@ -327,54 +323,97 @@
     });
   }
   function getDay(k) { return tx("readonly", function (s) { return s.get(k); }); }
-  function putDay(rec) { return tx("readwrite", function (s) { return s.put(rec); }); }
+  function putDay(r) { return tx("readwrite", function (s) { return s.put(r); }); }
   function delDay(k) { return tx("readwrite", function (s) { return s.delete(k); }); }
   function allKeys() { return tx("readonly", function (s) { return s.getAllKeys(); }); }
   function allDays() { return tx("readonly", function (s) { return s.getAll(); }); }
 
-  /* ============ canvases ============ */
-  var sheet = document.getElementById("sheet");
+  /* ================= canvas plumbing ================= */
+  var stage = document.getElementById("stage");
   var tplC = document.getElementById("tpl"), tplX = tplC.getContext("2d");
   var inkC = document.getElementById("ink"), inkX = inkC.getContext("2d");
-  var scale = 1, dpr = 1;
+  var dpr = 1, sw = 0, sh = 0;
 
-  function fit() {
-    var stage = document.querySelector(".stage");
-    var availW = stage.clientWidth - 24, availH = stage.clientHeight - 24;
-    scale = Math.min(availW / W, availH / H);
-    if (!isFinite(scale) || scale <= 0) scale = 0.5;
-    var cssW = Math.floor(W * scale), cssH = Math.floor(H * scale);
-    sheet.style.width = cssW + "px";
-    sheet.style.height = cssH + "px";
+  function sizeCanvases() {
+    sw = stage.clientWidth; sh = stage.clientHeight;
     dpr = Math.min(window.devicePixelRatio || 1, 3);
     [tplC, inkC].forEach(function (c) {
-      c.width = Math.floor(cssW * dpr);
-      c.height = Math.floor(cssH * dpr);
+      c.width = Math.max(1, Math.floor(sw * dpr));
+      c.height = Math.max(1, Math.floor(sh * dpr));
     });
-    var k = (cssW * dpr) / W;
-    tplX.setTransform(k, 0, 0, k, 0, 0);
-    inkX.setTransform(k, 0, 0, k, 0, 0);
-    drawTemplate();
-    redrawInk();
   }
 
-  
+  function applyView(ctx) {
+    ctx.setTransform(dpr * view.k, 0, 0, dpr * view.k, dpr * view.tx, dpr * view.ty);
+  }
+  function clearAll(ctx, c) {
+    ctx.save(); ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.restore();
+  }
 
+  function computeFit() {
+    fitK = Math.min((sw - 16) / W, (sh - 16) / H);
+    if (!isFinite(fitK) || fitK <= 0) fitK = 0.5;
+  }
+  function fitView() {
+    computeFit();
+    view.k = fitK;
+    view.tx = (sw - W * fitK) / 2;
+    view.ty = (sh - H * fitK) / 2;
+    renderAll();
+  }
+  function clampView() {
+    var minK = fitK * 0.9, maxK = fitK * 8;
+    view.k = Math.min(Math.max(view.k, minK), maxK);
+    var pw = W * view.k, ph = H * view.k;
+    // keep at least a third of the page on screen in each direction
+    view.tx = Math.min(Math.max(view.tx, sw - pw - 40), 40);
+    view.ty = Math.min(Math.max(view.ty, sh - ph - 40), 40);
+    if (pw <= sw) view.tx = (sw - pw) / 2;
+    if (ph <= sh) view.ty = (sh - ph) / 2;
+  }
+
+  var zoomTagTimer = null;
+  function showZoom() {
+    var el = document.getElementById("zoomTag");
+    var pct = Math.round(view.k / fitK * 100);
+    el.textContent = pct + "%";
+    el.hidden = pct === 100;
+    clearTimeout(zoomTagTimer);
+    if (!el.hidden) zoomTagTimer = setTimeout(function () { el.hidden = true; }, 1600);
+  }
+
+  var raf = null;
+  function renderAll() {
+    if (raf) return;
+    raf = requestAnimationFrame(function () {
+      raf = null;
+      drawTemplate();
+      redrawInk();
+    });
+  }
+
+  /* ================= the printed page ================= */
   function drawTemplate() {
     var RULE = "#DCE1DB", STRONG = "#BFC7C0", FAINT = "#8B9490",
-        SOFT = "#5C6763", PINE = "#3F6B5B", BRASS = "#A8813A", DARK = "#1B2421",
-        PAPER = "#F1F3EE";
+        SOFT = "#5C6763", PINE = "#3F6B5B", BRASS = "#A8813A", DARK = "#1B2421";
 
-    tplX.clearRect(0, 0, W, H);
+    clearAll(tplX, tplC);
+    applyView(tplX);
+
+    // the sheet itself
     tplX.fillStyle = "#FCFCFA";
     tplX.fillRect(0, 0, W, H);
+    tplX.strokeStyle = STRONG; tplX.lineWidth = 1 / view.k;
+    tplX.strokeRect(0, 0, W, H);
 
     // coil gutter
-    tplX.fillStyle = PAPER;
+    tplX.fillStyle = "#F1F3EE";
     tplX.fillRect(0, 0, L.gutter, H);
-    tplX.strokeStyle = RULE; tplX.lineWidth = 1;
-    tplX.beginPath(); tplX.moveTo(L.gutter + .5, 0); tplX.lineTo(L.gutter + .5, H); tplX.stroke();
-    for (var y = 34; y < H - 16; y += L.holeGap) {
+    tplX.strokeStyle = RULE;
+    line(L.gutter, 0, L.gutter, H);
+    for (var y = L.holeGap * 0.6; y < H - 16; y += L.holeGap) {
       tplX.beginPath(); tplX.arc(L.holeX, y, L.holeR, 0, 6.2832);
       tplX.fillStyle = "#E4E8E1"; tplX.fill();
       tplX.strokeStyle = "#D2D8D0"; tplX.stroke();
@@ -384,9 +423,9 @@
     tplX.textBaseline = "alphabetic";
     tplX.fillStyle = DARK;
     tplX.font = '300 62px "Newsreader", Georgia, serif';
-    var dnum = String(cur.getDate());
-    tplX.fillText(dnum, L.left, 90);
-    var nw = tplX.measureText(dnum).width;
+    var dn = String(cur.getDate());
+    tplX.fillText(dn, L.left, 90);
+    var nw = tplX.measureText(dn).width;
 
     tplX.fillStyle = PINE;
     tplX.font = 'italic 400 27px "Newsreader", Georgia, serif';
@@ -400,19 +439,18 @@
       tplX.strokeStyle = BRASS; tplX.fillStyle = BRASS;
       tplX.font = '400 11px "DM Mono", ui-monospace, monospace';
       var tw = tplX.measureText(sp("TODAY")).width;
-      tplX.lineWidth = 1;
-      tplX.strokeRect(L.right - tw - 17.5, 58.5, tw + 17, 22);
+      tplX.lineWidth = 1 / view.k;
+      tplX.strokeRect(L.right - tw - 17, 58, tw + 17, 22);
       tplX.fillText(sp("TODAY"), L.right - tw - 9, 73);
     }
 
     tplX.fillStyle = BRASS;
     tplX.fillRect(L.left, L.ruleY, L.right - L.left, 2);
 
-    // section labels
-    label("TODAY'S SCHEDULE", L.left, 138);
-    label("TO DO", L.rightCol, 138);
-    label("NOTES", L.rightCol, L.notesLabel);
-    label("MEALS", L.rightCol, L.mealsLabel);
+    label("TODAY'S SCHEDULE", L.left, L.labelY);
+    label("TO DO", L.rightCol, L.labelY);
+    label("NOTES", L.rightCol, L.notesTop - 12);
+    label("MEALS", L.rightCol, L.mealsTop - 12);
 
     function label(text, x, baseline) {
       tplX.fillStyle = SOFT;
@@ -420,162 +458,147 @@
       tplX.fillText(sp(text), x, baseline);
     }
 
-    // schedule rows
-    tplX.strokeStyle = STRONG; tplX.lineWidth = 1;
-    line(L.left, L.schedTop, L.colSplit, L.schedTop);
-    tplX.strokeStyle = RULE;
+    // schedule
+    tplX.strokeStyle = STRONG; line(L.left, L.rowsTop, L.colSplit, L.rowsTop);
     HOURS.forEach(function (h, i) {
-      var top = L.schedTop + i * L.schedRow, bot = top + L.schedRow;
-      line(L.left, bot, L.colSplit, bot);
+      var bot = L.rowsTop + (i + 1) * L.schedRow;
+      tplX.strokeStyle = RULE; line(L.left, bot, L.colSplit, bot);
       var n = String(h % 12 || 12);
       tplX.fillStyle = FAINT;
       tplX.font = '400 13px "DM Mono", ui-monospace, monospace';
-      tplX.fillText(n, L.left + 5, bot - 12);
+      tplX.fillText(n, L.left + 5, bot - 11);
       var mer = h === 6 ? "AM" : h === 12 ? "PM" : "";
       if (mer) {
-        var nw2 = tplX.measureText(n).width;
+        var w2 = tplX.measureText(n).width;
         tplX.fillStyle = BRASS;
         tplX.font = '400 9px "DM Mono", ui-monospace, monospace';
-        tplX.fillText(mer, L.left + 7 + nw2, bot - 12);
+        tplX.fillText(mer, L.left + 7 + w2, bot - 11);
       }
     });
 
     // to do
-    tplX.strokeStyle = STRONG;
-    line(L.rightCol, L.todoTop, L.right, L.todoTop);
+    tplX.strokeStyle = STRONG; line(L.rightCol, L.todoTop, L.right, L.todoTop);
     for (var i = 0; i < L.todoRows; i++) {
-      var top = L.todoTop + i * L.todoRow, bot = top + L.todoRow;
-      tplX.strokeStyle = RULE; line(L.rightCol, bot, L.right, bot);
-      tplX.strokeStyle = STRONG; tplX.lineWidth = 1;
-      tplX.strokeRect(L.rightCol + 4.5, top + (L.todoRow - 14) / 2 + .5, 13, 13);
+      var top = L.todoTop + i * L.r, bot2 = top + L.r;
+      tplX.strokeStyle = RULE; line(L.rightCol, bot2, L.right, bot2);
+      tplX.strokeStyle = STRONG; tplX.lineWidth = 1 / view.k;
+      var bs = Math.min(14, L.r - 8);
+      tplX.strokeRect(L.rightCol + 5, top + (L.r - bs) / 2, bs, bs);
     }
 
     // notes
-    tplX.strokeStyle = STRONG;
-    line(L.rightCol, L.notesTop, L.right, L.notesTop);
+    tplX.strokeStyle = STRONG; line(L.rightCol, L.notesTop, L.right, L.notesTop);
     tplX.strokeStyle = RULE;
-    for (var j = 1; j <= L.notesRows; j++) {
-      var yy = L.notesTop + j * L.notesRow;
-      line(L.rightCol, yy, L.right, yy);
-    }
+    for (var j = 1; j <= L.notesRows; j++) line(L.rightCol, L.notesTop + j * L.r, L.right, L.notesTop + j * L.r);
 
     // meals
-    tplX.strokeStyle = STRONG;
-    line(L.rightCol, L.mealsTop, L.right, L.mealsTop);
+    tplX.strokeStyle = STRONG; line(L.rightCol, L.mealsTop, L.right, L.mealsTop);
     ["B","L","D"].forEach(function (m, i) {
-      var top = L.mealsTop + i * L.mealsRow, bot = top + L.mealsRow;
-      tplX.strokeStyle = RULE; line(L.rightCol, bot, L.right, bot);
+      var bot3 = L.mealsTop + (i + 1) * L.r;
+      tplX.strokeStyle = RULE; line(L.rightCol, bot3, L.right, bot3);
       tplX.fillStyle = FAINT;
       tplX.font = '400 11px "DM Mono", ui-monospace, monospace';
-      tplX.fillText(m, L.rightCol + 5, bot - 11);
+      tplX.fillText(m, L.rightCol + 5, bot3 - 10);
     });
 
     function line(x1, y1, x2, y2) {
-      tplX.beginPath();
-      tplX.moveTo(x1, Math.floor(y1) + .5);
-      tplX.lineTo(x2, Math.floor(y2) + .5);
-      tplX.stroke();
+      tplX.lineWidth = 1 / view.k;
+      tplX.beginPath(); tplX.moveTo(x1, y1); tplX.lineTo(x2, y2); tplX.stroke();
     }
   }
 
-  function sp(s) { return s.split("").join(" "); }   // letter-spacing, canvas-style
+  function sp(s) { return s.split("").join(" "); }
 
-  /* ============ ink ============ */
+  /* ================= ink ================= */
   function redrawInk() {
-    inkX.clearRect(0, 0, W, H);
+    clearAll(inkX, inkC);
+    applyView(inkX);
     for (var i = 0; i < strokes.length; i++) paintStroke(strokes[i]);
+    if (live && !live.erase) paintStroke(live);
   }
 
   function paintStroke(s) {
     var p = s.p, n = p.length / 4;
     if (n < 1) return;
-    inkX.strokeStyle = INKS[s.c] ? INKS[s.c].css : INKS[0].css;
-    inkX.lineCap = "round";
-    inkX.lineJoin = "round";
+    inkX.strokeStyle = (INKS[s.c] || INKS[0]).css;
+    inkX.fillStyle = inkX.strokeStyle;
+    inkX.lineCap = "round"; inkX.lineJoin = "round";
     if (n === 1) {
-      inkX.beginPath();
-      inkX.arc(p[0], p[1], width(p[2]) / 2, 0, 6.2832);
-      inkX.fillStyle = inkX.strokeStyle;
-      inkX.fill();
+      inkX.beginPath(); inkX.arc(p[0], p[1], width(p[2]) / 2, 0, 6.2832); inkX.fill();
       return;
     }
-    // Draw segment by segment so pressure can vary along the stroke.
     for (var i = 1; i < n; i++) {
       var x0 = p[(i-1)*4], y0 = p[(i-1)*4+1], pr0 = p[(i-1)*4+2];
-      var x1 = p[i*4],     y1 = p[i*4+1],     pr1 = p[i*4+2];
+      var x1 = p[i*4], y1 = p[i*4+1], pr1 = p[i*4+2];
       inkX.lineWidth = (width(pr0) + width(pr1)) / 2;
-      inkX.beginPath();
-      inkX.moveTo(x0, y0);
+      inkX.beginPath(); inkX.moveTo(x0, y0);
       if (i < n - 1) {
         var x2 = p[(i+1)*4], y2 = p[(i+1)*4+1];
         inkX.quadraticCurveTo(x1, y1, (x1 + x2) / 2, (y1 + y2) / 2);
-      } else {
-        inkX.lineTo(x1, y1);
-      }
+      } else inkX.lineTo(x1, y1);
       inkX.stroke();
     }
   }
+  function width(pr100) { return 1.5 + ((pr100 || 50) / 100) * 2.6; }
 
-  function width(pr100) {
-    var pr = (pr100 || 50) / 100;
-    return 1.5 + pr * 2.6;
-  }
+  /* ---- pen writes; fingers pan and pinch ---- */
+  var live = null, lastX = 0, lastY = 0, lastT = 0;
+  var touches = new Map(), gesture = null;
 
-  /* ---- pointer handling: pen draws, finger is ignored ---- */
-  var live = null, lastX = 0, lastY = 0, t0 = 0, lastT = 0;
-
-  function toLocal(e) {
+  function toSheet(cx, cy) {
     var r = inkC.getBoundingClientRect();
-    return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H };
+    return { x: (cx - r.left - view.tx) / view.k, y: (cy - r.top - view.ty) / view.k };
   }
-  function isEraser(e) {
-    return erasing || e.pointerType === "eraser" || (e.buttons & 32) === 32;
-  }
+  function isEraser(e) { return erasing || e.pointerType === "eraser" || (e.buttons & 32) === 32; }
 
   inkC.addEventListener("pointerdown", function (e) {
-    if (e.pointerType === "touch") return;              // fingers don't write
+    if (e.pointerType === "touch") {
+      touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      startGesture();
+      return;
+    }
     if (e.pointerType === "mouse" && e.button !== 0) return;
     e.preventDefault();
     inkC.setPointerCapture(e.pointerId);
-    var pt = toLocal(e);
-
+    var pt = toSheet(e.clientX, e.clientY);
     if (isEraser(e)) { live = { erase: true, hit: [] }; eraseAt(pt.x, pt.y); return; }
-
-    t0 = performance.now(); lastT = t0;
+    lastT = performance.now();
     live = { c: inkIdx, p: [] };
     push(live, pt.x, pt.y, e.pressure, 0);
     lastX = pt.x; lastY = pt.y;
   });
 
   inkC.addEventListener("pointermove", function (e) {
+    if (e.pointerType === "touch") {
+      if (!touches.has(e.pointerId)) return;
+      touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      moveGesture();
+      return;
+    }
     if (!live) return;
     e.preventDefault();
     var pts = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
     for (var i = 0; i < pts.length; i++) {
-      var pt = toLocal(pts[i]);
+      var pt = toSheet(pts[i].clientX, pts[i].clientY);
       if (live.erase) { eraseAt(pt.x, pt.y); continue; }
       var dx = pt.x - lastX, dy = pt.y - lastY;
-      if (dx * dx + dy * dy < 1.6) continue;            // thin out the sample stream
+      if (dx*dx + dy*dy < 1.6) continue;
       var now = performance.now();
       push(live, pt.x, pt.y, pts[i].pressure, now - lastT);
       lastT = now; lastX = pt.x; lastY = pt.y;
     }
-    if (!live.erase) { inkX.clearRect(0,0,W,H); redrawLiveFast(); }
+    if (!live.erase) redrawInk();
   });
 
-  function redrawLiveFast() {
-    for (var i = 0; i < strokes.length; i++) paintStroke(strokes[i]);
-    paintStroke(live);
-  }
-
-  function endStroke(e) {
+  function endPointer(e) {
+    if (e.pointerType === "touch") {
+      touches.delete(e.pointerId);
+      startGesture();
+      return;
+    }
     if (!live) return;
     if (live.erase) {
-      if (live.hit.length) {
-        undoStack.push({ type: "erase", items: live.hit });
-        redoStack.length = 0;
-        markDirty();
-      }
+      if (live.hit.length) { undoStack.push({ type: "erase", items: live.hit }); redoStack.length = 0; markDirty(); }
     } else if (live.p.length >= 4) {
       strokes.push(live);
       undoStack.push({ type: "add" });
@@ -583,16 +606,15 @@
       markDirty();
     }
     live = null;
-    redrawInk();
-    syncButtons();
+    redrawInk(); syncButtons();
   }
-  inkC.addEventListener("pointerup", endStroke);
-  inkC.addEventListener("pointercancel", endStroke);
-  inkC.addEventListener("pointerleave", function (e) { if (live) endStroke(e); });
+  inkC.addEventListener("pointerup", endPointer);
+  inkC.addEventListener("pointercancel", endPointer);
 
   function push(s, x, y, pressure, dt) {
-    var pr = pressure > 0 ? Math.round(pressure * 100) : 50;
-    s.p.push(Math.round(x), Math.round(y), pr, Math.round(dt));
+    s.p.push(Math.round(x), Math.round(y),
+             pressure > 0 ? Math.round(pressure * 100) : 50,
+             Math.round(dt));
   }
 
   var ERASE_R2 = 13 * 13;
@@ -603,37 +625,71 @@
         var dx = p[j] - x, dy = p[j+1] - y;
         if (dx*dx + dy*dy <= ERASE_R2) { hit = true; break; }
       }
-      if (hit) {
-        live.hit.push({ i: i, s: strokes[i] });
-        strokes.splice(i, 1);
-        redrawInk();
-      }
+      if (hit) { live.hit.push({ i: i, s: strokes[i] }); strokes.splice(i, 1); redrawInk(); }
     }
   }
 
-  /* ---- undo / redo ---- */
-  function undo() {
-    var op = undoStack.pop();
-    if (!op) return;
-    if (op.type === "add") {
-      redoStack.push({ type: "add", s: strokes.pop() });
+  /* ---- pan / pinch ---- */
+  function centroid() {
+    var n = 0, x = 0, y = 0;
+    touches.forEach(function (t) { x += t.x; y += t.y; n++; });
+    return n ? { x: x / n, y: y / n, n: n } : null;
+  }
+  function spread() {
+    var a = Array.from(touches.values());
+    if (a.length < 2) return 0;
+    var dx = a[0].x - a[1].x, dy = a[0].y - a[1].y;
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+  function startGesture() {
+    var c = centroid();
+    gesture = c ? { cx: c.x, cy: c.y, d: spread(), k: view.k, tx: view.tx, ty: view.ty, n: c.n } : null;
+  }
+  function moveGesture() {
+    if (!gesture) return;
+    var c = centroid();
+    if (!c || c.n !== gesture.n) { startGesture(); return; }
+    var r = inkC.getBoundingClientRect();
+    if (c.n >= 2 && gesture.d > 8) {
+      var f = spread() / gesture.d;
+      var k = gesture.k * f;
+      // keep the point under your fingers pinned while the scale changes
+      var ax = gesture.cx - r.left, ay = gesture.cy - r.top;
+      var sx = (ax - gesture.tx) / gesture.k, sy = (ay - gesture.ty) / gesture.k;
+      view.k = k;
+      view.tx = (c.x - r.left) - sx * k;
+      view.ty = (c.y - r.top) - sy * k;
     } else {
-      op.items.forEach(function (it) { strokes.splice(it.i, 0, it.s); });
-      redoStack.push(op);
+      view.tx = gesture.tx + (c.x - gesture.cx);
+      view.ty = gesture.ty + (c.y - gesture.cy);
     }
+    clampView(); showZoom(); renderAll();
+  }
+
+  inkC.addEventListener("wheel", function (e) {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    e.preventDefault();
+    var r = inkC.getBoundingClientRect();
+    var ax = e.clientX - r.left, ay = e.clientY - r.top;
+    var sx = (ax - view.tx) / view.k, sy = (ay - view.ty) / view.k;
+    view.k *= Math.exp(-e.deltaY * 0.0016);
+    clampView();
+    view.tx = ax - sx * view.k; view.ty = ay - sy * view.k;
+    clampView(); showZoom(); renderAll();
+  }, { passive: false });
+
+  /* ================= undo / redo ================= */
+  function undo() {
+    var op = undoStack.pop(); if (!op) return;
+    if (op.type === "add") redoStack.push({ type: "add", s: strokes.pop() });
+    else { op.items.forEach(function (it) { strokes.splice(it.i, 0, it.s); }); redoStack.push(op); }
     markDirty(); redrawInk(); syncButtons();
   }
   function redo() {
-    var op = redoStack.pop();
-    if (!op) return;
-    if (op.type === "add") {
-      strokes.push(op.s);
-      undoStack.push({ type: "add" });
-    } else {
-      op.items.forEach(function (it) {
-        var k = strokes.indexOf(it.s);
-        if (k >= 0) strokes.splice(k, 1);
-      });
+    var op = redoStack.pop(); if (!op) return;
+    if (op.type === "add") { strokes.push(op.s); undoStack.push({ type: "add" }); }
+    else {
+      op.items.forEach(function (it) { var k = strokes.indexOf(it.s); if (k >= 0) strokes.splice(k, 1); });
       undoStack.push(op);
     }
     markDirty(); redrawInk(); syncButtons();
@@ -643,49 +699,42 @@
     document.getElementById("redo").disabled = !redoStack.length;
   }
 
-  /* ============ save / load ============ */
+  /* ================= save / load ================= */
   function markDirty() {
-    dirty = true;
-    setStatus("Saving…");
+    dirty = true; setStatus("Saving…");
     clearTimeout(saveTimer);
     saveTimer = setTimeout(flush, 500);
   }
-
   function flush() {
     clearTimeout(saveTimer); saveTimer = null;
     if (!dirty) return Promise.resolve();
     dirty = false;
-    var k = key(cur);
-    var done;
-    if (!strokes.length) {
-      delete dayKeys[k];
-      done = delDay(k);
-    } else {
+    var k = key(cur), done;
+    if (!strokes.length) { delete dayKeys[k]; done = delDay(k); }
+    else {
       dayKeys[k] = true;
       done = putDay({ ymd: k, v: 1, w: W, h: H, strokes: strokes, updated: Date.now() });
     }
-    return done.then(function () {
-      setStatus(strokes.length ? "Saved" : "");
-    }, function () {
-      setStatus("Not saved");
-      toast("Couldn't save this page. Your browser may be out of storage.");
-    });
+    return done.then(function () { setStatus(strokes.length ? "Saved" : ""); },
+                     function () { setStatus("Not saved"); toast("Couldn't save. Your browser may be out of storage."); });
   }
 
   function loadDay(d) {
     cur = d;
     monthAnchor = new Date(cur.getFullYear(), cur.getMonth(), 1);
     strokes = []; undoStack = []; redoStack = [];
-    syncButtons(); drawTemplate(); redrawInk(); renderDateBtn(); setStatus("");
+    syncButtons(); renderDateBtn(); setStatus("");
     var k = key(cur);
+    H = screenAspectH(); layout(); fitView();
     return getDay(k).then(function (rec) {
-      if (key(cur) !== k) return;                       // moved on already
+      if (key(cur) !== k) return;
       strokes = (rec && Array.isArray(rec.strokes)) ? rec.strokes : [];
-      redrawInk();
+      // a day keeps the page shape it was written on
+      if (rec && rec.h) { H = rec.h; layout(); fitView(); }
+      else redrawInk();
       setStatus(strokes.length ? "Saved" : "");
     }, function () {});
   }
-
   function goto(d) { flush().then(function () { loadDay(d); }); }
 
   function setStatus(t) { document.getElementById("status").textContent = t; }
@@ -697,29 +746,27 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { el.hidden = true; }, 4200);
   }
-
   function renderDateBtn() {
     document.getElementById("pick").textContent =
       DOW[cur.getDay()].slice(0,3) + " " + MON[cur.getMonth()].slice(0,3) + " " + cur.getDate() + ", " + cur.getFullYear();
   }
 
-  /* ============ toolbar ============ */
+  /* ================= toolbar ================= */
   document.getElementById("prev").onclick = function () { goto(shift(cur, -1)); };
   document.getElementById("next").onclick = function () { goto(shift(cur, 1)); };
   document.getElementById("today").onclick = function () { goto(startOfDay(new Date())); };
   document.getElementById("undo").onclick = undo;
   document.getElementById("redo").onclick = redo;
+  document.getElementById("fit").onclick = function () { fitView(); showZoom(); };
 
   var bPen = document.getElementById("tPen"), bEr = document.getElementById("tErase");
   function setTool(e) {
     erasing = e;
     bPen.setAttribute("aria-pressed", String(!e));
     bEr.setAttribute("aria-pressed", String(e));
-    sheet.classList.toggle("erasing", e);
   }
   bPen.onclick = function () { setTool(false); };
   bEr.onclick = function () { setTool(true); };
-
   function paintSwatch() { document.getElementById("penSw").style.background = INKS[inkIdx].css; }
 
   document.addEventListener("keydown", function (e) {
@@ -729,20 +776,11 @@
     else if (e.key === "ArrowLeft" && !mod) goto(shift(cur, -1));
     else if (e.key === "ArrowRight" && !mod) goto(shift(cur, 1));
     else if (e.key === "e") setTool(!erasing);
-    else if (e.key === "Escape") { closeAll(); }
+    else if (e.key === "0") fitView();
+    else if (e.key === "Escape") { document.getElementById("menu").hidden = true; document.getElementById("scrim").hidden = true; }
   });
 
-  /* ============ export ============ */
-  function renderToCanvas(mult) {
-    var c = document.createElement("canvas");
-    c.width = W * mult; c.height = H * mult;
-    var x = c.getContext("2d");
-    x.scale(mult, mult);
-    x.drawImage(tplC, 0, 0, W, H);
-    x.drawImage(inkC, 0, 0, W, H);
-    return c;
-  }
-
+  /* ================= export ================= */
   function download(blob, name) {
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -751,19 +789,40 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
   }
 
-  document.getElementById("save").onclick = function () {
+  function dayImage(mult) {
+    var c = document.createElement("canvas");
+    c.width = W * mult; c.height = H * mult;
+    var x = c.getContext("2d");
+    var save = { k: view.k, tx: view.tx, ty: view.ty }, saveD = dpr;
+    // render the page at 1:1 into the export canvas
+    var tw = tplC.width, th = tplC.height;
+    view.k = 1; view.tx = 0; view.ty = 0; dpr = mult;
+    tplC.width = W * mult; tplC.height = H * mult;
+    inkC.width = W * mult; inkC.height = H * mult;
+    drawTemplate(); redrawInkNow();
+    x.drawImage(tplC, 0, 0); x.drawImage(inkC, 0, 0);
+    tplC.width = tw; tplC.height = th; inkC.width = tw; inkC.height = th;
+    view.k = save.k; view.tx = save.tx; view.ty = save.ty; dpr = saveD;
+    drawTemplate(); redrawInkNow();
+    return c;
+  }
+  function redrawInkNow() {
+    clearAll(inkX, inkC); applyView(inkX);
+    for (var i = 0; i < strokes.length; i++) paintStroke(strokes[i]);
+  }
+
+  function saveImage() {
     flush().then(function () {
-      renderToCanvas(2).toBlob(function (b) {
+      dayImage(2).toBlob(function (b) {
         if (!b) return toast("Couldn't make the image.");
         download(b, "planner-" + key(cur) + ".png");
         toast("Saved to your downloads as an image.");
       }, "image/png");
     });
-  };
+  }
 
-  /* ============ month picker ============ */
+  /* ================= month picker ================= */
   var scrim = document.getElementById("scrim"), mgrid = document.getElementById("mgrid");
-
   document.getElementById("pick").onclick = function () {
     monthAnchor = new Date(cur.getFullYear(), cur.getMonth(), 1);
     refreshKeys().then(function () { scrim.hidden = false; drawMonth(); });
@@ -782,14 +841,11 @@
       (ks || []).forEach(function (k) { dayKeys[k] = true; });
     }, function () {});
   }
-
   function drawMonth() {
     document.getElementById("mtitle").textContent = MON[monthAnchor.getMonth()] + " " + monthAnchor.getFullYear();
     mgrid.textContent = "";
     ["S","M","T","W","T","F","S"].forEach(function (d) {
-      var el = document.createElement("div");
-      el.className = "dowlbl"; el.textContent = d;
-      mgrid.appendChild(el);
+      var el = document.createElement("div"); el.className = "dowlbl"; el.textContent = d; mgrid.appendChild(el);
     });
     var first = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), 1);
     var last = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() + 1, 0).getDate();
@@ -797,8 +853,7 @@
       var b = document.createElement("div"); b.className = "day blank"; mgrid.appendChild(b);
     }
     for (var n = 1; n <= last; n++) {
-      var d = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), n);
-      var k = key(d);
+      var d = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), n), k = key(d);
       var btn = document.createElement("button");
       btn.className = "day"; btn.textContent = n; btn.dataset.k = k;
       if (k === key(today)) btn.classList.add("today");
@@ -809,64 +864,55 @@
     }
   }
 
-  /* ============ more menu ============ */
+  /* ================= more ================= */
   var menu = document.getElementById("menu");
-  document.getElementById("more").onclick = function () {
-    menu.hidden = false;
-    showUsage();
-  };
+  document.getElementById("more").onclick = function () { menu.hidden = false; showUsage(); };
   document.getElementById("mClose").onclick = function () { menu.hidden = true; };
   menu.addEventListener("click", function (e) { if (e.target === menu) menu.hidden = true; });
-  function closeAll() { menu.hidden = true; scrim.hidden = true; }
 
   document.getElementById("mInk").onclick = function () {
-    inkIdx = (inkIdx + 1) % INKS.length;
-    paintSwatch();
+    inkIdx = (inkIdx + 1) % INKS.length; paintSwatch();
     toast("Ink is now " + INKS[inkIdx].name + ".");
   };
-
+  document.getElementById("mSave").onclick = function () { menu.hidden = true; saveImage(); };
   document.getElementById("mClear").onclick = function () {
     if (!strokes.length) { toast("This page is already blank."); return; }
-    if (!confirm("Clear everything written on " + key(cur) + "? You can undo this straight after.")) return;
+    if (!confirm("Clear everything written on this page? Undo will bring it back.")) return;
     undoStack.push({ type: "erase", items: strokes.map(function (s, i) { return { i: i, s: s }; }) });
-    redoStack.length = 0;
-    strokes = [];
-    markDirty(); redrawInk(); syncButtons();
-    menu.hidden = true;
+    redoStack.length = 0; strokes = [];
+    markDirty(); redrawInk(); syncButtons(); menu.hidden = true;
   };
-
   document.getElementById("mBackup").onclick = function () {
     flush().then(allDays).then(function (rows) {
-      var blob = new Blob([JSON.stringify({ app: "one-day-per-page", v: 1, days: rows || [] })],
-                          { type: "application/json" });
+      var blob = new Blob([JSON.stringify({ app: "one-day-per-page", v: 1, days: rows || [] })], { type: "application/json" });
       download(blob, "planner-backup-" + key(new Date()) + ".json");
       toast("Backed up " + ((rows || []).length) + " day" + ((rows || []).length === 1 ? "" : "s") + ".");
     }, function () { toast("Couldn't read your days to back them up."); });
   };
-
   function showUsage() {
     var el = document.getElementById("usage");
     allKeys().then(function (ks) {
       var n = (ks || []).length;
       el.textContent = n + " day" + (n === 1 ? "" : "s") + " written, kept on this device only. "
         + "Back up now and then — clearing your browser data erases them.";
-    }, function () {
-      el.textContent = "Your days are kept on this device only.";
-    });
+    }, function () { el.textContent = "Your days are kept on this device only."; });
   }
 
-  /* ============ boot ============ */
-  paintSwatch();
-  renderDateBtn();
-  fit();
+  /* ================= boot ================= */
+  paintSwatch(); renderDateBtn();
+  sizeCanvases();
+  H = screenAspectH(); layout(); fitView();
 
   var rt = null;
   window.addEventListener("resize", function () {
-    clearTimeout(rt); rt = setTimeout(fit, 120);
+    clearTimeout(rt);
+    rt = setTimeout(function () {
+      sizeCanvases();
+      if (!strokes.length) { H = screenAspectH(); layout(); }   // reshape only a blank page
+      fitView();
+    }, 140);
   });
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(function () { drawTemplate(); });
-  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { renderAll(); });
 
   openDB().then(function (d) {
     idb = d;
@@ -878,9 +924,7 @@
   document.addEventListener("visibilitychange", function () { if (document.hidden && dirty) flush(); });
 
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", function () {
-      navigator.serviceWorker.register("sw.js").catch(function () {});
-    });
+    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
   }
 })();
 </script>
