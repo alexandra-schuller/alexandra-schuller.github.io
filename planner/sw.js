@@ -1,6 +1,6 @@
 /* One Day Per Page — offline shell.
    Bump CACHE when index.html changes so tablets pick the new version up. */
-var CACHE = "odpp-v7";
+var CACHE = "odpp-v8";
 var SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", function (e) {
@@ -37,7 +37,11 @@ self.addEventListener("fetch", function (e) {
   if (url.origin !== self.location.origin) return;
 
   // App shell: try the network so updates land, fall back to cache when offline.
-  e.respondWith(fetch(e.request).then(function (res) {
+  var wantsHTML = e.request.mode === "navigate" ||
+                  (e.request.headers.get("accept") || "").indexOf("text/html") !== -1;
+  var net = wantsHTML ? fetch(e.request.url, { cache: "no-store" }) : fetch(e.request);
+
+  e.respondWith(net.then(function (res) {
     if (res && res.ok) {
       var copy = res.clone();
       caches.open(CACHE).then(function (c) { c.put(e.request, copy); });

@@ -923,6 +923,7 @@
     ["aquarius","Aquarius","Jan 20 – Feb 18"], ["pisces","Pisces","Feb 19 – Mar 20"]
   ];
   var SIGN_KEY = "sunrise:sign", HORO_KEY = "sunrise:horoscope";
+  var DEFAULT_SIGN = "gemini";
 
   var PROXIES = [
     function (u) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
@@ -945,7 +946,7 @@
   var signMem = "";
   function getSign() {
     if (signMem) return signMem;
-    try { return localStorage.getItem(SIGN_KEY) || ""; } catch (e) { return ""; }
+    try { return localStorage.getItem(SIGN_KEY) || DEFAULT_SIGN; } catch (e) { return DEFAULT_SIGN; }
   }
   function setSign(v) {
     signMem = v;
@@ -1152,7 +1153,18 @@
   load();
 
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+    var reloadedForUpdate = false;
+    navigator.serviceWorker.addEventListener("controllerchange", function () {
+      if (reloadedForUpdate) return;      // guard: skipWaiting would loop otherwise
+      reloadedForUpdate = true;
+      location.reload();
+    });
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").then(function (reg) {
+        reg.update();
+        setInterval(function () { reg.update(); }, 30 * 60 * 1000);
+      }).catch(function () {});
+    });
   }
 })();
 </script>

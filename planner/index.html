@@ -1044,7 +1044,18 @@
   document.addEventListener("visibilitychange", function () { if (document.hidden && dirty) flush(); });
 
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+    var reloadedForUpdate = false;
+    navigator.serviceWorker.addEventListener("controllerchange", function () {
+      if (reloadedForUpdate) return;
+      reloadedForUpdate = true;
+      if (!dirty && !saveTimer) location.reload();   // never reload over unsaved ink
+    });
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").then(function (reg) {
+        reg.update();
+        setInterval(function () { reg.update(); }, 30 * 60 * 1000);
+      }).catch(function () {});
+    });
   }
 })();
 </script>

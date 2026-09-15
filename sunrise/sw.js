@@ -1,6 +1,6 @@
 /* Sunrise — offline shell. Weather itself is fetched live and cached in
    localStorage by the page; this only keeps the app openable with no signal. */
-var CACHE = "sunrise-v2";
+var CACHE = "sunrise-v3";
 var SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", function (e) {
@@ -36,7 +36,11 @@ self.addEventListener("fetch", function (e) {
 
   if (url.origin !== self.location.origin) return;
 
-  e.respondWith(fetch(e.request).then(function (res) {
+  var wantsHTML = e.request.mode === "navigate" ||
+                  (e.request.headers.get("accept") || "").indexOf("text/html") !== -1;
+  var net = wantsHTML ? fetch(e.request.url, { cache: "no-store" }) : fetch(e.request);
+
+  e.respondWith(net.then(function (res) {
     if (res && res.ok) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put(e.request, copy); }); }
     return res;
   }).catch(function () {
