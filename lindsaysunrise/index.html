@@ -285,7 +285,7 @@
   <div class="top">
     <div class="mark">Sun<em>rise</em></div>
     <div class="place" id="today">—</div>
-    <div class="place" id="place">Montréal, QC</div>
+    <div class="place" id="place">Aylmer, Gatineau, QC</div>
   </div>
 
   <div class="card err" id="err" hidden></div>
@@ -323,7 +323,7 @@
   </div>
 
   <p class="foot">
-    Light times calculated for Montréal, QC; weather and air quality from
+    Light times calculated for Aylmer, Gatineau, QC; weather and air quality from
     <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>.
     <span id="stamp"></span><br>
     <button id="refresh">Refresh</button>
@@ -332,58 +332,25 @@
 
 <script>
 window.SUNRISE_CONFIG = {
-  "lat": 45.5019,
-  "lon": -73.5674,
-  "tz": "America/Montreal",
-  "storeKey": "sunrise:last",
+  "lat": 45.3946,
+  "lon": -75.8453,
+  "tz": "America/Toronto",
+  "storeKey": "lindsaysunrise:last",
   "tiles": [
     "now",
+    "feels",
     "uv",
     "wind",
     "humidity",
+    "dew",
     "air",
+    "cloud",
+    "rain",
+    "pressure",
     "pollen",
     "moon"
   ],
-  "apps": [
-    {
-      "name": "The Planner",
-      "blurb": "One day per page, written by hand.",
-      "href": "/planner/",
-      "accent": "--pine",
-      "tint": "--t-pine",
-      "edge": "#CFE0D6"
-    },
-    {
-      "name": "Strong Woman",
-      "blurb": "What you're lifting today.",
-      "accent": "--rose",
-      "tint": "--t-rose",
-      "edge": "#F0D3D7"
-    },
-    {
-      "name": "The Closet",
-      "blurb": "Everything you own, and what goes together.",
-      "href": "/closet/",
-      "accent": "--clay",
-      "tint": "--t-clay",
-      "edge": "#EFD5CA"
-    },
-    {
-      "name": "Morning Routine",
-      "blurb": "How the day starts.",
-      "accent": "--butter",
-      "tint": "--t-butter",
-      "edge": "#EFE0B6"
-    },
-    {
-      "name": "Bedtime Routine",
-      "blurb": "How it winds down.",
-      "accent": "--peri",
-      "tint": "--t-peri",
-      "edge": "#D6DAF0"
-    }
-  ]
+  "apps": []
 };
 </script>
 <script>

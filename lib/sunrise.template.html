@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>__TITLE__</title>
+<meta name="description" content="Light, weather and air over Montréal, what to put on before you go out, and the way in to everything else.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#FDF7F0">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+__CSS__
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="mark">Sun<em>rise</em></div>
+    <div class="place" id="today">—</div>
+    <div class="place" id="place">__PLACE__</div>
+  </div>
+
+  <div class="card err" id="err" hidden></div>
+
+  <div class="stack">
+    <section class="card arc-card">
+      <svg class="arc" id="arc" viewBox="0 0 720 250" role="img" aria-labelledby="arcTitle"><title id="arcTitle">The sun's path today</title></svg>
+      <div class="ends">
+        <div class="end"><span class="k">Sunrise</span><span class="v rise" id="riseT">—</span></div>
+        <div class="end right"><span class="k">Sunset</span><span class="v set" id="setT">—</span></div>
+      </div>
+      <div class="now-line">
+        <div class="headline" id="headline">Loading…</div>
+        <div class="sub" id="daylight"></div>
+        <div class="sub" id="golden"></div>
+      </div>
+    </section>
+
+    <section class="card advice">
+      <p class="lbl">Before you go out</p>
+      <ul id="advice"><li><span class="dot"></span><span class="lead">Checking the sky…</span></li></ul>
+    </section>
+
+    <div class="grid" id="tiles"></div>
+
+    <section class="card hours">
+      <p class="lbl">Next twelve hours</p>
+      <svg id="hours" viewBox="0 0 720 150" role="img" aria-labelledby="hTitle"><title id="hTitle">Temperature and chance of precipitation, hour by hour</title></svg>
+    </section>
+
+    <section class="card">
+      <p class="lbl">The next few days</p>
+      <div class="days" id="days"></div>
+    </section>
+  </div>
+
+  <p class="foot">
+    Light times calculated for __PLACE__; weather and air quality from
+    <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>.
+    <span id="stamp"></span><br>
+    <button id="refresh">Refresh</button>
+  </p>
+</div>
+
+<script>
+window.SUNRISE_CONFIG = __CONFIG__;
+</script>
+<script>
+__JS__
+</script>
+</body>
+</html>
