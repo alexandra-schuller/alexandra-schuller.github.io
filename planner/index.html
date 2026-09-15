@@ -275,7 +275,22 @@
   function screenAspectH() {
     var st = document.getElementById("stage");
     var a = st.clientHeight / Math.max(st.clientWidth, 1);
-    return Math.round(Math.min(Math.max(W * a, 620), 2100));
+    return Math.round(Math.min(Math.max(W * a, 580), 2400));
+  }
+
+  /* Move ink from one page shape to another. Rows scale with the page, so
+     what you wrote on the 3pm line stays on the 3pm line. */
+  function rescale(list, fw, fh, tw, th) {
+    var kx = tw / fw, ky = th / fh;
+    if (kx === 1 && ky === 1) return false;
+    for (var i = 0; i < list.length; i++) {
+      var p = list[i].p;
+      for (var j = 0; j < p.length; j += 4) {
+        p[j] = Math.round(p[j] * kx);
+        p[j + 1] = Math.round(p[j + 1] * ky);
+      }
+    }
+    return true;
   }
 
   /* ================= state ================= */
@@ -353,7 +368,7 @@
   }
 
   function computeFit() {
-    fitK = Math.min((sw - 16) / W, (sh - 16) / H);
+    fitK = Math.min((sw - 8) / W, (sh - 8) / H);
     if (!isFinite(fitK) || fitK <= 0) fitK = 0.5;
   }
   function fitView() {
@@ -729,9 +744,9 @@
     return getDay(k).then(function (rec) {
       if (key(cur) !== k) return;
       strokes = (rec && Array.isArray(rec.strokes)) ? rec.strokes : [];
-      // a day keeps the page shape it was written on
-      if (rec && rec.h) { H = rec.h; layout(); fitView(); }
-      else redrawInk();
+      // The page always takes the shape of the screen; older ink comes with it.
+      if (rec && rec.h && strokes.length && rescale(strokes, rec.w || W, rec.h, W, H)) markDirty();
+      redrawInk();
       setStatus(strokes.length ? "Saved" : "");
     }, function () {});
   }
@@ -908,7 +923,12 @@
     clearTimeout(rt);
     rt = setTimeout(function () {
       sizeCanvases();
-      if (!strokes.length) { H = screenAspectH(); layout(); }   // reshape only a blank page
+      var nh = screenAspectH();
+      if (nh !== H) {
+        if (strokes.length && rescale(strokes, W, H, W, nh)) markDirty();
+        H = nh;
+        layout();
+      }
       fitView();
     }, 140);
   });

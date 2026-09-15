@@ -1,6 +1,6 @@
 /* One Day Per Page — offline shell.
    Bump CACHE when index.html changes so tablets pick the new version up. */
-var CACHE = "odpp-v3";
+var CACHE = "odpp-v4";
 var SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", function (e) {
