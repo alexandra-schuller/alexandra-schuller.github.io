@@ -4,150 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>One Day Per Page has moved</title>
+<meta http-equiv="refresh" content="0; url=https://planner.alexschuller.com/">
+<title>Redirecting…</title>
 <link rel="canonical" href="https://planner.alexschuller.com/">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,400&display=swap">
-<style>
-  :root {
-    --paper: #F6F7F4; --sheet: #FCFCFA; --ink: #1B2421; --ink-soft: #4A5551;
-    --rule: #ACB5AE; --pine: #3F6B5B; --pine-deep: #33594A; --brass: #A8813A;
-  }
-  * { box-sizing: border-box; }
-  html { height: 100%; }
-  body {
-    min-height: 100%; margin: 0;
-    display: grid; place-items: center; padding: 28px 20px;
-    background: var(--paper); color: var(--ink);
-    font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; font-size: 16px;
-    line-height: 1.5; -webkit-font-smoothing: antialiased;
-  }
-  .card {
-    width: 100%; max-width: 440px; background: var(--sheet);
-    border: 1px solid var(--rule); border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(27,36,33,.06), 0 22px 44px -20px rgba(27,36,33,.3);
-    padding: 30px 28px 26px;
-  }
-  h1 {
-    margin: 0 0 6px; font-family: "Newsreader", Georgia, serif;
-    font-weight: 300; font-size: 33px; line-height: 1.08;
-  }
-  h1 em { font-style: italic; color: var(--pine); }
-  p { margin: 12px 0 0; color: var(--ink-soft); font-size: 15px; }
-  .go {
-    display: inline-block; margin-top: 20px;
-    font-size: 15.5px; font-weight: 600; text-decoration: none;
-    color: #FCFCFA; background: var(--pine);
-    border: 1px solid var(--pine-deep); border-radius: 3px;
-    padding: 12px 18px;
-  }
-  .go:hover { background: var(--pine-deep); }
-  .rescue {
-    margin-top: 20px; padding: 14px 16px;
-    background: #FBF4E6; border: 1px solid #E8D7AE; border-radius: 3px;
-  }
-  .rescue b { color: var(--brass); }
-  .rescue button {
-    font: inherit; font-size: 14.5px; font-weight: 600;
-    color: var(--ink); background: var(--sheet);
-    border: 1px solid var(--brass); border-radius: 3px;
-    padding: 9px 14px; margin-top: 10px; cursor: pointer;
-  }
-  .rescue button:hover { background: #FDF9F0; }
-  .quiet { font-size: 13px; }
-  [hidden] { display: none !important; }
-</style>
-</head>
-<body>
-
-<div class="card">
-  <h1>One Day <em>per</em> Page has moved</h1>
-  <p id="lede">Taking you to its new home…</p>
-
-  <!-- Only ever shown when this old copy still holds pages the new one cannot
-       see. Browser storage does not cross between addresses, so those pages
-       exist here and nowhere else until they are taken out. -->
-  <div class="rescue" id="rescue" hidden>
-    <p style="margin:0"><b id="count"></b> written here, and only here.</p>
-    <p class="quiet">The planner moved to a different address, and a browser keeps
-    each address's data separate — so these pages did not travel with it. Save
-    them and they can be brought back in.</p>
-    <button id="save" type="button">Download these pages</button>
-  </div>
-
-  <a class="go" href="https://planner.alexschuller.com/" id="go">Go to the planner</a>
-</div>
-
 <script>
-(function () {
-  "use strict";
-  var TARGET = "https://planner.alexschuller.com/";
-
-  /* This address used to install the planner as an app. Let go of that, or the
-     old copy keeps being served out of its own cache instead of this notice. */
+  /* This address used to install the planner as an app, so a browser here may
+     still serve the old copy out of a cache and never reach the redirect. */
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function (list) {
-      list.forEach(function (r) { r.unregister(); });
-    }).catch(function () {});
+    navigator.serviceWorker.getRegistrations()
+      .then(function (list) { list.forEach(function (r) { r.unregister(); }); })
+      .catch(function () {});
   }
   if (window.caches && caches.keys) {
-    caches.keys().then(function (names) {
-      names.forEach(function (n) { caches.delete(n); });
-    }).catch(function () {});
+    caches.keys()
+      .then(function (names) { names.forEach(function (n) { caches.delete(n); }); })
+      .catch(function () {});
   }
-
-  function leave() { location.replace(TARGET); }
-
-  function readOldPages() {
-    return new Promise(function (resolve) {
-      if (!("indexedDB" in window)) return resolve([]);
-      var request;
-      try { request = indexedDB.open("odpp", 1); } catch (e) { return resolve([]); }
-      request.onerror = function () { resolve([]); };
-      request.onsuccess = function () {
-        var db = request.result;
-        if (!db.objectStoreNames.contains("days")) return resolve([]);
-        try {
-          var all = db.transaction("days", "readonly").objectStore("days").getAll();
-          all.onsuccess = function () { resolve(all.result || []); };
-          all.onerror = function () { resolve([]); };
-        } catch (e) { resolve([]); }
-      };
-      // Never leave someone staring at a page that will not move on.
-      setTimeout(function () { resolve([]); }, 3000);
-    });
-  }
-
-  readOldPages().then(function (days) {
-    var written = days.filter(function (d) {
-      return (d.strokes && d.strokes.length) ||
-             (d.done && d.done.some(function (x) { return x; }));
-    });
-
-    if (!written.length) { leave(); return; }
-
-    document.getElementById("lede").textContent =
-      "Before you go — there is something saved at this address.";
-    document.getElementById("count").textContent =
-      written.length === 1 ? "1 page" : written.length + " pages";
-    document.getElementById("rescue").hidden = false;
-    document.getElementById("go").textContent = "Go to the planner anyway";
-
-    document.getElementById("save").addEventListener("click", function () {
-      var blob = new Blob(
-        [JSON.stringify({ app: "one-day-per-page", v: 1, days: written }, null, 2)],
-        { type: "application/json" });
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "planner-pages-from-alexschuller-com.json";
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
-      this.textContent = "Downloaded";
-    });
-  });
-})();
+  location.replace("https://planner.alexschuller.com/");
 </script>
+</head>
+<body>
+<p><a href="https://planner.alexschuller.com/">planner.alexschuller.com</a></p>
 </body>
 </html>
