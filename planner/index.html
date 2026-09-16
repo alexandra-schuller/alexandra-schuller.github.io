@@ -15,6 +15,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=DM+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300&display=swap">
+<script src="firebase-config.js"></script>
+<script type="module" src="sync.js"></script>
 <style>
   :root {
     --paper:       #F6F7F4;
@@ -232,8 +234,10 @@
       <button id="mSave">Save this day as an image</button>
       <button id="mClear">Clear this day</button>
       <button id="mBackup">Back up every day to a file</button>
+      <button id="mSync">Sync</button>
       <button id="mClose" class="ghost">Close</button>
     </div>
+    <p class="hint" id="syncNote"></p>
     <p class="hint" id="usage"></p>
   </div>
 </div>
@@ -316,7 +320,9 @@
   var today = startOfDay(new Date());
   var cur = today;
   var strokes = [];
+  var tomb = [];                      // ids of strokes rubbed out, so an erase syncs too
   var done = [];                      // which to-do rows are struck out
+  var doneAt = 0;
   var undoStack = [], redoStack = [];
   var inkIdx = 0, erasing = false;
   var dirty = false, saveTimer = null;
@@ -586,6 +592,7 @@
   function toggleBox(i) {
     if (i < 0) return;
     done[i] = !done[i];
+    doneAt = Date.now();
     undoStack.push({ type: "done", i: i });
     redoStack.length = 0;
     markDirty(); redrawInk(); syncButtons();
@@ -652,7 +659,7 @@
     if (isEraser(e)) { tapRec = null; live = { erase: true, hit: [] }; eraseAt(pt.x, pt.y); return; }
     noteTap(e, pt);
     lastT = performance.now();
-    live = { c: inkIdx, p: [] };
+    live = { i: strokeId(), t: Date.now(), c: inkIdx, p: [] };
     push(live, pt.x, pt.y, e.pressure, 0);
     lastX = pt.x; lastY = pt.y;
   });
@@ -715,6 +722,10 @@
              Math.round(dt));
   }
 
+  function strokeId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
   var ERASE_R2 = 13 * 13;
   function eraseAt(x, y) {
     for (var i = strokes.length - 1; i >= 0; i--) {
@@ -723,7 +734,12 @@
         var dx = p[j] - x, dy = p[j+1] - y;
         if (dx*dx + dy*dy <= ERASE_R2) { hit = true; break; }
       }
-      if (hit) { live.hit.push({ i: i, s: strokes[i] }); strokes.splice(i, 1); redrawInk(); }
+      if (hit) {
+        live.hit.push({ i: i, s: strokes[i] });
+        if (strokes[i].i) tomb.push(strokes[i].i);
+        strokes.splice(i, 1);
+        redrawInk();
+      }
     }
   }
 
@@ -781,7 +797,14 @@
     var op = undoStack.pop(); if (!op) return;
     if (op.type === "add") redoStack.push({ type: "add", s: strokes.pop() });
     else if (op.type === "done") { done[op.i] = !done[op.i]; redoStack.push(op); }
-    else { op.items.forEach(function (it) { strokes.splice(it.i, 0, it.s); }); redoStack.push(op); }
+    else {
+      op.items.forEach(function (it) {
+        strokes.splice(it.i, 0, it.s);
+        var k = tomb.indexOf(it.s.i);
+        if (k >= 0) tomb.splice(k, 1);
+      });
+      redoStack.push(op);
+    }
     markDirty(); redrawInk(); syncButtons();
   }
   function redo() {
@@ -789,7 +812,11 @@
     if (op.type === "add") { strokes.push(op.s); undoStack.push({ type: "add" }); }
     else if (op.type === "done") { done[op.i] = !done[op.i]; undoStack.push(op); }
     else {
-      op.items.forEach(function (it) { var k = strokes.indexOf(it.s); if (k >= 0) strokes.splice(k, 1); });
+      op.items.forEach(function (it) {
+        var k = strokes.indexOf(it.s);
+        if (k >= 0) strokes.splice(k, 1);
+        if (it.s.i) tomb.push(it.s.i);
+      });
       undoStack.push(op);
     }
     markDirty(); redrawInk(); syncButtons();
@@ -809,27 +836,67 @@
     clearTimeout(saveTimer); saveTimer = null;
     if (!dirty) return Promise.resolve();
     dirty = false;
-    var k = key(cur), written = strokes.length || anyDone(), op;
+    var k = key(cur), written = strokes.length || anyDone() || tomb.length, op;
+    var rec = { ymd: k, v: 3, w: W, h: H, strokes: strokes, tomb: capTomb(tomb),
+                done: done, doneAt: doneAt, updated: Date.now() };
     if (!written) { delete dayKeys[k]; op = delDay(k); }
-    else {
-      dayKeys[k] = true;
-      op = putDay({ ymd: k, v: 2, w: W, h: H, strokes: strokes, done: done, updated: Date.now() });
-    }
+    else { dayKeys[k] = true; op = putDay(rec); }
+    if (written) pushUp(k, rec);
     return op.then(function () { setStatus(written ? "Saved" : ""); },
                      function () { setStatus("Not saved"); toast("Couldn't save. Your browser may be out of storage."); });
+  }
+
+  /* Tombstones only ever grow; keep the most recent and let the rest go. A
+     stroke rubbed out long ago isn't coming back from another device. */
+  function capTomb(list) {
+    var seen = {}, out = [];
+    for (var i = list.length - 1; i >= 0 && out.length < 3000; i--) {
+      if (!seen[list[i]]) { seen[list[i]] = 1; out.push(list[i]); }
+    }
+    return out.reverse();
+  }
+
+  /* The union of both sides' strokes, minus anything either side erased. */
+  function mergeDay(a, b) {
+    if (!a) return b;
+    if (!b) return a;
+    var gone = {}, byId = {}, order = [], i, s;
+    capTomb((a.tomb || []).concat(b.tomb || [])).forEach(function (id) { gone[id] = 1; });
+
+    [a, b].forEach(function (side) {
+      (side.strokes || []).forEach(function (st) {
+        var id = st.i || (st.i = strokeId());
+        if (gone[id] || byId[id]) return;
+        byId[id] = st;
+        order.push(st);
+      });
+    });
+    order.sort(function (x, y) { return (x.t || 0) - (y.t || 0); });
+
+    var newer = (b.updated || 0) >= (a.updated || 0) ? b : a;
+    var ticks = (b.doneAt || 0) >= (a.doneAt || 0) ? b : a;
+    return {
+      ymd: newer.ymd, v: 3, w: newer.w || W, h: newer.h || H,
+      strokes: order, tomb: capTomb((a.tomb || []).concat(b.tomb || [])),
+      done: ticks.done || [], doneAt: ticks.doneAt || 0,
+      updated: Math.max(a.updated || 0, b.updated || 0)
+    };
   }
 
   function loadDay(d) {
     cur = d;
     monthAnchor = new Date(cur.getFullYear(), cur.getMonth(), 1);
-    strokes = []; done = []; undoStack = []; redoStack = [];
+    strokes = []; done = []; tomb = []; doneAt = 0; undoStack = []; redoStack = [];
     syncButtons(); renderDateBtn(); setStatus("");
     var k = key(cur);
     H = screenAspectH(); layout(); fitView();
     return getDay(k).then(function (rec) {
       if (key(cur) !== k) return;
       strokes = (rec && Array.isArray(rec.strokes)) ? rec.strokes : [];
+      tomb = (rec && Array.isArray(rec.tomb)) ? rec.tomb : [];
       done = (rec && Array.isArray(rec.done)) ? rec.done.slice(0, L.todoRows) : [];
+      doneAt = (rec && rec.doneAt) || 0;
+      strokes.forEach(function (st) { if (!st.i) { st.i = strokeId(); st.t = st.t || 0; } });
       // The page always takes the shape of the screen; older ink comes with it.
       if (rec && rec.h && strokes.length && rescale(strokes, rec.w || W, rec.h, W, H)) markDirty();
       redrawInk();
@@ -968,7 +1035,17 @@
 
   /* ================= more ================= */
   var menu = document.getElementById("menu");
-  document.getElementById("more").onclick = function () { menu.hidden = false; showUsage(); };
+  document.getElementById("more").onclick = function () { menu.hidden = false; showUsage(); paintSync(); };
+
+  document.getElementById("mSync").onclick = function () {
+    if (!SY || SY.state === "off") return;
+    if (SY.state === "on") {
+      if (!confirm("Stop syncing on this device? Your days stay here, they just won't travel.")) return;
+      SY.signOut();
+    } else {
+      SY.signIn();
+    }
+  };
   document.getElementById("mClose").onclick = function () { menu.hidden = true; };
   menu.addEventListener("click", function (e) { if (e.target === menu) menu.hidden = true; });
 
@@ -981,7 +1058,9 @@
     if (!strokes.length && !anyDone()) { toast("This page is already blank."); return; }
     if (!confirm("Clear everything written on this page? Undo will bring it back.")) return;
     undoStack.push({ type: "erase", items: strokes.map(function (s, i) { return { i: i, s: s }; }) });
-    redoStack.length = 0; strokes = []; done = [];
+    redoStack.length = 0;
+    strokes.forEach(function (s) { if (s.i) tomb.push(s.i); });
+    strokes = []; done = [];
     markDirty(); redrawInk(); syncButtons(); menu.hidden = true;
   };
   document.getElementById("mBackup").onclick = function () {
@@ -1010,6 +1089,94 @@
       else if (persisted === false) msg += "Your browser may clear them if the tablet runs very low on space. ";
       el.textContent = msg + "Back them up now and then — erasing your browsing data erases them too.";
     }, function () { el.textContent = "Your days are kept on this tablet only."; });
+  }
+
+  /* ================= sync ================= */
+  var SY = window.PlannerSync;
+
+  function pushUp(k, rec) {
+    if (!SY || SY.state !== "on") return;
+    SY.push(k, {
+      ymd: k, v: 3, w: rec.w, h: rec.h,
+      strokes: rec.strokes, tomb: rec.tomb,
+      done: rec.done, doneAt: rec.doneAt, updated: rec.updated
+    }).catch(function () { /* the offline cache will send it later */ });
+  }
+
+  /* Fold a record from the cloud into whatever is on this device. */
+  function absorb(remote) {
+    if (!remote || !remote.ymd) return Promise.resolve(false);
+    var k = remote.ymd;
+    return getDay(k).then(function (local) {
+      var merged = mergeDay(local, remote);
+      var changed = !local || JSON.stringify(local.strokes || []) !== JSON.stringify(merged.strokes) ||
+                    JSON.stringify(local.done || []) !== JSON.stringify(merged.done);
+      if (!changed) return false;
+      dayKeys[k] = true;
+      return putDay(merged).then(function () {
+        // If it's the page in front of us, show it — unless a stroke is mid-flight.
+        if (k === key(cur) && !live) {
+          strokes = merged.strokes; tomb = merged.tomb || [];
+          done = merged.done || []; doneAt = merged.doneAt || 0;
+          if (merged.h && merged.h !== H && !strokes.length) { H = merged.h; layout(); fitView(); }
+          redrawInk();
+        }
+        return true;
+      });
+    }, function () { return false; });
+  }
+
+  function firstSync() {
+    setStatus("Syncing…");
+    // Push what's here, pull what's there; merging means neither side loses.
+    return SY.pullAll().then(function (remote) {
+      var chain = Promise.resolve(0);
+      remote.forEach(function (r) {
+        chain = chain.then(function (n) { return absorb(r).then(function (c) { return n + (c ? 1 : 0); }); });
+      });
+      return chain;
+    }).then(function () {
+      return allDays();
+    }).then(function (rows) {
+      (rows || []).forEach(function (r) { pushUp(r.ymd, r); });
+      return refreshKeys();
+    }).then(function () {
+      setStatus("Synced");
+      toast("Synced. This planner now lives in two places.");
+    }, function () {
+      setStatus("Sync failed");
+    });
+  }
+
+  function syncLabel() {
+    if (!SY || SY.state === "off") return "Sync isn't set up yet";
+    if (SY.state === "signed-out") return "Turn on sync";
+    if (SY.state === "signing-in") return "Signing in…";
+    if (SY.state === "error") return "Sync problem — try again";
+    return "Synced as " + ((SY.user && SY.user.email) || "you");
+  }
+
+  function paintSync() {
+    var b = document.getElementById("mSync");
+    if (!b) return;
+    b.textContent = syncLabel();
+    b.disabled = !SY || SY.state === "off" || SY.state === "signing-in";
+    var note = document.getElementById("syncNote");
+    if (note) {
+      note.textContent =
+        !SY || SY.state === "off" ? "Not configured yet — your days stay on this device."
+        : SY.state === "on" ? "Every day is copied to your account as you write, and pulled back on your other devices."
+        : SY.state === "error" ? (SY.detail || "Something went wrong signing in.")
+        : "Sign in with Google to keep this planner on every device.";
+    }
+  }
+
+  if (SY) {
+    SY.onState = function () {
+      paintSync();
+      if (SY.state === "on") { firstSync(); }
+    };
+    SY.watch(function (rec) { absorb(rec); });
   }
 
   /* ================= boot ================= */

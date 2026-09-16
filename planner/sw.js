@@ -1,7 +1,8 @@
 /* One Day Per Page — offline shell.
    Bump CACHE when index.html changes so tablets pick the new version up. */
-var CACHE = "odpp-v8";
-var SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
+var CACHE = "odpp-v9";
+var SHELL = ["./", "./index.html", "./manifest.webmanifest", "./firebase-config.js",
+             "./sync.js", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); }).then(function () {
