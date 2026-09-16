@@ -2,1228 +2,151 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>One Day Per Page</title>
-<meta name="description" content="A one-day-per-page daily planner you write on with a pen.">
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#F6F7F4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#121614" media="(prefers-color-scheme: dark)">
-<meta name="mobile-web-app-capable" content="yes">
+<title>One Day Per Page has moved</title>
+<link rel="canonical" href="https://planner.alexschuller.com/">
 <link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=DM+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300&display=swap">
-<script src="firebase-config.js"></script>
-<script type="module" src="sync.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,400&display=swap">
 <style>
   :root {
-    --paper:       #F6F7F4;
-    --ink:         #1B2421;
-    --ink-soft:    #4A5551;
-    --ink-faint:   #6E7873;
-    --rule-strong: #ACB5AE;
-    --pine:        #3F6B5B;
-    --pine-wash:   #E6EEE9;
-    --brass:       #A8813A;
-    --shadow:      0 1px 2px rgba(27,36,33,.06), 0 14px 36px -14px rgba(27,36,33,.22);
+    --paper: #F6F7F4; --sheet: #FCFCFA; --ink: #1B2421; --ink-soft: #4A5551;
+    --rule: #ACB5AE; --pine: #3F6B5B; --pine-deep: #33594A; --brass: #A8813A;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --paper:       #101413;
-      --ink:         #E8EDE9;
-      --ink-soft:    #9AA5A0;
-      --ink-faint:   #6B7672;
-      --rule-strong: #3E4A45;
-      --pine:        #8CC4AC;
-      --pine-wash:   #22302A;
-      --brass:       #D2AC6B;
-      --shadow:      0 1px 2px rgba(0,0,0,.5), 0 18px 44px -16px rgba(0,0,0,.7);
-    }
-  }
-
   * { box-sizing: border-box; }
-  html, body { height: 100%; }
-  html { -webkit-text-size-adjust: 100%; }
-
+  html { height: 100%; }
   body {
-    margin: 0;
-    display: flex; flex-direction: column;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
-    font-size: 15px;
-    overflow: hidden;
-    overscroll-behavior: none;
-    -webkit-font-smoothing: antialiased;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  /* ---------- toolbar ---------- */
-  .bar {
-    flex: 0 0 auto;
-    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-    padding: 6px 12px;
-    padding-top: calc(6px + env(safe-area-inset-top));
-    border-bottom: 1px solid var(--rule-strong);
-    background: var(--paper);
-  }
-  .grp { display: flex; align-items: center; gap: 5px; }
-  .grp + .grp { margin-left: 4px; padding-left: 10px; border-left: 1px solid var(--rule-strong); }
-  .spacer { margin-left: auto; }
-
-  button {
-    font: inherit; font-size: 15px; color: var(--ink);
-    background: transparent;
-    border: 1px solid var(--rule-strong);
-    border-radius: 4px;
-    padding: 6px 11px; min-height: 38px;
-    cursor: pointer;
-    touch-action: manipulation;
-    display: inline-flex; align-items: center; gap: 6px;
-  }
-  button:hover:not(:disabled) { background: var(--pine-wash); border-color: var(--pine); }
-  button:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
-  button:disabled { opacity: .35; cursor: default; }
-  button[aria-pressed="true"] { background: var(--pine); border-color: var(--pine); color: #FCFCFA; }
-  .arrow { width: 40px; padding: 6px 0; justify-content: center; font-size: 16px; }
-  .ghost { border-color: transparent; color: var(--ink-soft); }
-  .ghost:hover:not(:disabled) { color: var(--ink); }
-
-  .datebtn { font-family: "Newsreader", Georgia, serif; font-size: 19px; min-width: 172px; justify-content: center; }
-  .swatch { width: 15px; height: 15px; border-radius: 50%; border: 1px solid rgba(0,0,0,.22); }
-  .status {
-    font-family: "DM Mono", ui-monospace, monospace;
-    font-size: 12px; color: var(--ink-soft); letter-spacing: .02em;
-    min-width: 70px; text-align: right;
-  }
-
-  /* ---------- the page surface ---------- */
-  .stage { flex: 1 1 auto; min-height: 0; position: relative; overflow: hidden; }
-  .stage canvas {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    display: block;
-    touch-action: none;             /* we handle pan and pinch ourselves */
-  }
-  #zoomTag {
-    position: absolute; right: 10px; bottom: 10px;
-    font-family: "DM Mono", ui-monospace, monospace;
-    font-size: 11px; color: var(--ink-faint);
-    background: var(--paper); border: 1px solid var(--rule-strong);
-    border-radius: 3px; padding: 3px 7px;
-    pointer-events: none;
-  }
-  #zoomTag[hidden] { display: none !important; }
-
-  /* ---------- overlays ---------- */
-  .scrim {
-    position: fixed; inset: 0; z-index: 40;
-    background: rgba(20,26,24,.5);
-    display: grid; place-items: center; padding: 20px;
-  }
-  .scrim[hidden] { display: none !important; }
-  .card {
-    width: 100%; max-width: 430px;
+    min-height: 100%; margin: 0;
+    display: grid; place-items: center; padding: 28px 20px;
     background: var(--paper); color: var(--ink);
-    border: 1px solid var(--rule-strong); border-radius: 4px;
-    box-shadow: var(--shadow);
-    padding: 16px 18px 20px;
+    font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; font-size: 16px;
+    line-height: 1.5; -webkit-font-smoothing: antialiased;
   }
-  .mhead { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-  .mtitle { flex: 1 1 auto; text-align: center; font-family: "Newsreader", Georgia, serif; font-size: 20px; }
-  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
-  .dowlbl {
-    font-family: "DM Mono", ui-monospace, monospace;
-    font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
-    color: var(--ink-faint); text-align: center; padding-bottom: 6px;
+  .card {
+    width: 100%; max-width: 440px; background: var(--sheet);
+    border: 1px solid var(--rule); border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(27,36,33,.06), 0 22px 44px -20px rgba(27,36,33,.3);
+    padding: 30px 28px 26px;
   }
-  .day {
-    position: relative; aspect-ratio: 1/1;
-    display: grid; place-items: center;
-    font-family: "DM Mono", ui-monospace, monospace;
-    font-size: 14px; font-variant-numeric: tabular-nums;
-    border: 1px solid transparent; border-radius: 3px;
-    background: transparent; color: var(--ink);
-    min-height: 0; padding: 0;
+  h1 {
+    margin: 0 0 6px; font-family: "Newsreader", Georgia, serif;
+    font-weight: 300; font-size: 33px; line-height: 1.08;
   }
-  .day:hover:not(.blank) { background: var(--pine-wash); }
-  .day.blank { visibility: hidden; }
-  .day.today { color: var(--brass); border-color: var(--brass); }
-  .day.sel { background: var(--pine); border-color: var(--pine); color: #FCFCFA; }
-  .day.has::after {
-    content: ""; position: absolute; bottom: 5px;
-    width: 4px; height: 4px; border-radius: 50%; background: var(--pine);
+  h1 em { font-style: italic; color: var(--pine); }
+  p { margin: 12px 0 0; color: var(--ink-soft); font-size: 15px; }
+  .go {
+    display: inline-block; margin-top: 20px;
+    font-size: 15.5px; font-weight: 600; text-decoration: none;
+    color: #FCFCFA; background: var(--pine);
+    border: 1px solid var(--pine-deep); border-radius: 3px;
+    padding: 12px 18px;
   }
-  .day.sel.has::after { background: #FCFCFA; }
-
-  .hint {
-    margin: 14px 0 0; padding-top: 12px;
-    border-top: 1px solid var(--rule-strong);
-    font-size: 13px; line-height: 1.5; color: var(--ink-soft);
+  .go:hover { background: var(--pine-deep); }
+  .rescue {
+    margin-top: 20px; padding: 14px 16px;
+    background: #FBF4E6; border: 1px solid #E8D7AE; border-radius: 3px;
   }
-  .toast {
-    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
-    z-index: 60;
-    background: var(--ink); color: var(--paper);
-    font-size: 13px; padding: 10px 16px; border-radius: 4px;
-    box-shadow: var(--shadow); max-width: calc(100% - 32px);
+  .rescue b { color: var(--brass); }
+  .rescue button {
+    font: inherit; font-size: 14.5px; font-weight: 600;
+    color: var(--ink); background: var(--sheet);
+    border: 1px solid var(--brass); border-radius: 3px;
+    padding: 9px 14px; margin-top: 10px; cursor: pointer;
   }
-  .toast[hidden] { display: none !important; }
-
-  @media (max-width: 680px) {
-    .datebtn { min-width: 0; font-size: 17px; }
-    .bar { gap: 5px; padding: 5px 8px; }
-    .grp + .grp { margin-left: 0; padding-left: 6px; }
-    .status { display: none; }
-  }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  .rescue button:hover { background: #FDF9F0; }
+  .quiet { font-size: 13px; }
+  [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 
-<header class="bar">
-  <div class="grp">
-    <button class="arrow" id="prev" aria-label="Previous day" title="Previous day">←</button>
-    <button class="datebtn" id="pick" title="Choose a date">—</button>
-    <button class="arrow" id="next" aria-label="Next day" title="Next day">→</button>
-    <button class="ghost" id="today" title="Jump to today">Today</button>
+<div class="card">
+  <h1>One Day <em>per</em> Page has moved</h1>
+  <p id="lede">Taking you to its new home…</p>
+
+  <!-- Only ever shown when this old copy still holds pages the new one cannot
+       see. Browser storage does not cross between addresses, so those pages
+       exist here and nowhere else until they are taken out. -->
+  <div class="rescue" id="rescue" hidden>
+    <p style="margin:0"><b id="count"></b> written here, and only here.</p>
+    <p class="quiet">The planner moved to a different address, and a browser keeps
+    each address's data separate — so these pages did not travel with it. Save
+    them and they can be brought back in.</p>
+    <button id="save" type="button">Download these pages</button>
   </div>
 
-  <div class="grp">
-    <button id="tPen" aria-pressed="true" title="Pen"><span class="swatch" id="penSw"></span>Pen</button>
-    <button id="tErase" aria-pressed="false" title="Eraser — or flip the pen / hold its button">Eraser</button>
-  </div>
-
-  <div class="grp">
-    <button class="ghost" id="undo" aria-label="Undo" title="Undo" disabled>↶</button>
-    <button class="ghost" id="redo" aria-label="Redo" title="Redo" disabled>↷</button>
-  </div>
-
-  <div class="grp spacer">
-    <button class="ghost" id="fit" title="Fit the whole page on screen">Fit</button>
-    <button class="ghost" id="more" title="More">⋯</button>
-  </div>
-  <span class="status" id="status"></span>
-</header>
-
-<main class="stage" id="stage">
-  <canvas id="tpl"></canvas>
-  <canvas id="ink"></canvas>
-  <div id="zoomTag" hidden>100%</div>
-</main>
-
-<div class="scrim" id="scrim" hidden>
-  <div class="card" role="dialog" aria-modal="true" aria-label="Choose a date">
-    <div class="mhead">
-      <button class="arrow" id="mprev" aria-label="Previous month">←</button>
-      <div class="mtitle" id="mtitle"></div>
-      <button class="arrow" id="mnext" aria-label="Next month">→</button>
-    </div>
-    <div class="grid" id="mgrid"></div>
-    <p class="hint">A dot marks a day you've written on.</p>
-  </div>
+  <a class="go" href="https://planner.alexschuller.com/" id="go">Go to the planner</a>
 </div>
-
-<div class="scrim" id="menu" hidden>
-  <div class="card" role="dialog" aria-modal="true" aria-label="More">
-    <div class="mhead"><div class="mtitle">This planner</div></div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <button id="mInk">Ink colour — navy or pine</button>
-      <button id="mSave">Save this day as an image</button>
-      <button id="mClear">Clear this day</button>
-      <button id="mBackup">Back up every day to a file</button>
-      <button id="mSync">Sync</button>
-      <button id="mClose" class="ghost">Close</button>
-    </div>
-    <p class="hint" id="syncNote"></p>
-    <p class="hint" id="usage"></p>
-  </div>
-</div>
-
-<div class="toast" id="toast" hidden></div>
 
 <script>
 (function () {
   "use strict";
+  var TARGET = "https://planner.alexschuller.com/";
 
-  /* ================= the page ==================
-     A page is W units wide. Its height follows the shape of your screen,
-     so the sheet fills the tablet instead of sitting in a letterbox.
-     Each day remembers the shape it was written on. */
-  var W = 1120;
-  var H = 840;
-  var HOURS = [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
-  var DOW = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-  var MON = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  var INKS = [{ name: "navy", css: "#1F3A5F" }, { name: "pine", css: "#2E5F4C" }];
-  var DONE_FILL = "#33594A", DONE_TICK = "#FCFCFA", DONE_STRIKE = "rgba(51,89,74,.8)";
-
-  var L = {};
-  function layout() {
-    var rowsTop = 152, bottom = H - 30, avail = bottom - rowsTop, GAP = 34;
-    var r = (avail - 2 * GAP) / 18;
-    L = {
-      gutter: 56, holeX: 28, holeR: 7,
-      left: 76, right: 1090, colSplit: 560, rightCol: 610,
-      ruleY: 106, labelY: 138, rowsTop: rowsTop, bottom: bottom,
-      schedRow: avail / 16,
-      r: r,
-      todoTop: rowsTop, todoRows: 10,
-      notesTop: rowsTop + 10 * r + GAP, notesRows: 5,
-      mealsTop: rowsTop + 15 * r + 2 * GAP, mealsRows: 3
-    };
-    L.holeGap = Math.max(44, H / 16);
-  }
-
-  function screenAspectH() {
-    var st = document.getElementById("stage");
-    var a = st.clientHeight / Math.max(st.clientWidth, 1);
-    return Math.round(Math.min(Math.max(W * a, 580), 2400));
-  }
-
-  /* Where a to-do tick box sits, and how far around it a tap still counts. */
-  function boxRect(i) {
-    var top = L.todoTop + i * L.r;
-    var s = Math.min(Math.max(L.r * 0.42, 14), 26, L.r - 6);
-    return { x: L.rightCol + 6, y: top + (L.r - s) / 2, s: s, top: top, bot: top + L.r };
-  }
-  function boxIndexAt(x, y) {
-    for (var i = 0; i < L.todoRows; i++) {
-      var r = boxRect(i);
-      if (x >= L.rightCol - 6 && x <= r.x + r.s + 12 && y >= r.top && y <= r.bot) return i;
-    }
-    return -1;
-  }
-  function anyDone() {
-    for (var i = 0; i < done.length; i++) if (done[i]) return true;
-    return false;
-  }
-
-  /* Move ink from one page shape to another. Rows scale with the page, so
-     what you wrote on the 3pm line stays on the 3pm line. */
-  function rescale(list, fw, fh, tw, th) {
-    var kx = tw / fw, ky = th / fh;
-    if (kx === 1 && ky === 1) return false;
-    for (var i = 0; i < list.length; i++) {
-      var p = list[i].p;
-      for (var j = 0; j < p.length; j += 4) {
-        p[j] = Math.round(p[j] * kx);
-        p[j + 1] = Math.round(p[j + 1] * ky);
-      }
-    }
-    return true;
-  }
-
-  /* ================= state ================= */
-  var today = startOfDay(new Date());
-  var cur = today;
-  var strokes = [];
-  var tomb = [];                      // ids of strokes rubbed out, so an erase syncs too
-  var done = [];                      // which to-do rows are struck out
-  var doneAt = 0;
-  var undoStack = [], redoStack = [];
-  var inkIdx = 0, erasing = false;
-  var dirty = false, saveTimer = null;
-  var monthAnchor = new Date(cur.getFullYear(), cur.getMonth(), 1);
-  var dayKeys = {};
-  var view = { k: 1, tx: 0, ty: 0 };
-  var fitK = 1;
-
-  function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
-  function key(d) {
-    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
-  }
-  function fromKey(k) { var p = k.split("-"); return new Date(+p[0], +p[1]-1, +p[2]); }
-  function shift(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()+n); }
-
-  /* ================= storage ================= */
-  var idb = null;
-  function openDB() {
-    return new Promise(function (res) {
-      if (!("indexedDB" in window)) return res(null);
-      var rq;
-      try { rq = indexedDB.open("odpp", 1); } catch (e) { return res(null); }
-      rq.onupgradeneeded = function () {
-        var d = rq.result;
-        if (!d.objectStoreNames.contains("days")) d.createObjectStore("days", { keyPath: "ymd" });
-      };
-      rq.onsuccess = function () { res(rq.result); };
-      rq.onerror = function () { res(null); };
-    });
-  }
-  function tx(mode, fn) {
-    return new Promise(function (res, rej) {
-      if (!idb) return rej(new Error("no store"));
-      var t = idb.transaction("days", mode);
-      var out = fn(t.objectStore("days"));
-      t.oncomplete = function () { res(out && out.result !== undefined ? out.result : undefined); };
-      t.onerror = function () { rej(t.error); };
-      t.onabort = function () { rej(t.error); };
-    });
-  }
-  function getDay(k) { return tx("readonly", function (s) { return s.get(k); }); }
-  function putDay(r) { return tx("readwrite", function (s) { return s.put(r); }); }
-  function delDay(k) { return tx("readwrite", function (s) { return s.delete(k); }); }
-  function allKeys() { return tx("readonly", function (s) { return s.getAllKeys(); }); }
-  function allDays() { return tx("readonly", function (s) { return s.getAll(); }); }
-
-  /* ================= canvas plumbing ================= */
-  var stage = document.getElementById("stage");
-  var tplC = document.getElementById("tpl"), tplX = tplC.getContext("2d");
-  var inkC = document.getElementById("ink"), inkX = inkC.getContext("2d");
-  var dpr = 1, sw = 0, sh = 0;
-
-  function sizeCanvases() {
-    sw = stage.clientWidth; sh = stage.clientHeight;
-    dpr = Math.min(window.devicePixelRatio || 1, 3);
-    [tplC, inkC].forEach(function (c) {
-      c.width = Math.max(1, Math.floor(sw * dpr));
-      c.height = Math.max(1, Math.floor(sh * dpr));
-    });
-  }
-
-  function applyView(ctx) {
-    ctx.setTransform(dpr * view.k, 0, 0, dpr * view.k, dpr * view.tx, dpr * view.ty);
-  }
-  function clearAll(ctx, c) {
-    ctx.save(); ctx.setTransform(1,0,0,1,0,0);
-    ctx.clearRect(0, 0, c.width, c.height);
-    ctx.restore();
-  }
-
-  function computeFit() {
-    fitK = Math.min((sw - 8) / W, (sh - 8) / H);
-    if (!isFinite(fitK) || fitK <= 0) fitK = 0.5;
-  }
-  function fitView() {
-    computeFit();
-    view.k = fitK;
-    view.tx = (sw - W * fitK) / 2;
-    view.ty = (sh - H * fitK) / 2;
-    renderAll();
-  }
-  function clampView() {
-    var minK = fitK * 0.9, maxK = fitK * 8;
-    view.k = Math.min(Math.max(view.k, minK), maxK);
-    var pw = W * view.k, ph = H * view.k;
-    // keep at least a third of the page on screen in each direction
-    view.tx = Math.min(Math.max(view.tx, sw - pw - 40), 40);
-    view.ty = Math.min(Math.max(view.ty, sh - ph - 40), 40);
-    if (pw <= sw) view.tx = (sw - pw) / 2;
-    if (ph <= sh) view.ty = (sh - ph) / 2;
-  }
-
-  var zoomTagTimer = null;
-  function showZoom() {
-    var el = document.getElementById("zoomTag");
-    var pct = Math.round(view.k / fitK * 100);
-    el.textContent = pct + "%";
-    el.hidden = pct === 100;
-    clearTimeout(zoomTagTimer);
-    if (!el.hidden) zoomTagTimer = setTimeout(function () { el.hidden = true; }, 1600);
-  }
-
-  var raf = null;
-  function renderAll() {
-    if (raf) return;
-    raf = requestAnimationFrame(function () {
-      raf = null;
-      drawTemplate();
-      redrawInk();
-    });
-  }
-
-  /* ================= the printed page ================= */
-  function drawTemplate() {
-    var RULE = "#CFD6CE", STRONG = "#A6B0A8", FAINT = "#69736E",
-        SOFT = "#3D4844", PINE = "#33594A", BRASS = "#8E6E2B", DARK = "#141B18";
-    // Printed type scales with the row it sits in, so a tall portrait page
-    // gets bigger labels rather than the same small ones floating in space.
-    var hourPx = Math.round(Math.min(Math.max(L.schedRow * 0.55, 16), 30));
-    var mealPx = Math.round(Math.min(Math.max(L.r * 0.55, 15), 28));
-
-    clearAll(tplX, tplC);
-    applyView(tplX);
-
-    // the sheet itself
-    tplX.fillStyle = "#FCFCFA";
-    tplX.fillRect(0, 0, W, H);
-    tplX.strokeStyle = STRONG; tplX.lineWidth = 1 / view.k;
-    tplX.strokeRect(0, 0, W, H);
-
-    // coil gutter
-    tplX.fillStyle = "#EDF0EA";
-    tplX.fillRect(0, 0, L.gutter, H);
-    tplX.strokeStyle = RULE;
-    line(L.gutter, 0, L.gutter, H);
-    for (var y = L.holeGap * 0.6; y < H - 16; y += L.holeGap) {
-      tplX.beginPath(); tplX.arc(L.holeX, y, L.holeR, 0, 6.2832);
-      tplX.fillStyle = "#DFE4DC"; tplX.fill();
-      tplX.strokeStyle = "#C3CBC2"; tplX.stroke();
-    }
-
-    // date header
-    tplX.textBaseline = "alphabetic";
-    tplX.fillStyle = DARK;
-    tplX.font = '400 66px "Newsreader", Georgia, serif';
-    var dn = String(cur.getDate());
-    tplX.fillText(dn, L.left, 92);
-    var nw = tplX.measureText(dn).width;
-
-    tplX.fillStyle = PINE;
-    tplX.font = 'italic 400 31px "Newsreader", Georgia, serif';
-    tplX.fillText(DOW[cur.getDay()], L.left + nw + 16, 74);
-
-    tplX.fillStyle = FAINT;
-    tplX.font = '500 14px "DM Mono", ui-monospace, monospace';
-    tplX.fillText(sp(MON[cur.getMonth()].toUpperCase() + " " + cur.getFullYear()), L.left + nw + 18, 95);
-
-    if (key(cur) === key(today)) {
-      tplX.strokeStyle = BRASS; tplX.fillStyle = BRASS;
-      tplX.font = '500 13px "DM Mono", ui-monospace, monospace';
-      var tw = tplX.measureText(sp("TODAY")).width;
-      tplX.lineWidth = 1.5 / view.k;
-      tplX.strokeRect(L.right - tw - 19, 56, tw + 19, 25);
-      tplX.fillText(sp("TODAY"), L.right - tw - 10, 73);
-    }
-
-    tplX.fillStyle = BRASS;
-    tplX.fillRect(L.left, L.ruleY, L.right - L.left, 2);
-
-    label("TODAY'S SCHEDULE", L.left, L.labelY);
-    label("TO DO", L.rightCol, L.labelY);
-    label("NOTES", L.rightCol, L.notesTop - 13);
-    label("MEALS", L.rightCol, L.mealsTop - 13);
-
-    function label(text, x, baseline) {
-      tplX.fillStyle = SOFT;
-      tplX.font = '500 15px "DM Mono", ui-monospace, monospace';
-      tplX.fillText(sp(text), x, baseline);
-    }
-
-    // schedule
-    tplX.strokeStyle = STRONG; line(L.left, L.rowsTop, L.colSplit, L.rowsTop);
-    HOURS.forEach(function (h, i) {
-      var bot = L.rowsTop + (i + 1) * L.schedRow;
-      tplX.strokeStyle = RULE; line(L.left, bot, L.colSplit, bot);
-      var n = String(h % 12 || 12);
-      tplX.fillStyle = FAINT;
-      tplX.font = '500 ' + hourPx + 'px "DM Mono", ui-monospace, monospace';
-      tplX.fillText(n, L.left + 6, bot - 10);
-      var mer = h === 6 ? "AM" : h === 12 ? "PM" : "";
-      if (mer) {
-        var w2 = tplX.measureText(n).width;
-        tplX.fillStyle = BRASS;
-        tplX.font = '500 ' + Math.round(hourPx * 0.68) + 'px "DM Mono", ui-monospace, monospace';
-        tplX.fillText(mer, L.left + 9 + w2, bot - 10);
-      }
-    });
-
-    // to do
-    tplX.strokeStyle = STRONG; line(L.rightCol, L.todoTop, L.right, L.todoTop);
-    for (var i = 0; i < L.todoRows; i++) {
-      var br = boxRect(i);
-      tplX.strokeStyle = RULE; line(L.rightCol, br.bot, L.right, br.bot);
-      tplX.strokeStyle = STRONG; tplX.lineWidth = 1.4 / view.k;
-      tplX.strokeRect(br.x, br.y, br.s, br.s);
-    }
-
-    // notes
-    tplX.strokeStyle = STRONG; line(L.rightCol, L.notesTop, L.right, L.notesTop);
-    tplX.strokeStyle = RULE;
-    for (var j = 1; j <= L.notesRows; j++) line(L.rightCol, L.notesTop + j * L.r, L.right, L.notesTop + j * L.r);
-
-    // meals
-    tplX.strokeStyle = STRONG; line(L.rightCol, L.mealsTop, L.right, L.mealsTop);
-    ["B","L","D"].forEach(function (m, i) {
-      var bot3 = L.mealsTop + (i + 1) * L.r;
-      tplX.strokeStyle = RULE; line(L.rightCol, bot3, L.right, bot3);
-      tplX.fillStyle = FAINT;
-      tplX.font = '500 ' + mealPx + 'px "DM Mono", ui-monospace, monospace';
-      tplX.fillText(m, L.rightCol + 6, bot3 - 9);
-    });
-
-    function line(x1, y1, x2, y2) {
-      tplX.lineWidth = 1 / view.k;
-      tplX.beginPath(); tplX.moveTo(x1, y1); tplX.lineTo(x2, y2); tplX.stroke();
-    }
-  }
-
-  function sp(s) { return s.split("").join(" "); }
-
-  /* ================= ink ================= */
-  function redrawInk() {
-    clearAll(inkX, inkC);
-    applyView(inkX);
-    for (var i = 0; i < strokes.length; i++) paintStroke(strokes[i]);
-    if (live && !live.erase) paintStroke(live);
-    drawDone();
-  }
-
-  /* Ticked rows are drawn last, so the line crosses out what you wrote. */
-  function drawDone() {
-    for (var i = 0; i < L.todoRows; i++) {
-      if (!done[i]) continue;
-      var r = boxRect(i);
-
-      inkX.fillStyle = DONE_FILL;
-      inkX.fillRect(r.x, r.y, r.s, r.s);
-
-      inkX.strokeStyle = DONE_TICK;
-      inkX.lineWidth = Math.max(1.6, r.s * 0.14);
-      inkX.lineCap = "round"; inkX.lineJoin = "round";
-      inkX.beginPath();
-      inkX.moveTo(r.x + r.s * 0.22, r.y + r.s * 0.53);
-      inkX.lineTo(r.x + r.s * 0.42, r.y + r.s * 0.73);
-      inkX.lineTo(r.x + r.s * 0.79, r.y + r.s * 0.27);
-      inkX.stroke();
-
-      inkX.strokeStyle = DONE_STRIKE;
-      inkX.lineWidth = Math.max(1.8, L.r * 0.06);
-      inkX.beginPath();
-      inkX.moveTo(r.x + r.s + 10, r.top + L.r * 0.55);
-      inkX.lineTo(L.right - 6, r.top + L.r * 0.55);
-      inkX.stroke();
-    }
-  }
-
-  function toggleBox(i) {
-    if (i < 0) return;
-    done[i] = !done[i];
-    doneAt = Date.now();
-    undoStack.push({ type: "done", i: i });
-    redoStack.length = 0;
-    markDirty(); redrawInk(); syncButtons();
-  }
-
-  function paintStroke(s) {
-    var p = s.p, n = p.length / 4;
-    if (n < 1) return;
-    inkX.strokeStyle = (INKS[s.c] || INKS[0]).css;
-    inkX.fillStyle = inkX.strokeStyle;
-    inkX.lineCap = "round"; inkX.lineJoin = "round";
-    if (n === 1) {
-      inkX.beginPath(); inkX.arc(p[0], p[1], width(p[2]) / 2, 0, 6.2832); inkX.fill();
-      return;
-    }
-    for (var i = 1; i < n; i++) {
-      var x0 = p[(i-1)*4], y0 = p[(i-1)*4+1], pr0 = p[(i-1)*4+2];
-      var x1 = p[i*4], y1 = p[i*4+1], pr1 = p[i*4+2];
-      inkX.lineWidth = (width(pr0) + width(pr1)) / 2;
-      inkX.beginPath(); inkX.moveTo(x0, y0);
-      if (i < n - 1) {
-        var x2 = p[(i+1)*4], y2 = p[(i+1)*4+1];
-        inkX.quadraticCurveTo(x1, y1, (x1 + x2) / 2, (y1 + y2) / 2);
-      } else inkX.lineTo(x1, y1);
-      inkX.stroke();
-    }
-  }
-  function width(pr100) { return 1.5 + ((pr100 || 50) / 100) * 2.6; }
-
-  /* ---- pen writes; fingers pan and pinch ---- */
-  var live = null, lastX = 0, lastY = 0, lastT = 0;
-  var touches = new Map(), gesture = null;
-
-  function toSheet(cx, cy) {
-    var r = inkC.getBoundingClientRect();
-    return { x: (cx - r.left - view.tx) / view.k, y: (cy - r.top - view.ty) / view.k };
-  }
-  function isEraser(e) { return erasing || e.pointerType === "eraser" || (e.buttons & 32) === 32; }
-
-  /* A tap is a touch that goes down and up in the same place. Anything that
-     moves is writing, or panning — never a tick. */
-  var tapRec = null;
-  function noteTap(e, pt) {
-    tapRec = { id: e.pointerId, t: performance.now(), cx: e.clientX, cy: e.clientY, i: boxIndexAt(pt.x, pt.y) };
-  }
-  function tapLands(e) {
-    if (!tapRec || tapRec.id !== e.pointerId || tapRec.i < 0) return false;
-    var dx = e.clientX - tapRec.cx, dy = e.clientY - tapRec.cy;
-    return performance.now() - tapRec.t < 500 && dx * dx + dy * dy < 200;
-  }
-
-  inkC.addEventListener("pointerdown", function (e) {
-    if (e.pointerType === "touch") {
-      touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      if (touches.size === 1) noteTap(e, toSheet(e.clientX, e.clientY));
-      else tapRec = null;                      // a second finger means a pinch
-      startGesture();
-      return;
-    }
-    if (e.pointerType === "mouse" && e.button !== 0) return;
-    e.preventDefault();
-    inkC.setPointerCapture(e.pointerId);
-    var pt = toSheet(e.clientX, e.clientY);
-    if (isEraser(e)) { tapRec = null; live = { erase: true, hit: [] }; eraseAt(pt.x, pt.y); return; }
-    noteTap(e, pt);
-    lastT = performance.now();
-    live = { i: strokeId(), t: Date.now(), c: inkIdx, p: [] };
-    push(live, pt.x, pt.y, e.pressure, 0);
-    lastX = pt.x; lastY = pt.y;
-  });
-
-  inkC.addEventListener("pointermove", function (e) {
-    if (e.pointerType === "touch") {
-      if (!touches.has(e.pointerId)) return;
-      touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      moveGesture();
-      return;
-    }
-    if (!live) return;
-    e.preventDefault();
-    var pts = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
-    for (var i = 0; i < pts.length; i++) {
-      var pt = toSheet(pts[i].clientX, pts[i].clientY);
-      if (live.erase) { eraseAt(pt.x, pt.y); continue; }
-      var dx = pt.x - lastX, dy = pt.y - lastY;
-      if (dx*dx + dy*dy < 1.6) continue;
-      var now = performance.now();
-      push(live, pt.x, pt.y, pts[i].pressure, now - lastT);
-      lastT = now; lastX = pt.x; lastY = pt.y;
-    }
-    if (!live.erase) redrawInk();
-  });
-
-  function endPointer(e) {
-    if (e.pointerType === "touch") {
-      touches.delete(e.pointerId);
-      startGesture();
-      if (tapLands(e)) { var ti = tapRec.i; tapRec = null; toggleBox(ti); }
-      return;
-    }
-    if (!live) return;
-    // A pen tap on a box ticks it rather than leaving a dot.
-    if (!live.erase && tapLands(e)) {
-      var bi = tapRec.i;
-      tapRec = null; live = null;
-      redrawInk(); toggleBox(bi);
-      return;
-    }
-    tapRec = null;
-    if (live.erase) {
-      if (live.hit.length) { undoStack.push({ type: "erase", items: live.hit }); redoStack.length = 0; markDirty(); }
-    } else if (live.p.length >= 4) {
-      strokes.push(live);
-      undoStack.push({ type: "add" });
-      redoStack.length = 0;
-      markDirty();
-    }
-    live = null;
-    redrawInk(); syncButtons();
-  }
-  inkC.addEventListener("pointerup", endPointer);
-  inkC.addEventListener("pointercancel", endPointer);
-
-  function push(s, x, y, pressure, dt) {
-    s.p.push(Math.round(x), Math.round(y),
-             pressure > 0 ? Math.round(pressure * 100) : 50,
-             Math.round(dt));
-  }
-
-  function strokeId() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  }
-
-  var ERASE_R2 = 13 * 13;
-  function eraseAt(x, y) {
-    for (var i = strokes.length - 1; i >= 0; i--) {
-      var p = strokes[i].p, hit = false;
-      for (var j = 0; j < p.length; j += 4) {
-        var dx = p[j] - x, dy = p[j+1] - y;
-        if (dx*dx + dy*dy <= ERASE_R2) { hit = true; break; }
-      }
-      if (hit) {
-        live.hit.push({ i: i, s: strokes[i] });
-        if (strokes[i].i) tomb.push(strokes[i].i);
-        strokes.splice(i, 1);
-        redrawInk();
-      }
-    }
-  }
-
-  /* ---- pan / pinch ---- */
-  function centroid() {
-    var n = 0, x = 0, y = 0;
-    touches.forEach(function (t) { x += t.x; y += t.y; n++; });
-    return n ? { x: x / n, y: y / n, n: n } : null;
-  }
-  function spread() {
-    var a = Array.from(touches.values());
-    if (a.length < 2) return 0;
-    var dx = a[0].x - a[1].x, dy = a[0].y - a[1].y;
-    return Math.sqrt(dx*dx + dy*dy);
-  }
-  function startGesture() {
-    var c = centroid();
-    gesture = c ? { cx: c.x, cy: c.y, d: spread(), k: view.k, tx: view.tx, ty: view.ty, n: c.n } : null;
-  }
-  function moveGesture() {
-    if (!gesture) return;
-    var c = centroid();
-    if (!c || c.n !== gesture.n) { startGesture(); return; }
-    var r = inkC.getBoundingClientRect();
-    if (c.n >= 2 && gesture.d > 8) {
-      var f = spread() / gesture.d;
-      var k = gesture.k * f;
-      // keep the point under your fingers pinned while the scale changes
-      var ax = gesture.cx - r.left, ay = gesture.cy - r.top;
-      var sx = (ax - gesture.tx) / gesture.k, sy = (ay - gesture.ty) / gesture.k;
-      view.k = k;
-      view.tx = (c.x - r.left) - sx * k;
-      view.ty = (c.y - r.top) - sy * k;
-    } else {
-      view.tx = gesture.tx + (c.x - gesture.cx);
-      view.ty = gesture.ty + (c.y - gesture.cy);
-    }
-    clampView(); showZoom(); renderAll();
-  }
-
-  inkC.addEventListener("wheel", function (e) {
-    if (!(e.ctrlKey || e.metaKey)) return;
-    e.preventDefault();
-    var r = inkC.getBoundingClientRect();
-    var ax = e.clientX - r.left, ay = e.clientY - r.top;
-    var sx = (ax - view.tx) / view.k, sy = (ay - view.ty) / view.k;
-    view.k *= Math.exp(-e.deltaY * 0.0016);
-    clampView();
-    view.tx = ax - sx * view.k; view.ty = ay - sy * view.k;
-    clampView(); showZoom(); renderAll();
-  }, { passive: false });
-
-  /* ================= undo / redo ================= */
-  function undo() {
-    var op = undoStack.pop(); if (!op) return;
-    if (op.type === "add") redoStack.push({ type: "add", s: strokes.pop() });
-    else if (op.type === "done") { done[op.i] = !done[op.i]; redoStack.push(op); }
-    else {
-      op.items.forEach(function (it) {
-        strokes.splice(it.i, 0, it.s);
-        var k = tomb.indexOf(it.s.i);
-        if (k >= 0) tomb.splice(k, 1);
-      });
-      redoStack.push(op);
-    }
-    markDirty(); redrawInk(); syncButtons();
-  }
-  function redo() {
-    var op = redoStack.pop(); if (!op) return;
-    if (op.type === "add") { strokes.push(op.s); undoStack.push({ type: "add" }); }
-    else if (op.type === "done") { done[op.i] = !done[op.i]; undoStack.push(op); }
-    else {
-      op.items.forEach(function (it) {
-        var k = strokes.indexOf(it.s);
-        if (k >= 0) strokes.splice(k, 1);
-        if (it.s.i) tomb.push(it.s.i);
-      });
-      undoStack.push(op);
-    }
-    markDirty(); redrawInk(); syncButtons();
-  }
-  function syncButtons() {
-    document.getElementById("undo").disabled = !undoStack.length;
-    document.getElementById("redo").disabled = !redoStack.length;
-  }
-
-  /* ================= save / load ================= */
-  function markDirty() {
-    dirty = true; setStatus("Saving…");
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(flush, 500);
-  }
-  function flush() {
-    clearTimeout(saveTimer); saveTimer = null;
-    if (!dirty) return Promise.resolve();
-    dirty = false;
-    var k = key(cur), written = strokes.length || anyDone() || tomb.length, op;
-    var rec = { ymd: k, v: 3, w: W, h: H, strokes: strokes, tomb: capTomb(tomb),
-                done: done, doneAt: doneAt, updated: Date.now() };
-    if (!written) { delete dayKeys[k]; op = delDay(k); }
-    else { dayKeys[k] = true; op = putDay(rec); }
-    if (written) pushUp(k, rec);
-    return op.then(function () { setStatus(written ? "Saved" : ""); },
-                     function () { setStatus("Not saved"); toast("Couldn't save. Your browser may be out of storage."); });
-  }
-
-  /* Tombstones only ever grow; keep the most recent and let the rest go. A
-     stroke rubbed out long ago isn't coming back from another device. */
-  function capTomb(list) {
-    var seen = {}, out = [];
-    for (var i = list.length - 1; i >= 0 && out.length < 3000; i--) {
-      if (!seen[list[i]]) { seen[list[i]] = 1; out.push(list[i]); }
-    }
-    return out.reverse();
-  }
-
-  /* The union of both sides' strokes, minus anything either side erased. */
-  function mergeDay(a, b) {
-    if (!a) return b;
-    if (!b) return a;
-    var gone = {}, byId = {}, order = [], i, s;
-    capTomb((a.tomb || []).concat(b.tomb || [])).forEach(function (id) { gone[id] = 1; });
-
-    [a, b].forEach(function (side) {
-      (side.strokes || []).forEach(function (st) {
-        var id = st.i || (st.i = strokeId());
-        if (gone[id] || byId[id]) return;
-        byId[id] = st;
-        order.push(st);
-      });
-    });
-    order.sort(function (x, y) { return (x.t || 0) - (y.t || 0); });
-
-    var newer = (b.updated || 0) >= (a.updated || 0) ? b : a;
-    var ticks = (b.doneAt || 0) >= (a.doneAt || 0) ? b : a;
-    return {
-      ymd: newer.ymd, v: 3, w: newer.w || W, h: newer.h || H,
-      strokes: order, tomb: capTomb((a.tomb || []).concat(b.tomb || [])),
-      done: ticks.done || [], doneAt: ticks.doneAt || 0,
-      updated: Math.max(a.updated || 0, b.updated || 0)
-    };
-  }
-
-  function loadDay(d) {
-    cur = d;
-    monthAnchor = new Date(cur.getFullYear(), cur.getMonth(), 1);
-    strokes = []; done = []; tomb = []; doneAt = 0; undoStack = []; redoStack = [];
-    syncButtons(); renderDateBtn(); setStatus("");
-    var k = key(cur);
-    H = screenAspectH(); layout(); fitView();
-    return getDay(k).then(function (rec) {
-      if (key(cur) !== k) return;
-      strokes = (rec && Array.isArray(rec.strokes)) ? rec.strokes : [];
-      tomb = (rec && Array.isArray(rec.tomb)) ? rec.tomb : [];
-      done = (rec && Array.isArray(rec.done)) ? rec.done.slice(0, L.todoRows) : [];
-      doneAt = (rec && rec.doneAt) || 0;
-      strokes.forEach(function (st) { if (!st.i) { st.i = strokeId(); st.t = st.t || 0; } });
-      // The page always takes the shape of the screen; older ink comes with it.
-      if (rec && rec.h && strokes.length && rescale(strokes, rec.w || W, rec.h, W, H)) markDirty();
-      redrawInk();
-      setStatus((strokes.length || anyDone()) ? "Saved" : "");
-    }, function () {});
-  }
-  function goto(d) { flush().then(function () { loadDay(d); }); }
-
-  function setStatus(t) { document.getElementById("status").textContent = t; }
-
-  var toastTimer = null;
-  function toast(msg) {
-    var el = document.getElementById("toast");
-    el.textContent = msg; el.hidden = false;
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { el.hidden = true; }, 4200);
-  }
-  function renderDateBtn() {
-    document.getElementById("pick").textContent =
-      DOW[cur.getDay()].slice(0,3) + " " + MON[cur.getMonth()].slice(0,3) + " " + cur.getDate() + ", " + cur.getFullYear();
-  }
-
-  /* ================= toolbar ================= */
-  document.getElementById("prev").onclick = function () { goto(shift(cur, -1)); };
-  document.getElementById("next").onclick = function () { goto(shift(cur, 1)); };
-  document.getElementById("today").onclick = function () { goto(startOfDay(new Date())); };
-  document.getElementById("undo").onclick = undo;
-  document.getElementById("redo").onclick = redo;
-  document.getElementById("fit").onclick = function () { fitView(); showZoom(); };
-
-  var bPen = document.getElementById("tPen"), bEr = document.getElementById("tErase");
-  function setTool(e) {
-    erasing = e;
-    bPen.setAttribute("aria-pressed", String(!e));
-    bEr.setAttribute("aria-pressed", String(e));
-  }
-  bPen.onclick = function () { setTool(false); };
-  bEr.onclick = function () { setTool(true); };
-  function paintSwatch() { document.getElementById("penSw").style.background = INKS[inkIdx].css; }
-
-  document.addEventListener("keydown", function (e) {
-    var mod = e.ctrlKey || e.metaKey;
-    if (mod && e.key.toLowerCase() === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
-    else if (mod && (e.key.toLowerCase() === "y" || (e.key.toLowerCase() === "z" && e.shiftKey))) { e.preventDefault(); redo(); }
-    else if (e.key === "ArrowLeft" && !mod) goto(shift(cur, -1));
-    else if (e.key === "ArrowRight" && !mod) goto(shift(cur, 1));
-    else if (e.key === "e") setTool(!erasing);
-    else if (e.key === "0") fitView();
-    else if (e.key === "Escape") { document.getElementById("menu").hidden = true; document.getElementById("scrim").hidden = true; }
-  });
-
-  /* ================= export ================= */
-  function download(blob, name) {
-    var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = name;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
-  }
-
-  function dayImage(mult) {
-    var c = document.createElement("canvas");
-    c.width = W * mult; c.height = H * mult;
-    var x = c.getContext("2d");
-    var save = { k: view.k, tx: view.tx, ty: view.ty }, saveD = dpr;
-    // render the page at 1:1 into the export canvas
-    var tw = tplC.width, th = tplC.height;
-    view.k = 1; view.tx = 0; view.ty = 0; dpr = mult;
-    tplC.width = W * mult; tplC.height = H * mult;
-    inkC.width = W * mult; inkC.height = H * mult;
-    drawTemplate(); redrawInkNow();
-    x.drawImage(tplC, 0, 0); x.drawImage(inkC, 0, 0);
-    tplC.width = tw; tplC.height = th; inkC.width = tw; inkC.height = th;
-    view.k = save.k; view.tx = save.tx; view.ty = save.ty; dpr = saveD;
-    drawTemplate(); redrawInkNow();
-    return c;
-  }
-  function redrawInkNow() {
-    clearAll(inkX, inkC); applyView(inkX);
-    for (var i = 0; i < strokes.length; i++) paintStroke(strokes[i]);
-    drawDone();
-  }
-
-  function saveImage() {
-    flush().then(function () {
-      dayImage(2).toBlob(function (b) {
-        if (!b) return toast("Couldn't make the image.");
-        download(b, "planner-" + key(cur) + ".png");
-        toast("Saved to your downloads as an image.");
-      }, "image/png");
-    });
-  }
-
-  /* ================= month picker ================= */
-  var scrim = document.getElementById("scrim"), mgrid = document.getElementById("mgrid");
-  document.getElementById("pick").onclick = function () {
-    monthAnchor = new Date(cur.getFullYear(), cur.getMonth(), 1);
-    refreshKeys().then(function () { scrim.hidden = false; drawMonth(); });
-  };
-  document.getElementById("mprev").onclick = function () {
-    monthAnchor = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() - 1, 1); drawMonth();
-  };
-  document.getElementById("mnext").onclick = function () {
-    monthAnchor = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() + 1, 1); drawMonth();
-  };
-  scrim.addEventListener("click", function (e) { if (e.target === scrim) scrim.hidden = true; });
-
-  function refreshKeys() {
-    return allKeys().then(function (ks) {
-      dayKeys = {};
-      (ks || []).forEach(function (k) { dayKeys[k] = true; });
-    }, function () {});
-  }
-  function drawMonth() {
-    document.getElementById("mtitle").textContent = MON[monthAnchor.getMonth()] + " " + monthAnchor.getFullYear();
-    mgrid.textContent = "";
-    ["S","M","T","W","T","F","S"].forEach(function (d) {
-      var el = document.createElement("div"); el.className = "dowlbl"; el.textContent = d; mgrid.appendChild(el);
-    });
-    var first = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), 1);
-    var last = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() + 1, 0).getDate();
-    for (var p = 0; p < first.getDay(); p++) {
-      var b = document.createElement("div"); b.className = "day blank"; mgrid.appendChild(b);
-    }
-    for (var n = 1; n <= last; n++) {
-      var d = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), n), k = key(d);
-      var btn = document.createElement("button");
-      btn.className = "day"; btn.textContent = n; btn.dataset.k = k;
-      if (k === key(today)) btn.classList.add("today");
-      if (k === key(cur)) btn.classList.add("sel");
-      if (dayKeys[k]) btn.classList.add("has");
-      btn.onclick = function () { scrim.hidden = true; goto(fromKey(this.dataset.k)); };
-      mgrid.appendChild(btn);
-    }
-  }
-
-  /* ================= more ================= */
-  var menu = document.getElementById("menu");
-  document.getElementById("more").onclick = function () { menu.hidden = false; showUsage(); paintSync(); };
-
-  document.getElementById("mSync").onclick = function () {
-    if (!SY || SY.state === "off") return;
-    if (SY.state === "on") {
-      if (!confirm("Stop syncing on this device? Your days stay here, they just won't travel.")) return;
-      SY.signOut();
-    } else {
-      SY.signIn();
-    }
-  };
-  document.getElementById("mClose").onclick = function () { menu.hidden = true; };
-  menu.addEventListener("click", function (e) { if (e.target === menu) menu.hidden = true; });
-
-  document.getElementById("mInk").onclick = function () {
-    inkIdx = (inkIdx + 1) % INKS.length; paintSwatch();
-    toast("Ink is now " + INKS[inkIdx].name + ".");
-  };
-  document.getElementById("mSave").onclick = function () { menu.hidden = true; saveImage(); };
-  document.getElementById("mClear").onclick = function () {
-    if (!strokes.length && !anyDone()) { toast("This page is already blank."); return; }
-    if (!confirm("Clear everything written on this page? Undo will bring it back.")) return;
-    undoStack.push({ type: "erase", items: strokes.map(function (s, i) { return { i: i, s: s }; }) });
-    redoStack.length = 0;
-    strokes.forEach(function (s) { if (s.i) tomb.push(s.i); });
-    strokes = []; done = [];
-    markDirty(); redrawInk(); syncButtons(); menu.hidden = true;
-  };
-  document.getElementById("mBackup").onclick = function () {
-    flush().then(allDays).then(function (rows) {
-      var blob = new Blob([JSON.stringify({ app: "one-day-per-page", v: 1, days: rows || [] })], { type: "application/json" });
-      download(blob, "planner-backup-" + key(new Date()) + ".json");
-      toast("Backed up " + ((rows || []).length) + " day" + ((rows || []).length === 1 ? "" : "s") + ".");
-    }, function () { toast("Couldn't read your days to back them up."); });
-  };
-  /* Android can evict a site's storage when the tablet runs low on space.
-     Asking to persist puts this planner off limits to that sweep. */
-  var persisted = null;
-  function claimStorage() {
-    if (!navigator.storage || !navigator.storage.persist) return Promise.resolve(null);
-    return navigator.storage.persisted().then(function (p) {
-      return p ? true : navigator.storage.persist();
-    }).then(function (p) { persisted = p; return p; }, function () { return null; });
-  }
-
-  function showUsage() {
-    var el = document.getElementById("usage");
-    allKeys().then(function (ks) {
-      var n = (ks || []).length;
-      var msg = n + " day" + (n === 1 ? "" : "s") + " written, kept on this tablet only. ";
-      if (persisted === true) msg += "Your browser has marked them protected, so they won't be cleared to free up space. ";
-      else if (persisted === false) msg += "Your browser may clear them if the tablet runs very low on space. ";
-      el.textContent = msg + "Back them up now and then — erasing your browsing data erases them too.";
-    }, function () { el.textContent = "Your days are kept on this tablet only."; });
-  }
-
-  /* ================= sync ================= */
-  var SY = window.PlannerSync;
-
-  function pushUp(k, rec) {
-    if (!SY || SY.state !== "on") return;
-    SY.push(k, {
-      ymd: k, v: 3, w: rec.w, h: rec.h,
-      strokes: rec.strokes, tomb: rec.tomb,
-      done: rec.done, doneAt: rec.doneAt, updated: rec.updated
-    }).catch(function () { /* the offline cache will send it later */ });
-  }
-
-  /* Fold a record from the cloud into whatever is on this device. */
-  function absorb(remote) {
-    if (!remote || !remote.ymd) return Promise.resolve(false);
-    var k = remote.ymd;
-    return getDay(k).then(function (local) {
-      var merged = mergeDay(local, remote);
-      var changed = !local || JSON.stringify(local.strokes || []) !== JSON.stringify(merged.strokes) ||
-                    JSON.stringify(local.done || []) !== JSON.stringify(merged.done);
-      if (!changed) return false;
-      dayKeys[k] = true;
-      return putDay(merged).then(function () {
-        // If it's the page in front of us, show it — unless a stroke is mid-flight.
-        if (k === key(cur) && !live) {
-          strokes = merged.strokes; tomb = merged.tomb || [];
-          done = merged.done || []; doneAt = merged.doneAt || 0;
-          if (merged.h && merged.h !== H && !strokes.length) { H = merged.h; layout(); fitView(); }
-          redrawInk();
-        }
-        return true;
-      });
-    }, function () { return false; });
-  }
-
-  function firstSync() {
-    setStatus("Syncing…");
-    // Push what's here, pull what's there; merging means neither side loses.
-    return SY.pullAll().then(function (remote) {
-      var chain = Promise.resolve(0);
-      remote.forEach(function (r) {
-        chain = chain.then(function (n) { return absorb(r).then(function (c) { return n + (c ? 1 : 0); }); });
-      });
-      return chain;
-    }).then(function () {
-      return allDays();
-    }).then(function (rows) {
-      (rows || []).forEach(function (r) { pushUp(r.ymd, r); });
-      return refreshKeys();
-    }).then(function () {
-      setStatus("Synced");
-      toast("Synced. This planner now lives in two places.");
-    }, function () {
-      setStatus("Sync failed");
-    });
-  }
-
-  function syncLabel() {
-    if (!SY || SY.state === "off") return "Sync isn't set up yet";
-    if (SY.state === "signed-out") return "Turn on sync";
-    if (SY.state === "signing-in") return "Signing in…";
-    if (SY.state === "error") return "Sync problem — try again";
-    return "Synced as " + ((SY.user && SY.user.email) || "you");
-  }
-
-  function paintSync() {
-    var b = document.getElementById("mSync");
-    if (!b) return;
-    b.textContent = syncLabel();
-    b.disabled = !SY || SY.state === "off" || SY.state === "signing-in";
-    var note = document.getElementById("syncNote");
-    if (note) {
-      note.textContent =
-        !SY || SY.state === "off" ? "Not configured yet — your days stay on this device."
-        : SY.state === "on" ? "Every day is copied to your account as you write, and pulled back on your other devices."
-        : SY.state === "error" ? (SY.detail || "Something went wrong signing in.")
-        : "Sign in with Google to keep this planner on every device.";
-    }
-  }
-
-  if (SY) {
-    SY.onState = function () {
-      paintSync();
-      if (SY.state === "on") { firstSync(); }
-    };
-    SY.watch(function (rec) { absorb(rec); });
-  }
-
-  /* ================= boot ================= */
-  paintSwatch(); renderDateBtn();
-  sizeCanvases();
-  H = screenAspectH(); layout(); fitView();
-
-  var rt = null;
-  window.addEventListener("resize", function () {
-    clearTimeout(rt);
-    rt = setTimeout(function () {
-      sizeCanvases();
-      var nh = screenAspectH();
-      if (nh !== H) {
-        if (strokes.length && rescale(strokes, W, H, W, nh)) markDirty();
-        H = nh;
-        layout();
-      }
-      fitView();
-    }, 140);
-  });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { renderAll(); });
-
-  claimStorage();
-  openDB().then(function (d) {
-    idb = d;
-    if (!idb) { setStatus("No storage"); toast("This browser won't let the planner save. Private mode?"); return; }
-    return refreshKeys().then(function () { return loadDay(cur); });
-  });
-
-  window.addEventListener("beforeunload", function () { if (dirty) flush(); });
-  document.addEventListener("visibilitychange", function () { if (document.hidden && dirty) flush(); });
-
+  /* This address used to install the planner as an app. Let go of that, or the
+     old copy keeps being served out of its own cache instead of this notice. */
   if ("serviceWorker" in navigator) {
-    var reloadedForUpdate = false;
-    navigator.serviceWorker.addEventListener("controllerchange", function () {
-      if (reloadedForUpdate) return;
-      reloadedForUpdate = true;
-      if (!dirty && !saveTimer) location.reload();   // never reload over unsaved ink
-    });
-    window.addEventListener("load", function () {
-      navigator.serviceWorker.register("sw.js").then(function (reg) {
-        reg.update();
-        setInterval(function () { reg.update(); }, 30 * 60 * 1000);
-      }).catch(function () {});
+    navigator.serviceWorker.getRegistrations().then(function (list) {
+      list.forEach(function (r) { r.unregister(); });
+    }).catch(function () {});
+  }
+  if (window.caches && caches.keys) {
+    caches.keys().then(function (names) {
+      names.forEach(function (n) { caches.delete(n); });
+    }).catch(function () {});
+  }
+
+  function leave() { location.replace(TARGET); }
+
+  function readOldPages() {
+    return new Promise(function (resolve) {
+      if (!("indexedDB" in window)) return resolve([]);
+      var request;
+      try { request = indexedDB.open("odpp", 1); } catch (e) { return resolve([]); }
+      request.onerror = function () { resolve([]); };
+      request.onsuccess = function () {
+        var db = request.result;
+        if (!db.objectStoreNames.contains("days")) return resolve([]);
+        try {
+          var all = db.transaction("days", "readonly").objectStore("days").getAll();
+          all.onsuccess = function () { resolve(all.result || []); };
+          all.onerror = function () { resolve([]); };
+        } catch (e) { resolve([]); }
+      };
+      // Never leave someone staring at a page that will not move on.
+      setTimeout(function () { resolve([]); }, 3000);
     });
   }
+
+  readOldPages().then(function (days) {
+    var written = days.filter(function (d) {
+      return (d.strokes && d.strokes.length) ||
+             (d.done && d.done.some(function (x) { return x; }));
+    });
+
+    if (!written.length) { leave(); return; }
+
+    document.getElementById("lede").textContent =
+      "Before you go — there is something saved at this address.";
+    document.getElementById("count").textContent =
+      written.length === 1 ? "1 page" : written.length + " pages";
+    document.getElementById("rescue").hidden = false;
+    document.getElementById("go").textContent = "Go to the planner anyway";
+
+    document.getElementById("save").addEventListener("click", function () {
+      var blob = new Blob(
+        [JSON.stringify({ app: "one-day-per-page", v: 1, days: written }, null, 2)],
+        { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "planner-pages-from-alexschuller-com.json";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
+      this.textContent = "Downloaded";
+    });
+  });
 })();
 </script>
 </body>

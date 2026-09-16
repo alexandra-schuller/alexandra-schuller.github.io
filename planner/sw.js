@@ -1,56 +1,18 @@
-/* One Day Per Page — offline shell.
-   Bump CACHE when index.html changes so tablets pick the new version up. */
-var CACHE = "odpp-v9";
-var SHELL = ["./", "./index.html", "./manifest.webmanifest", "./firebase-config.js",
-             "./sync.js", "./icons/icon-192.png", "./icons/icon-512.png"];
+/* One Day Per Page has moved to planner.alexschuller.com.
 
-self.addEventListener("install", function (e) {
-  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); }).then(function () {
-    return self.skipWaiting();
-  }));
-});
+   This address used to install the planner as an app, so a browser here may
+   still hold a worker that serves the old copy from its cache. This replaces
+   it with one that removes itself, hands every request straight to the
+   network, and lets the page at / do the redirecting. */
+
+self.addEventListener("install", function () { self.skipWaiting(); });
 
 self.addEventListener("activate", function (e) {
-  e.waitUntil(caches.keys().then(function (keys) {
-    return Promise.all(keys.map(function (k) { return k === CACHE ? null : caches.delete(k); }));
-  }).then(function () { return self.clients.claim(); }));
-});
-
-self.addEventListener("fetch", function (e) {
-  if (e.request.method !== "GET") return;
-  var url = new URL(e.request.url);
-  var isFont = url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com";
-
-  if (isFont) {
-    // Fonts rarely change: serve from cache, refill in the background.
-    e.respondWith(caches.open(CACHE).then(function (c) {
-      return c.match(e.request).then(function (hit) {
-        var live = fetch(e.request).then(function (res) {
-          if (res && (res.ok || res.type === "opaque")) c.put(e.request, res.clone());
-          return res;
-        }).catch(function () { return hit; });
-        return hit || live;
-      });
-    }));
-    return;
-  }
-
-  if (url.origin !== self.location.origin) return;
-
-  // App shell: try the network so updates land, fall back to cache when offline.
-  var wantsHTML = e.request.mode === "navigate" ||
-                  (e.request.headers.get("accept") || "").indexOf("text/html") !== -1;
-  var net = wantsHTML ? fetch(e.request.url, { cache: "no-store" }) : fetch(e.request);
-
-  e.respondWith(net.then(function (res) {
-    if (res && res.ok) {
-      var copy = res.clone();
-      caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
-    }
-    return res;
-  }).catch(function () {
-    return caches.match(e.request).then(function (hit) {
-      return hit || caches.match("./index.html");
-    });
-  }));
+  e.waitUntil(
+    caches.keys()
+      .then(function (names) { return Promise.all(names.map(function (n) { return caches.delete(n); })); })
+      .then(function () { return self.registration.unregister(); })
+      .then(function () { return self.clients.matchAll({ type: "window" }); })
+      .then(function (clients) { clients.forEach(function (c) { c.navigate(c.url); }); })
+  );
 });
