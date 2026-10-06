@@ -1,4 +1,4 @@
-/* One Day Per Page has moved to app.alexschuller.com/planner.
+/* One Day Per Page has moved to apps.alexschuller.com/planner.
 
    This address used to install the planner as an app, so a browser here may
    still hold a worker that serves the old copy from its cache. This replaces
