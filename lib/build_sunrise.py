@@ -26,7 +26,7 @@ SITES = [
             "tiles": ["now", "uv", "wind", "air", "pollen", "moon"],
             "apps": [
                 {"name": "The Planner", "blurb": "One day per page, written by hand.",
-                 "href": "/planner/", "accent": "--pine", "tint": "--t-pine", "edge": "#CFE0D6"},
+                 "href": "https://app.alexschuller.com/planner/", "accent": "--pine", "tint": "--t-pine", "edge": "#CFE0D6"},
                 {"name": "Strong Woman", "blurb": "What you're lifting today.",
                  "href": "https://app.alexschuller.com/exercise/",
                  "accent": "--rose", "tint": "--t-rose", "edge": "#F0D3D7"},
