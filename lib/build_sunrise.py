@@ -22,12 +22,17 @@ SITES = [
         "config": {
             "lat": 45.5019, "lon": -73.5674, "tz": "America/Montreal",
             "storeKey": "sunrise:last",
-            "tiles": ["now", "uv", "wind", "humidity", "air", "pollen", "moon"],
+            # Humidity made way for Meals, to keep the grid at twelve.
+            "tiles": ["now", "uv", "wind", "air", "pollen", "moon"],
             "apps": [
                 {"name": "The Planner", "blurb": "One day per page, written by hand.",
                  "href": "/planner/", "accent": "--pine", "tint": "--t-pine", "edge": "#CFE0D6"},
                 {"name": "Strong Woman", "blurb": "What you're lifting today.",
+                 "href": "https://app.alexschuller.com/exercise/",
                  "accent": "--rose", "tint": "--t-rose", "edge": "#F0D3D7"},
+                {"name": "Meals", "blurb": "Tap what you had, and watch the day add up.",
+                 "href": "https://app.alexschuller.com/meals/",
+                 "accent": "--apricot", "tint": "--t-apricot", "edge": "#F3DCC4"},
                 {"name": "The Closet", "blurb": "Everything you own, and what goes together.",
                  "href": "/closet/", "accent": "--clay", "tint": "--t-clay", "edge": "#EFD5CA"},
                 {"name": "Morning Routine", "blurb": "How the day starts.",
