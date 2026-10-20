@@ -36,6 +36,7 @@ SITES = [
                 {"name": "The Closet", "blurb": "Everything you own, and what goes together.",
                  "href": "/closet/", "accent": "--clay", "tint": "--t-clay", "edge": "#EFD5CA"},
                 {"name": "Morning Routine", "blurb": "How the day starts.",
+                 "href": "https://apps.alexschuller.com/morning/",
                  "accent": "--butter", "tint": "--t-butter", "edge": "#EFE0B6"},
                 {"name": "Bedtime Routine", "blurb": "How it winds down.",
                  "accent": "--peri", "tint": "--t-peri", "edge": "#D6DAF0"},
