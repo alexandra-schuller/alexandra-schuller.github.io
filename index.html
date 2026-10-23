@@ -13,6 +13,9 @@
   <script>
     var _paq = window._paq = window._paq || [];
     /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+    // CV short links (/sb, /si, /cb, /ci) arrive as /?v=..; keep that URL for tracking
+    // because variants.js tidies the address bar before matomo.js loads.
+    if (location.search) _paq.push(['setCustomUrl', location.href]);
     _paq.push(['trackPageView']);
     _paq.push(['enableLinkTracking']);
     (function() {
@@ -41,13 +44,13 @@
         </div>
 
         <div class="hero">
-          <p class="hero-text" data-en="I have a deep desire to contribute to the future of infrastructure. My coursework, internships, and extracurricular activities have given me experience with several software programs, including SAP2000, CSI Bridge, ETABS, Revit, SAFE, and AutoCAD. Over the course of my three internships, I had the opportunity to work in varied and complementary settings: within a clean energy research laboratory at Natural Resources Canada, on the Louis-Hippolyte-La Fontaine tunnel construction site, and on the development of a new planning system for about 1,000 publicly managed dams in Québec.">
+          <p class="hero-text" id="intro" data-en="I have a deep desire to contribute to the future of infrastructure. My coursework, internships, and extracurricular activities have given me experience with several software programs, including SAP2000, CSI Bridge, ETABS, Revit, SAFE, and AutoCAD. Over the course of my three internships, I had the opportunity to work in varied and complementary settings: within a clean energy research laboratory at Natural Resources Canada, on the Louis-Hippolyte-La Fontaine tunnel construction site, and on the development of a new planning system for about 1,000 publicly managed dams in Québec.">
             J’ai un désir profond de participer à l’avenir des infrastructures. Mes cours, stages et activités parascolaires m’ont permis d’acquérir de l’expérience en plusieurs logiciels, notamment SAP2000, CSI Bridge, ETABS, Revit, SAFE, et AutoCAD. Au cours de mes trois stages, j’ai eu l’occasion de travailler dans des contextes variés et complémentaires : au sein d’un laboratoire de recherche en énergie propre de Ressources naturelles Canada, sur le chantier du tunnel Louis-Hippolyte-La Fontaine, ainsi qu’au développement d’un nouveau système de planification pour environ 1 000 barrages sous gestion publique au Québec.
           </p>
           <div id="contact">
             <h2 class="contact-title">Contact</h2>
             <div class="contact-row">
-              <a class="pill" href="assets/Alexandra-Schuller-CV.pdf" target="_blank" rel="noopener" data-en="Resume (PDF)">CV (PDF)</a>
+              <a class="pill" id="cv-link" href="assets/Alexandra-Schuller-CV.pdf" target="_blank" rel="noopener" data-en="Resume (PDF)">CV (PDF)</a>
               <a class="pill" href="https://www.linkedin.com/in/alexandra-schuller/" target="_blank" rel="noopener">LinkedIn</a>
               <a class="pill" href="mailto:alexandra.k.schuller@gmail.com">alexandra.k.schuller@gmail.com</a>
             </div>
@@ -73,7 +76,7 @@
       <div class="container-wide">
         <div class="grid">
           <!-- Card 1 -->
-          <div class="card">
+          <div class="card" data-card="canoe">
             <img alt="Concrete canoe" class="card-img" src="assets/IMG_3367.JPG" />
             <div class="card-body">
               <div class="card-title" data-en="Concrete Canoe Team Captain">Capitaine de l’équipe de canoë de béton</div>
@@ -83,7 +86,7 @@
           </div>
 
           <!-- Card 2 -->
-          <div class="card">
+          <div class="card" data-card="capdecarie">
             <img class="card-img" src="assets/Queen-Mary.jpg" alt="The Décarie Expressway trench under the Queen Mary overpass">
             <div class="card-body">
               <div class="card-title" data-en="The CapDécarie Project">Le Projet CapDécarie</div>
@@ -95,7 +98,7 @@
           </div>
 
           <!-- Card 3 -->
-          <div class="card">
+          <div class="card" data-card="rockslope">
             <img alt="Abaqus maximum principal stress contours on a rock slope model" class="card-img" src="assets/rockslope-max-principal.jpg" />
             <div class="card-body">
               <div class="card-title" data-en="Rock Slope Stability Analysis">Analyse de stabilité des pentes rocheuses</div>
@@ -105,7 +108,7 @@
           </div>
 
           <!-- Card 4 -->
-          <div class="card">
+          <div class="card" data-card="water">
             <img alt="Pipeline route map to the Chief Crowfoot Water Treatment Plant" class="card-img" src="assets/pipeline-map.png" />
             <div class="card-body">
               <div class="card-title" data-en="Water Treatment Plant Design">Conception d’usine de traitement d’eau</div>
@@ -115,7 +118,7 @@
           </div>
 
           <!-- Card 5 -->
-          <div class="card">
+          <div class="card" data-card="bridge">
             <img alt="Bridge deck finite element model" class="card-img" src="assets/bridge-model.png" />
             <div class="card-body">
               <div class="card-title" data-en="Bridge Model">Modèle de pont</div>
@@ -124,7 +127,7 @@
           </div>
 
           <!-- Card 6 -->
-          <div class="card">
+          <div class="card" data-card="office">
             <img alt="Deformed shape of a ten-story office building model" class="card-img" src="assets/office-building-quebec-city.png" />
             <div class="card-body">
               <div class="card-title" data-en="Design of a Ten-Story Office Building in Quebec City">Conception d’un immeuble de bureaux de dix étages à Québec</div>
@@ -145,6 +148,7 @@
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
+  <script src="variants.js"></script>
   <script src="i18n.js"></script>
 </body>
 </html>
