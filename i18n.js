@@ -15,6 +15,13 @@
       el.textContent = lang === "en" ? el.getAttribute("data-en") : el.getAttribute("data-fr");
     });
 
+    document.querySelectorAll("[data-href-en]").forEach(function (el) {
+      if (!el.hasAttribute("data-href-fr")) {
+        el.setAttribute("data-href-fr", el.getAttribute("href"));
+      }
+      el.setAttribute("href", lang === "en" ? el.getAttribute("data-href-en") : el.getAttribute("data-href-fr"));
+    });
+
     var btn = document.getElementById("lang-toggle");
     if (btn) {
       btn.textContent = lang === "fr" ? "English" : "Français";

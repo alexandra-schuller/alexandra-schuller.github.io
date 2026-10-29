@@ -13,7 +13,7 @@
   <script>
     var _paq = window._paq = window._paq || [];
     /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-    // CV short links (/sb, /si, /cb, /ci) arrive as /?v=..; keep that URL for tracking
+    // CV short links (/sb, /si, /cb, /ci, /gi) arrive as /?v=..; keep that URL for tracking
     // because variants.js tidies the address bar before matomo.js loads.
     if (location.search) _paq.push(['setCustomUrl', location.href]);
     _paq.push(['trackPageView']);
@@ -148,7 +148,7 @@
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
-  <script src="variants.js"></script>
-  <script src="i18n.js"></script>
+  <script src="variants.js?v=2"></script>
+  <script src="i18n.js?v=2"></script>
 </body>
 </html>
